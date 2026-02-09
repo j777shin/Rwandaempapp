@@ -11,6 +11,9 @@ import { ChatbotPage } from "@/app/pages/beneficiary/ChatbotPage";
 import { ResultReport } from "@/app/pages/beneficiary/ResultReport";
 import { BusinessDevelopment } from "@/app/pages/beneficiary/BusinessDevelopment";
 import { BusinessLearning } from "@/app/pages/beneficiary/BusinessLearning";
+import { Phase1Survey } from "@/app/pages/beneficiary/Phase1Survey";
+import { EmploymentSurvey } from "@/app/pages/beneficiary/EmploymentSurvey";
+import { EntrepreneurshipSurvey } from "@/app/pages/beneficiary/EntrepreneurshipSurvey";
 import { AdminLayout } from "@/app/components/AdminLayout";
 import { AdminDashboard } from "@/app/pages/admin/Dashboard";
 import { DataRegistration } from "@/app/pages/admin/DataRegistration";
@@ -49,6 +52,9 @@ export const router = createBrowserRouter([
           { path: "results", Component: ResultReport },
           { path: "business-development", Component: BusinessDevelopment },
           { path: "business-learning", Component: BusinessLearning },
+          { path: "phase1-survey", Component: Phase1Survey },
+          { path: "employment-survey", Component: EmploymentSurvey },
+          { path: "entrepreneurship-survey", Component: EntrepreneurshipSurvey },
         ],
       },
       {

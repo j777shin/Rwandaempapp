@@ -6,6 +6,7 @@ import { Progress } from "@/app/components/ui/progress";
 import { Badge } from "@/app/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/app/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
+import { useState } from "react";
 
 export function BeneficiaryDashboard() {
   // Updated: Business Development added to Phase 1 features
@@ -19,6 +20,8 @@ export function BeneficiaryDashboard() {
     phase2Track: "entrepreneurship", // "employment" or "entrepreneurship"
     selectedForPhase2: true, // true if user is selected for phase 2
   };
+
+  const [employmentStatus, setEmploymentStatus] = useState<"self-employed" | "hired" | null>(null);
 
   const phase1Features = [
     {
@@ -153,6 +156,91 @@ export function BeneficiaryDashboard() {
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      {/* Update Employment Status */}
+      <section>
+        <h2 className="text-2xl font-bold mb-4 text-foreground">Update Employment Status</h2>
+        <Card className="border-border bg-white">
+          <CardHeader>
+            <CardTitle className="text-foreground">Current Employment Status</CardTitle>
+            <CardDescription>Please select your current employment status</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <label className={`flex items-center gap-3 cursor-pointer p-4 border-2 rounded-lg transition-all hover:border-primary/50 flex-1 ${
+                employmentStatus === "self-employed" ? "border-primary bg-primary/5" : "border-border"
+              }`}>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={employmentStatus === "self-employed"}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setEmploymentStatus("self-employed");
+                      } else {
+                        setEmploymentStatus(null);
+                      }
+                    }}
+                    className="w-5 h-5 cursor-pointer appearance-none border-2 border-neutral-300 rounded checked:bg-primary checked:border-primary relative"
+                  />
+                  {employmentStatus === "self-employed" && (
+                    <svg className="w-3 h-3 text-white absolute top-1 left-1 pointer-events-none" viewBox="0 0 12 12" fill="none">
+                      <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-primary" />
+                  <span className="font-medium text-foreground">Self-Employed</span>
+                </div>
+                {employmentStatus === "self-employed" && (
+                  <Badge className="ml-auto bg-primary text-white">Selected</Badge>
+                )}
+              </label>
+
+              <label className={`flex items-center gap-3 cursor-pointer p-4 border-2 rounded-lg transition-all hover:border-primary/50 flex-1 ${
+                employmentStatus === "hired" ? "border-primary bg-primary/5" : "border-border"
+              }`}>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={employmentStatus === "hired"}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setEmploymentStatus("hired");
+                      } else {
+                        setEmploymentStatus(null);
+                      }
+                    }}
+                    className="w-5 h-5 cursor-pointer appearance-none border-2 border-neutral-300 rounded checked:bg-primary checked:border-primary relative"
+                  />
+                  {employmentStatus === "hired" && (
+                    <svg className="w-3 h-3 text-white absolute top-1 left-1 pointer-events-none" viewBox="0 0 12 12" fill="none">
+                      <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-primary" />
+                  <span className="font-medium text-foreground">Hired</span>
+                </div>
+                {employmentStatus === "hired" && (
+                  <Badge className="ml-auto bg-primary text-white">Selected</Badge>
+                )}
+              </label>
+            </div>
+            
+            {employmentStatus && (
+              <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <p className="text-sm text-foreground">
+                  <CheckCircle2 className="w-4 h-4 text-primary inline mr-2" />
+                  Your employment status has been updated to <span className="font-semibold">{employmentStatus === "self-employed" ? "Self-Employed" : "Hired"}</span>
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </section>
 
       {/* Tab-based Phase Selection */}

@@ -44,12 +44,6 @@ export function AdminDashboard() {
       icon: UserCheck,
     },
     { 
-      title: "Track Assignee View", 
-      description: "Assign beneficiaries to Employment or Entrepreneur tracks", 
-      link: "/admin/track-assignment", 
-      icon: Award,
-    },
-    { 
       title: "Employment Track View", 
       description: "Monitor employment track progress and completion", 
       link: "/admin/employment-progress", 

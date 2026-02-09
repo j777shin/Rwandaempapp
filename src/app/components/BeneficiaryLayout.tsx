@@ -16,7 +16,8 @@ import {
   X,
   User,
   GraduationCap,
-  Lightbulb
+  Lightbulb,
+  Star
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
@@ -56,6 +57,7 @@ export function BeneficiaryLayout() {
         { title: "SkillCraft Test", path: "/beneficiary/skillcraft" },
         { title: "Pathways", path: "/beneficiary/pathways" },
         { title: "Business Development", path: "/beneficiary/business-development" },
+        { title: "Completion Survey", path: "/beneficiary/phase1-survey" },
       ]
     },
     {
@@ -65,6 +67,7 @@ export function BeneficiaryLayout() {
       badge: user.phase2Track === "employment" ? "Active" : "Locked",
       children: [
         { title: "Pathways Deep Dive", path: "/beneficiary/pathways-deepdive" },
+        { title: "Completion Survey", path: "/beneficiary/employment-survey" },
       ]
     },
     {
@@ -76,6 +79,7 @@ export function BeneficiaryLayout() {
         { title: "Business Learning", path: "/beneficiary/business-learning" },
         { title: "Business Chatbot", path: "/beneficiary/chatbot" },
         { title: "Results & Reports", path: "/beneficiary/results" },
+        { title: "Completion Survey", path: "/beneficiary/entrepreneurship-survey" },
       ]
     }
   ];
