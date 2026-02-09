@@ -69,7 +69,7 @@ export function EligibilityManagement() {
 
         <div className="space-y-6">
           {/* Header */}
-          <Card className="border-l-4 border-l-[#00A1DE]">
+          <Card className="border-l-4 border-l-primary">
             <CardHeader>
               <CardTitle className="text-2xl">Eligibility Score Management</CardTitle>
               <CardDescription>
@@ -80,7 +80,7 @@ export function EligibilityManagement() {
 
           {/* Statistics Overview */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="border-l-4 border-l-[#00A1DE]">
+            <Card className="border-l-4 border-l-primary">
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Users className="w-4 h-4" />
@@ -93,15 +93,15 @@ export function EligibilityManagement() {
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-[#00A651]">
+            <Card className="border-l-4 border-l-primary">
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#00A651]" />
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
                   Passing
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-[#00A651]">{passedCandidates.toLocaleString()}</div>
+                <div className="text-3xl font-bold text-primary">{passedCandidates.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground mt-1">{passRate}% of total</p>
               </CardContent>
             </Card>
@@ -119,15 +119,15 @@ export function EligibilityManagement() {
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-[#FAD201]">
+            <Card className="border-l-4 border-l-primary">
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-[#FAD201]" />
+                  <TrendingUp className="w-4 h-4 text-primary" />
                   Current Cutoff
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-[#FAD201]">{cutoffScore[0]}</div>
+                <div className="text-3xl font-bold text-primary">{cutoffScore[0]}</div>
                 <p className="text-xs text-muted-foreground mt-1">Minimum score</p>
               </CardContent>
             </Card>
@@ -144,7 +144,7 @@ export function EligibilityManagement() {
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg">Cutoff Score: <span className="text-2xl font-bold text-[#00A1DE]">{cutoffScore[0]}</span></Label>
+                  <Label className="text-lg">Cutoff Score: <span className="text-2xl font-bold text-primary">{cutoffScore[0]}</span></Label>
                   <Badge variant="outline" className="text-base px-4 py-1">
                     {passedCandidates.toLocaleString()} candidates pass
                   </Badge>
@@ -187,7 +187,7 @@ export function EligibilityManagement() {
 
               <Button 
                 onClick={handleApplyCutoff} 
-                className="w-full bg-[#00A651] hover:bg-[#008641]"
+                className="w-full bg-primary hover:bg-primary/90"
               >
                 Apply Cutoff Score
               </Button>
@@ -218,7 +218,7 @@ export function EligibilityManagement() {
                         return (
                           <div className="bg-white p-4 border border-gray-200 rounded shadow-lg">
                             <p className="font-semibold">Score Range: {data.range}</p>
-                            <p className="text-[#00A651]">Passing: {data.passed.toLocaleString()}</p>
+                            <p className="text-primary">Passing: {data.passed.toLocaleString()}</p>
                             <p className="text-red-500">Failing: {data.failed.toLocaleString()}</p>
                             <p className="font-semibold mt-2">Total: {data.count.toLocaleString()}</p>
                           </div>
@@ -230,11 +230,11 @@ export function EligibilityManagement() {
                   <Legend />
                   <ReferenceLine 
                     x={chartData.findIndex(d => d.score >= cutoffScore[0])} 
-                    stroke="#FAD201" 
+                    stroke="#10b981" 
                     strokeWidth={2}
-                    label={{ value: `Cutoff: ${cutoffScore[0]}`, fill: '#FAD201', fontSize: 14, fontWeight: 'bold' }}
+                    label={{ value: `Cutoff: ${cutoffScore[0]}`, fill: '#10b981', fontSize: 14, fontWeight: 'bold' }}
                   />
-                  <Bar dataKey="passed" stackId="a" fill="#00A651" name="Passing" />
+                  <Bar dataKey="passed" stackId="a" fill="#10b981" name="Passing" />
                   <Bar dataKey="failed" stackId="a" fill="#ef4444" name="Not Passing" />
                 </BarChart>
               </ResponsiveContainer>
@@ -265,8 +265,8 @@ export function EligibilityManagement() {
                         return (
                           <div className="bg-white p-4 border border-gray-200 rounded shadow-lg">
                             <p className="font-semibold">Score Range: {data.range}</p>
-                            <p className="text-[#00A1DE]">Candidates: {data.count.toLocaleString()}</p>
-                            <p className={data.score >= cutoffScore[0] ? "text-[#00A651]" : "text-red-500"}>
+                            <p className="text-primary">Candidates: {data.count.toLocaleString()}</p>
+                            <p className={data.score >= cutoffScore[0] ? "text-primary" : "text-red-500"}>
                               Status: {data.score >= cutoffScore[0] ? "Passing" : "Not Passing"}
                             </p>
                           </div>
@@ -277,12 +277,12 @@ export function EligibilityManagement() {
                   />
                   <ReferenceLine 
                     x={chartData.findIndex(d => d.score >= cutoffScore[0])} 
-                    stroke="#FAD201" 
+                    stroke="#10b981" 
                     strokeWidth={3}
                     strokeDasharray="5 5"
                     label={{ 
                       value: `Cutoff: ${cutoffScore[0]}`, 
-                      fill: '#FAD201', 
+                      fill: '#10b981', 
                       fontSize: 14, 
                       fontWeight: 'bold',
                       position: 'top'
@@ -291,8 +291,8 @@ export function EligibilityManagement() {
                   <Area 
                     type="monotone" 
                     dataKey="count" 
-                    stroke="#00A1DE" 
-                    fill="#00A1DE" 
+                    stroke="#10b981" 
+                    fill="#10b981" 
                     fillOpacity={0.6}
                     name="Candidates"
                   />

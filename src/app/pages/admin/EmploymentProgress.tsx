@@ -7,17 +7,17 @@ import { Progress } from "@/app/components/ui/progress";
 
 export function EmploymentProgress() {
   const stats = [
-    { label: "Total Employment Track", value: "1,800", icon: Building2, color: "bg-[#00A1DE]" },
-    { label: "Active in Training", value: "1,450", icon: Clock, color: "bg-[#FAD201]" },
-    { label: "Completed Training", value: "350", icon: CheckCircle2, color: "bg-[#00A651]" },
-    { label: "Avg Progress", value: "68%", icon: TrendingUp, color: "bg-[#00A1DE]" },
+    { label: "Total Employment Track", value: "1,800", icon: Building2, color: "bg-primary" },
+    { label: "Active in Training", value: "1,450", icon: Clock, color: "bg-primary" },
+    { label: "Completed Training", value: "350", icon: CheckCircle2, color: "bg-primary" },
+    { label: "Avg Progress", value: "68%", icon: TrendingUp, color: "bg-primary" },
   ];
 
   const pathwayProgress = [
-    { pathway: "Construction & Trades", total: 520, avgProgress: 72, color: "bg-[#00A1DE]" },
-    { pathway: "Hospitality & Tourism", total: 380, avgProgress: 65, color: "bg-[#00A651]" },
-    { pathway: "Technology & Digital", total: 450, avgProgress: 78, color: "bg-[#FAD201]" },
-    { pathway: "Agriculture", total: 450, avgProgress: 60, color: "bg-[#00A1DE]" },
+    { pathway: "Construction & Trades", total: 520, avgProgress: 72, color: "bg-primary" },
+    { pathway: "Hospitality & Tourism", total: 380, avgProgress: 65, color: "bg-primary" },
+    { pathway: "Technology & Digital", total: 450, avgProgress: 78, color: "bg-primary" },
+    { pathway: "Agriculture", total: 450, avgProgress: 60, color: "bg-primary" },
   ];
 
   const recentActivity = [
@@ -40,7 +40,7 @@ export function EmploymentProgress() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-[#00A1DE] rounded-lg flex items-center justify-center">
+            <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
               <Building2 className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -49,22 +49,22 @@ export function EmploymentProgress() {
             </div>
           </div>
           <div className="flex gap-3">
-            <Badge variant="outline" className="border-[#00A651] text-[#00A651]">Phase 2</Badge>
-            <Badge variant="outline" className="border-[#00A1DE] text-[#00A1DE]">Employment Track</Badge>
+            <Badge variant="outline" className="border-primary text-primary">Phase 2</Badge>
+            <Badge variant="outline" className="border-primary text-primary">Employment Track</Badge>
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
-            <Card key={index} className="border-l-4 border-l-[#00A1DE]">
+            <Card key={index} className="border-l-4 border-l-primary">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">{stat.label}</p>
                     <p className="text-3xl font-bold mt-2">{stat.value}</p>
                   </div>
-                  <div className={`w-12 h-12 ${stat.color} ${stat.color === "bg-[#FAD201]" ? "text-black" : "text-white"} rounded-lg flex items-center justify-center`}>
+                  <div className={`w-12 h-12 ${stat.color} text-white rounded-lg flex items-center justify-center`}>
                     <stat.icon className="w-6 h-6" />
                   </div>
                 </div>
@@ -90,7 +90,7 @@ export function EmploymentProgress() {
                     </div>
                     <div className="flex items-center gap-4">
                       <span className="text-sm text-muted-foreground">{pathway.total} beneficiaries</span>
-                      <span className="font-bold text-[#00A651]">{pathway.avgProgress}%</span>
+                      <span className="font-bold text-primary">{pathway.avgProgress}%</span>
                     </div>
                   </div>
                   <Progress value={pathway.avgProgress} className="h-3" />
@@ -114,13 +114,13 @@ export function EmploymentProgress() {
                   className="flex items-start justify-between p-4 bg-gray-50 rounded-lg border-2 border-gray-200"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-[#00A1DE] rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
                       {activity.name.split(" ").map((n) => n[0]).join("")}
                     </div>
                     <div>
                       <p className="font-semibold">{activity.name}</p>
                       <p className="text-sm text-muted-foreground">{activity.action}</p>
-                      <Badge variant="outline" className="mt-2 border-[#00A1DE] text-[#00A1DE]">
+                      <Badge variant="outline" className="mt-2 border-primary text-primary">
                         {activity.pathway}
                       </Badge>
                     </div>
@@ -131,7 +131,7 @@ export function EmploymentProgress() {
             </div>
 
             <div className="mt-6 flex justify-center">
-              <Button variant="outline" className="border-[#00A1DE] text-[#00A1DE] hover:bg-[#00A1DE] hover:text-white">
+              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
                 <Users className="w-4 h-4 mr-2" />
                 View All Beneficiaries
               </Button>

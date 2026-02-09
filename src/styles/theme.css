@@ -178,4 +178,13 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+
+  /* Ensure ResponsiveContainer from recharts has proper height */
+  .recharts-responsive-container {
+    min-height: 0;
+  }
+
+  [data-slot="card-content"] .recharts-responsive-container {
+    min-height: 300px;
+  }
 }

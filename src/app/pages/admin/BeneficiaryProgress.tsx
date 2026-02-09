@@ -162,11 +162,11 @@ export function BeneficiaryProgress() {
                       key={beneficiary.id}
                       onClick={() => setSelectedBeneficiaryId(beneficiary.id)}
                       className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
-                        selectedBeneficiaryId === beneficiary.id ? 'bg-[#00A1DE]/10 border-l-4 border-l-[#00A1DE]' : ''
+                        selectedBeneficiaryId === beneficiary.id ? 'bg-primary/10 border-l-4 border-l-primary' : ''
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-[#00A1DE] to-[#00A651] rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
                           {beneficiary.name.split(' ').map(n => n[0]).join('')}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -192,7 +192,7 @@ export function BeneficiaryProgress() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-gradient-to-r from-[#00A1DE] to-[#00A651] rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                      <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold">
                         {selectedBeneficiary.name.split(' ').map(n => n[0]).join('')}
                       </div>
                       <div>
@@ -213,7 +213,7 @@ export function BeneficiaryProgress() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-[#00A1DE]" />
+                    <BookOpen className="w-5 h-5 text-primary" />
                     SkillCraft Test Results
                   </CardTitle>
                 </CardHeader>
@@ -242,7 +242,7 @@ export function BeneficiaryProgress() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Route className="w-5 h-5 text-[#FAD201]" />
+                    <Route className="w-5 h-5 text-primary" />
                     Pathways Progress Details
                   </CardTitle>
                 </CardHeader>
@@ -258,10 +258,10 @@ export function BeneficiaryProgress() {
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
-                            {pathway.progress === 100 && <CheckCircle2 className="w-5 h-5 text-[#00A651]" />}
+                            {pathway.progress === 100 && <CheckCircle2 className="w-5 h-5 text-primary" />}
                             <Badge 
                               variant={pathway.progress === 100 ? "default" : "outline"}
-                              className={pathway.progress === 100 ? "bg-[#00A651] text-base px-3 py-1" : "text-base px-3 py-1"}
+                              className={pathway.progress === 100 ? "bg-primary text-base px-3 py-1" : "text-base px-3 py-1"}
                             >
                               {pathway.progress}%
                             </Badge>
@@ -279,7 +279,7 @@ export function BeneficiaryProgress() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Award className="w-5 h-5 text-[#00A651]" />
+                    <Award className="w-5 h-5 text-primary" />
                     Business Concept
                   </CardTitle>
                 </CardHeader>

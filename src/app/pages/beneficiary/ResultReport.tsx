@@ -22,7 +22,7 @@ export function ResultReport() {
               Back to Dashboard
             </Button>
           </Link>
-          <Button className="bg-[#00A651] hover:bg-[#008641]">
+          <Button className="bg-primary hover:bg-primary/90">
             <Download className="w-4 h-4 mr-2" />
             Download Report
           </Button>
@@ -42,7 +42,7 @@ export function ResultReport() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="score" fill="#00A1DE" />
+                    <Bar dataKey="score" fill="#10b981" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -55,7 +55,7 @@ export function ResultReport() {
                 <CardTitle>Total Assessments</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-[#00A1DE]">12</div>
+                <div className="text-4xl font-bold text-primary">12</div>
                 <p className="text-muted-foreground">Completed</p>
               </CardContent>
             </Card>
@@ -65,7 +65,7 @@ export function ResultReport() {
                 <CardTitle>Average Score</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-[#FAD201]">80.8</div>
+                <div className="text-4xl font-bold text-primary">80.8</div>
                 <p className="text-muted-foreground">Out of 100</p>
               </CardContent>
             </Card>
@@ -75,7 +75,7 @@ export function ResultReport() {
                 <CardTitle>Learning Hours</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-[#00A651]">127</div>
+                <div className="text-4xl font-bold text-primary">127</div>
                 <p className="text-muted-foreground">Total hours</p>
               </CardContent>
             </Card>

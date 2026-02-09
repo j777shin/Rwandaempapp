@@ -21,7 +21,7 @@ export function AdditionalDataRegistration() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-[#00A1DE] rounded-lg flex items-center justify-center">
+            <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
               <FilePlus className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -29,7 +29,7 @@ export function AdditionalDataRegistration() {
               <p className="text-muted-foreground">Add supplementary information for existing beneficiaries</p>
             </div>
           </div>
-          <Badge variant="outline" className="border-[#00A1DE] text-[#00A1DE]">Phase 1</Badge>
+          <Badge variant="outline" className="border-primary text-primary">Phase 1</Badge>
         </div>
 
         {/* Search Beneficiary */}
@@ -44,7 +44,7 @@ export function AdditionalDataRegistration() {
                 <Label htmlFor="search">Beneficiary ID or Name</Label>
                 <Input id="search" placeholder="Enter ID or name..." />
               </div>
-              <Button className="mt-6 bg-[#00A1DE] hover:bg-[#00A1DE]/90">
+              <Button className="mt-6 bg-primary hover:bg-primary/90">
                 <Search className="w-4 h-4 mr-2" />
                 Search
               </Button>
@@ -84,7 +84,7 @@ export function AdditionalDataRegistration() {
             </div>
 
             <div className="flex gap-4">
-              <Button className="bg-[#00A651] hover:bg-[#00A651]/90">
+              <Button className="bg-primary hover:bg-primary/90">
                 <Upload className="w-4 h-4 mr-2" />
                 Save Additional Data
               </Button>

@@ -140,7 +140,7 @@ export function BeneficiarySelection() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-[#00A1DE] rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
                 <UserCheck className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -150,7 +150,7 @@ export function BeneficiarySelection() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Selection Parameters */}
-            <Card className="border-[#FAD201]">
+            <Card className="border-primary">
               <CardHeader>
                 <CardTitle>Selection Parameters</CardTitle>
               </CardHeader>
@@ -160,7 +160,7 @@ export function BeneficiarySelection() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <Label className="text-base font-semibold">Age Range</Label>
-                      <span className="text-sm font-medium text-[#00A1DE]">
+                      <span className="text-sm font-medium text-primary">
                         {ageRange[0]} - {ageRange[1]} years
                       </span>
                     </div>
@@ -178,7 +178,7 @@ export function BeneficiarySelection() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <Label className="text-base font-semibold">Education Level Range</Label>
-                      <span className="text-sm font-medium text-[#00A1DE]">
+                      <span className="text-sm font-medium text-primary">
                         {educationLabels[educationRange[0]]} - {educationLabels[educationRange[1]]}
                       </span>
                     </div>
@@ -206,7 +206,7 @@ export function BeneficiarySelection() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <Label className="text-sm">Male</Label>
-                        <span className="text-sm font-medium text-[#00A1DE]">
+                        <span className="text-sm font-medium text-primary">
                           {malePercentage[0]}%
                         </span>
                       </div>
@@ -223,7 +223,7 @@ export function BeneficiarySelection() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <Label className="text-sm">Female</Label>
-                        <span className="text-sm font-medium text-[#00A1DE]">
+                        <span className="text-sm font-medium text-primary">
                           {femalePercentage[0]}%
                         </span>
                       </div>
@@ -245,7 +245,7 @@ export function BeneficiarySelection() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <Label className="text-sm">With Disability</Label>
-                        <span className="text-sm font-medium text-[#00A1DE]">
+                        <span className="text-sm font-medium text-primary">
                           {withDisabilityPercentage[0]}%
                         </span>
                       </div>
@@ -262,7 +262,7 @@ export function BeneficiarySelection() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <Label className="text-sm">Without Disability</Label>
-                        <span className="text-sm font-medium text-[#00A1DE]">
+                        <span className="text-sm font-medium text-primary">
                           {withoutDisabilityPercentage[0]}%
                         </span>
                       </div>
@@ -281,7 +281,7 @@ export function BeneficiarySelection() {
                 <div className="flex gap-4 mt-6">
                   <Button 
                     onClick={handleApplyFilters}
-                    className="bg-[#00A651] hover:bg-[#008641]"
+                    className="bg-primary hover:bg-primary/90"
                   >
                     Apply Filters
                   </Button>
@@ -296,7 +296,7 @@ export function BeneficiarySelection() {
             </Card>
 
             {/* Selected Beneficiaries */}
-            <Card className="border-[#00A651]">
+            <Card className="border-primary">
               <CardHeader>
                 <CardTitle>Selected Beneficiaries ({selectedCandidates.length})</CardTitle>
               </CardHeader>

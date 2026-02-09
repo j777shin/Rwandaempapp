@@ -83,7 +83,7 @@ export function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              <Button onClick={handleAdminLogin} className="w-full bg-primary hover:bg-primary/90">
+              <Button onClick={handleAdminLogin} className="w-full bg-neutral-800 hover:bg-neutral-700">
                 Sign In as Admin
               </Button>
             </TabsContent>

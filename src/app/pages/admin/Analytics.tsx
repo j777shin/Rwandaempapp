@@ -11,9 +11,9 @@ import {
 
 // Mock data for charts
 const phaseDistributionData = [
-  { name: "Phase 1 - Active", value: 2755, color: "#00A1DE" },
-  { name: "Phase 1 - Completed", value: 6245, color: "#0080B3" },
-  { name: "Phase 2 - Active", value: 3000, color: "#00A651" },
+  { name: "Phase 1 - Active", value: 2755, color: "#10b981" },
+  { name: "Phase 1 - Completed", value: 6245, color: "#059669" },
+  { name: "Phase 2 - Active", value: 3000, color: "#047857" },
 ];
 
 const ageDistributionData = [
@@ -24,8 +24,8 @@ const ageDistributionData = [
 ];
 
 const genderDistributionData = [
-  { name: "Female", value: 6450, color: "#00A651" },
-  { name: "Male", value: 5550, color: "#00A1DE" },
+  { name: "Female", value: 6450, color: "#10b981" },
+  { name: "Male", value: 5550, color: "#059669" },
 ];
 
 const educationLevelData = [
@@ -53,9 +53,9 @@ const livestockOwnershipData = [
 const landOwnershipData = [
   { category: "No Land", value: 2845, color: "#ef4444" },
   { category: "<0.5 ha", value: 4125, color: "#f59e0b" },
-  { category: "0.5-1 ha", value: 3250, color: "#FAD201" },
-  { category: "1-2 ha", value: 1580, color: "#00A651" },
-  { category: ">2 ha", value: 200, color: "#0080B3" },
+  { category: "0.5-1 ha", value: 3250, color: "#10b981" },
+  { category: "1-2 ha", value: 1580, color: "#059669" },
+  { category: ">2 ha", value: 200, color: "#047857" },
 ];
 
 const housingQualityData = [
@@ -129,14 +129,14 @@ export function Analytics() {
           {/* OVERVIEW SECTION */}
           <section className="space-y-6">
             <div className="flex items-center gap-3">
-              <BarChart3 className="w-6 h-6 text-[#00A1DE]" />
+              <BarChart3 className="w-6 h-6 text-primary" />
               <h2 className="text-2xl font-bold">Overview</h2>
             </div>
             <Separator />
 
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="border-l-4 border-l-[#00A1DE]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Users className="w-4 h-4" />
@@ -144,12 +144,12 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-4xl font-bold text-[#00A1DE]">12,000</div>
+                  <div className="text-4xl font-bold text-primary">12,000</div>
                   <p className="text-xs text-muted-foreground mt-2">All phases combined</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-[#00A651]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Target className="w-4 h-4" />
@@ -157,12 +157,12 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-4xl font-bold text-[#00A651]">69.4%</div>
+                  <div className="text-4xl font-bold text-primary">69.4%</div>
                   <p className="text-xs text-muted-foreground mt-2">Phase 1 completion</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-[#FAD201]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
                     <TrendingUp className="w-4 h-4" />
@@ -170,12 +170,12 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-4xl font-bold text-[#FAD201]">76.2</div>
+                  <div className="text-4xl font-bold text-primary">76.2</div>
                   <p className="text-xs text-muted-foreground mt-2">Out of 100</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-blue-600">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />
@@ -183,7 +183,7 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-4xl font-bold text-blue-600">13,320</div>
+                  <div className="text-4xl font-bold text-primary">13,320</div>
                   <p className="text-xs text-muted-foreground mt-2">Phase 2 total</p>
                 </CardContent>
               </Card>
@@ -194,7 +194,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <PieChartIcon className="w-5 h-5 text-[#00A1DE]" />
+                    <PieChartIcon className="w-5 h-5 text-primary" />
                     Phase Distribution
                   </CardTitle>
                   <CardDescription>Current status across program phases</CardDescription>
@@ -225,7 +225,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-[#00A651]" />
+                    <Activity className="w-5 h-5 text-primary" />
                     Monthly Activity Trends
                   </CardTitle>
                   <CardDescription>User engagement over time</CardDescription>
@@ -238,9 +238,9 @@ export function Analytics() {
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Line type="monotone" dataKey="logins" stroke="#00A1DE" strokeWidth={2} name="Logins" />
-                      <Line type="monotone" dataKey="testsCompleted" stroke="#FAD201" strokeWidth={2} name="Tests" />
-                      <Line type="monotone" dataKey="chatbotSessions" stroke="#00A651" strokeWidth={2} name="Chatbot" />
+                      <Line type="monotone" dataKey="logins" stroke="#10b981" strokeWidth={2} name="Logins" />
+                      <Line type="monotone" dataKey="testsCompleted" stroke="#059669" strokeWidth={2} name="Tests" />
+                      <Line type="monotone" dataKey="chatbotSessions" stroke="#047857" strokeWidth={2} name="Chatbot" />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -251,14 +251,14 @@ export function Analytics() {
           {/* BENEFICIARY ANALYSIS SECTION */}
           <section className="space-y-6">
             <div className="flex items-center gap-3">
-              <Users className="w-6 h-6 text-[#00A651]" />
+              <Users className="w-6 h-6 text-primary" />
               <h2 className="text-2xl font-bold">Beneficiary Analysis</h2>
             </div>
             <Separator />
 
             {/* Demographic Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-l-4 border-l-[#00A1DE]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm">Total Beneficiaries</CardTitle>
                 </CardHeader>
@@ -268,22 +268,22 @@ export function Analytics() {
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-[#00A651]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm">Female Beneficiaries</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-[#00A651]">53.8%</div>
+                  <div className="text-3xl font-bold text-primary">53.8%</div>
                   <p className="text-xs text-muted-foreground mt-1">6,450 women enrolled</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-[#FAD201]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm">Avg. Age</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-[#FAD201]">26.4</div>
+                  <div className="text-3xl font-bold text-primary">26.4</div>
                   <p className="text-xs text-muted-foreground mt-1">Years old</p>
                 </CardContent>
               </Card>
@@ -294,7 +294,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-[#00A1DE]" />
+                    <Users className="w-5 h-5 text-primary" />
                     Age Distribution
                   </CardTitle>
                   <CardDescription>Beneficiaries by age group</CardDescription>
@@ -306,7 +306,7 @@ export function Analytics() {
                       <XAxis dataKey="ageGroup" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="count" fill="#00A1DE" name="Beneficiaries" />
+                      <Bar dataKey="count" fill="#10b981" name="Beneficiaries" />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -315,7 +315,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-[#00A651]" />
+                    <Users className="w-5 h-5 text-primary" />
                     Gender Distribution
                   </CardTitle>
                   <CardDescription>Gender breakdown of participants</CardDescription>
@@ -346,7 +346,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <GraduationCap className="w-5 h-5 text-[#FAD201]" />
+                    <GraduationCap className="w-5 h-5 text-primary" />
                     Education Levels
                   </CardTitle>
                   <CardDescription>Educational background distribution</CardDescription>
@@ -358,7 +358,7 @@ export function Analytics() {
                       <XAxis type="number" />
                       <YAxis dataKey="level" type="category" width={100} />
                       <Tooltip />
-                      <Bar dataKey="count" fill="#FAD201" name="Beneficiaries" />
+                      <Bar dataKey="count" fill="#10b981" name="Beneficiaries" />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -367,7 +367,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-[#00A651]" />
+                    <Target className="w-5 h-5 text-primary" />
                     Pathway Progress Overview
                   </CardTitle>
                   <CardDescription>Average completion by pathway</CardDescription>
@@ -378,7 +378,7 @@ export function Analytics() {
                       <PolarGrid />
                       <PolarAngleAxis dataKey="subject" />
                       <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                      <Radar name="Progress %" dataKey="value" stroke="#00A651" fill="#00A651" fillOpacity={0.6} />
+                      <Radar name="Progress %" dataKey="value" stroke="#10b981" fill="#10b981" fillOpacity={0.6} />
                       <Tooltip />
                     </RadarChart>
                   </ResponsiveContainer>
@@ -390,14 +390,14 @@ export function Analytics() {
           {/* SOCIOECONOMIC SECTION */}
           <section className="space-y-6">
             <div className="flex items-center gap-3">
-              <Home className="w-6 h-6 text-[#FAD201]" />
+              <Home className="w-6 h-6 text-primary" />
               <h2 className="text-2xl font-bold">Socioeconomic Indicators</h2>
             </div>
             <Separator />
 
             {/* Socioeconomic Summary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card className="border-l-4 border-l-[#00A651]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Home className="w-4 h-4" />
@@ -405,12 +405,12 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-[#00A651]">5.2</div>
+                  <div className="text-3xl font-bold text-primary">5.2</div>
                   <p className="text-xs text-muted-foreground mt-1">Members per household</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-[#FAD201]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Coins className="w-4 h-4" />
@@ -418,27 +418,27 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-[#FAD201]">95k</div>
+                  <div className="text-3xl font-bold text-primary">95k</div>
                   <p className="text-xs text-muted-foreground mt-1">RWF per month</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-[#00A1DE]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm">Land Ownership</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-[#00A1DE]">76.3%</div>
+                  <div className="text-3xl font-bold text-primary">76.3%</div>
                   <p className="text-xs text-muted-foreground mt-1">Own some land</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-orange-500">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm">Livestock Owners</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-orange-500">72.6%</div>
+                  <div className="text-3xl font-bold text-primary">72.6%</div>
                   <p className="text-xs text-muted-foreground mt-1">Own livestock</p>
                 </CardContent>
               </Card>
@@ -449,7 +449,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Coins className="w-5 h-5 text-[#FAD201]" />
+                    <Coins className="w-5 h-5 text-primary" />
                     Household Income Distribution
                   </CardTitle>
                   <CardDescription>Monthly household income ranges</CardDescription>
@@ -461,7 +461,7 @@ export function Analytics() {
                       <XAxis dataKey="range" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="count" fill="#FAD201" name="Households" />
+                      <Bar dataKey="count" fill="#10b981" name="Households" />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -470,7 +470,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Home className="w-5 h-5 text-[#00A1DE]" />
+                    <Home className="w-5 h-5 text-primary" />
                     Land Ownership Distribution
                   </CardTitle>
                   <CardDescription>Land holdings by size</CardDescription>
@@ -501,7 +501,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-[#00A651]" />
+                    <Users className="w-5 h-5 text-primary" />
                     Livestock Ownership
                   </CardTitle>
                   <CardDescription>Types of livestock owned by beneficiaries</CardDescription>
@@ -515,8 +515,8 @@ export function Analytics() {
                       <YAxis yAxisId="right" orientation="right" />
                       <Tooltip />
                       <Legend />
-                      <Bar yAxisId="left" dataKey="owners" fill="#00A651" name="Number of Owners" />
-                      <Line yAxisId="right" type="monotone" dataKey="percentage" stroke="#FAD201" strokeWidth={2} name="Percentage %" />
+                      <Bar yAxisId="left" dataKey="owners" fill="#10b981" name="Number of Owners" />
+                      <Line yAxisId="right" type="monotone" dataKey="percentage" stroke="#059669" strokeWidth={2} name="Percentage %" />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -525,19 +525,19 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Home className="w-5 h-5 text-orange-500" />
+                    <Home className="w-5 h-5 text-primary" />
                     Housing Quality
                   </CardTitle>
                   <CardDescription>Quality of beneficiary housing</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="min-h-[320px]">
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={housingQualityData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="quality" />
                       <YAxis />
                       <Tooltip />
-                      <Area type="monotone" dataKey="count" stroke="#f97316" fill="#f97316" fillOpacity={0.6} name="Households" />
+                      <Area type="monotone" dataKey="count" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name="Households" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -548,14 +548,14 @@ export function Analytics() {
           {/* ENGAGEMENT SECTION */}
           <section className="space-y-6 pb-12">
             <div className="flex items-center gap-3">
-              <Activity className="w-6 h-6 text-blue-600" />
+              <Activity className="w-6 h-6 text-primary" />
               <h2 className="text-2xl font-bold">Engagement Metrics</h2>
             </div>
             <Separator />
 
             {/* Engagement Summary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card className="border-l-4 border-l-[#00A1DE]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Activity className="w-4 h-4" />
@@ -563,12 +563,12 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-[#00A1DE]">7,245</div>
+                  <div className="text-3xl font-bold text-primary">7,245</div>
                   <p className="text-xs text-muted-foreground mt-1">60.4% of total</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-[#00A651]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />
@@ -576,12 +576,12 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-[#00A651]">4.4</div>
+                  <div className="text-3xl font-bold text-primary">4.4</div>
                   <p className="text-xs text-muted-foreground mt-1">Per Phase 2 user</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-[#FAD201]">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Target className="w-4 h-4" />
@@ -589,12 +589,12 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-[#FAD201]">91.2%</div>
+                  <div className="text-3xl font-bold text-primary">91.2%</div>
                   <p className="text-xs text-muted-foreground mt-1">All tests completed</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-purple-500">
+              <Card className="border-l-4 border-l-primary">
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
                     <TrendingUp className="w-4 h-4" />
@@ -602,7 +602,7 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-purple-500">79.8%</div>
+                  <div className="text-3xl font-bold text-primary">79.8%</div>
                   <p className="text-xs text-muted-foreground mt-1">Average rate</p>
                 </CardContent>
               </Card>
@@ -613,7 +613,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-[#00A651]" />
+                    <MessageSquare className="w-5 h-5 text-primary" />
                     Chatbot Usage Trend
                   </CardTitle>
                   <CardDescription>Weekly chatbot session growth (Phase 2)</CardDescription>
@@ -625,7 +625,7 @@ export function Analytics() {
                       <XAxis dataKey="week" />
                       <YAxis />
                       <Tooltip />
-                      <Area type="monotone" dataKey="sessions" stroke="#00A651" fill="#00A651" fillOpacity={0.6} name="Sessions" />
+                      <Area type="monotone" dataKey="sessions" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name="Sessions" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -634,7 +634,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-[#00A1DE]" />
+                    <Target className="w-5 h-5 text-primary" />
                     Test Completion Rates
                   </CardTitle>
                   <CardDescription>Progress on required assessments</CardDescription>
@@ -647,8 +647,8 @@ export function Analytics() {
                       <YAxis dataKey="test" type="category" width={150} />
                       <Tooltip />
                       <Legend />
-                      <Bar dataKey="completed" stackId="a" fill="#00A651" name="Completed" />
-                      <Bar dataKey="inProgress" stackId="a" fill="#FAD201" name="In Progress" />
+                      <Bar dataKey="completed" stackId="a" fill="#10b981" name="Completed" />
+                      <Bar dataKey="inProgress" stackId="a" fill="#059669" name="In Progress" />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -657,7 +657,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-[#FAD201]" />
+                    <Activity className="w-5 h-5 text-primary" />
                     Daily Engagement Rate
                   </CardTitle>
                   <CardDescription>User activity by day of week</CardDescription>
@@ -669,7 +669,7 @@ export function Analytics() {
                       <XAxis dataKey="day" />
                       <YAxis domain={[0, 100]} />
                       <Tooltip />
-                      <Line type="monotone" dataKey="rate" stroke="#FAD201" strokeWidth={3} name="Engagement %" />
+                      <Line type="monotone" dataKey="rate" stroke="#10b981" strokeWidth={3} name="Engagement %" />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -678,7 +678,7 @@ export function Analytics() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-[#00A1DE]" />
+                    <TrendingUp className="w-5 h-5 text-primary" />
                     Overall Platform Activity
                   </CardTitle>
                   <CardDescription>Combined engagement metrics over time</CardDescription>
@@ -691,9 +691,9 @@ export function Analytics() {
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Bar dataKey="testsCompleted" fill="#00A651" name="Tests Completed" />
-                      <Line type="monotone" dataKey="logins" stroke="#00A1DE" strokeWidth={2} name="User Logins" />
-                      <Line type="monotone" dataKey="chatbotSessions" stroke="#FAD201" strokeWidth={2} name="Chatbot Sessions" />
+                      <Bar dataKey="testsCompleted" fill="#10b981" name="Tests Completed" />
+                      <Line type="monotone" dataKey="logins" stroke="#059669" strokeWidth={2} name="User Logins" />
+                      <Line type="monotone" dataKey="chatbotSessions" stroke="#047857" strokeWidth={2} name="Chatbot Sessions" />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </CardContent>

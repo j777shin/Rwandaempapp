@@ -12,7 +12,7 @@ export function PathwaysDeepDive() {
       id: 1,
       title: "Construction & Trades",
       icon: Building2,
-      color: "bg-[#00A1DE]",
+      color: "bg-primary",
       description: "Master skilled trades in construction, carpentry, plumbing, and electrical work",
       progress: 45,
       modules: [
@@ -32,7 +32,7 @@ export function PathwaysDeepDive() {
       id: 2,
       title: "Hospitality & Tourism",
       icon: Users,
-      color: "bg-[#00A651]",
+      color: "bg-primary",
       description: "Build expertise in hotel management, customer service, and tourism operations",
       progress: 30,
       modules: [
@@ -52,7 +52,7 @@ export function PathwaysDeepDive() {
       id: 3,
       title: "Technology & Digital Skills",
       icon: TrendingUp,
-      color: "bg-[#FAD201]",
+      color: "bg-primary",
       description: "Develop technical skills in IT support, web development, and digital marketing",
       progress: 60,
       modules: [
@@ -72,7 +72,7 @@ export function PathwaysDeepDive() {
       id: 4,
       title: "Agriculture & Agribusiness",
       icon: Target,
-      color: "bg-[#00A1DE]",
+      color: "bg-primary",
       description: "Learn modern farming techniques, crop management, and agricultural business",
       progress: 20,
       modules: [
@@ -103,7 +103,7 @@ export function PathwaysDeepDive() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#00A1DE] to-[#00A651] rounded-lg flex items-center justify-center">
+            <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
               <BookOpen className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -112,9 +112,9 @@ export function PathwaysDeepDive() {
             </div>
           </div>
           <div className="flex gap-3">
-            <Badge variant="outline" className="border-[#00A1DE] text-[#00A1DE]">Phase 2</Badge>
-            <Badge variant="outline" className="border-[#00A651] text-[#00A651]">Employment Track</Badge>
-            <Badge variant="outline" className="border-[#FAD201] text-[#FAD201]">{careerPathways.length} Career Pathways</Badge>
+            <Badge variant="outline" className="border-primary text-primary">Phase 2</Badge>
+            <Badge variant="outline" className="border-primary text-primary">Employment Track</Badge>
+            <Badge variant="outline" className="border-primary text-primary">{careerPathways.length} Career Pathways</Badge>
           </div>
         </div>
 
@@ -125,7 +125,7 @@ export function PathwaysDeepDive() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className={`w-14 h-14 ${pathway.color} ${pathway.color === "bg-[#FAD201]" ? "text-black" : "text-white"} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                    <div className={`w-14 h-14 ${pathway.color} text-white rounded-lg flex items-center justify-center flex-shrink-0`}>
                       <pathway.icon className="w-7 h-7" />
                     </div>
                     <div>
@@ -134,7 +134,7 @@ export function PathwaysDeepDive() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-[#00A651]">{pathway.progress}%</div>
+                    <div className="text-3xl font-bold text-primary">{pathway.progress}%</div>
                     <p className="text-xs text-muted-foreground">Complete</p>
                   </div>
                 </div>
@@ -158,13 +158,13 @@ export function PathwaysDeepDive() {
                           key={idx}
                           className={`flex items-center justify-between p-4 rounded-lg border-2 ${
                             module.completed
-                              ? "bg-[#00A651]/5 border-[#00A651]"
+                              ? "bg-primary/5 border-primary"
                               : "bg-gray-50 border-gray-200"
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             {module.completed ? (
-                              <CheckCircle2 className="w-6 h-6 text-[#00A651]" />
+                              <CheckCircle2 className="w-6 h-6 text-primary" />
                             ) : (
                               <div className="w-6 h-6 rounded-full border-2 border-gray-300" />
                             )}
@@ -174,7 +174,7 @@ export function PathwaysDeepDive() {
                             </div>
                           </div>
                           {!module.completed && (
-                            <Button size="sm" variant="outline" className="border-[#00A1DE] text-[#00A1DE] hover:bg-[#00A1DE] hover:text-white">
+                            <Button size="sm" variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
                               Start Module
                             </Button>
                           )}
@@ -195,21 +195,17 @@ export function PathwaysDeepDive() {
                             </div>
                             <Badge
                               variant="outline"
-                              className={
-                                job.demand === "High"
-                                  ? "border-[#00A651] text-[#00A651]"
-                                  : "border-[#FAD201] text-[#FAD201]"
-                              }
+                              className="border-primary text-primary"
                             >
                               {job.demand} Demand
                             </Badge>
                           </div>
                         </div>
                       ))}
-                      <Card className="bg-[#00A1DE]/5 border-[#00A1DE]">
+                      <Card className="bg-primary/5 border-primary">
                         <CardContent className="pt-6">
                           <div className="flex items-start gap-3">
-                            <Award className="w-6 h-6 text-[#00A1DE] flex-shrink-0 mt-1" />
+                            <Award className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                             <div>
                               <h4 className="font-semibold mb-2">Job Placement Support</h4>
                               <p className="text-sm text-muted-foreground">
@@ -226,25 +222,25 @@ export function PathwaysDeepDive() {
                   <TabsContent value="certifications" className="mt-4">
                     <div className="space-y-3">
                       {pathway.certifications.map((cert, idx) => (
-                        <div key={idx} className="p-4 bg-gray-50 rounded-lg border-2 border-[#FAD201]">
+                        <div key={idx} className="p-4 bg-gray-50 rounded-lg border-2 border-primary">
                           <div className="flex items-center gap-3">
-                            <Award className="w-8 h-8 text-[#FAD201]" />
+                            <Award className="w-8 h-8 text-primary" />
                             <div className="flex-1">
                               <h4 className="font-semibold">{cert}</h4>
                               <p className="text-sm text-muted-foreground">
                                 Awarded upon pathway completion
                               </p>
                             </div>
-                            <Badge variant="outline" className="border-[#00A1DE] text-[#00A1DE]">
+                            <Badge variant="outline" className="border-primary text-primary">
                               Recognized
                             </Badge>
                           </div>
                         </div>
                       ))}
-                      <Card className="bg-[#00A651]/5 border-[#00A651]">
+                      <Card className="bg-primary/5 border-primary">
                         <CardContent className="pt-6">
                           <div className="flex items-start gap-3">
-                            <CheckCircle2 className="w-6 h-6 text-[#00A651] flex-shrink-0 mt-1" />
+                            <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                             <div>
                               <h4 className="font-semibold mb-2">Industry-Recognized Certifications</h4>
                               <p className="text-sm text-muted-foreground">
@@ -263,7 +259,7 @@ export function PathwaysDeepDive() {
         </div>
 
         {/* Overall Progress Summary */}
-        <Card className="mt-8 border-2 border-[#00A1DE]">
+        <Card className="mt-8 border-2 border-primary">
           <CardHeader>
             <CardTitle>Your Overall Pathway Progress</CardTitle>
             <CardDescription>Track your progress across all career pathways</CardDescription>
@@ -272,7 +268,7 @@ export function PathwaysDeepDive() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {careerPathways.map((pathway, idx) => (
                 <div key={idx} className="text-center">
-                  <div className={`w-12 h-12 ${pathway.color} ${pathway.color === "bg-[#FAD201]" ? "text-black" : "text-white"} rounded-lg flex items-center justify-center mx-auto mb-3`}>
+                  <div className={`w-12 h-12 ${pathway.color} text-white rounded-lg flex items-center justify-center mx-auto mb-3`}>
                     <pathway.icon className="w-6 h-6" />
                   </div>
                   <p className="text-sm font-medium mb-2">{pathway.title}</p>

@@ -157,7 +157,7 @@ export function DataRegistration() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-[#00A1DE] rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
                 <Database className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -197,8 +197,8 @@ export function DataRegistration() {
                   {/* CSV Upload Tab */}
                   <TabsContent value="csv" className="mt-6">
                     <div className="space-y-6">
-                      <Alert className="border-[#00A1DE] bg-[#00A1DE]/10">
-                        <FileSpreadsheet className="h-4 w-4 text-[#00A1DE]" />
+                      <Alert className="border-primary bg-primary/10">
+                        <FileSpreadsheet className="h-4 w-4 text-primary" />
                         <AlertTitle>CSV Format Requirements</AlertTitle>
                         <AlertDescription>
                           Upload a CSV file with the following columns: name, age, gender, contact, marriage_status, disability, education_level, occupation, informal_working, num_cows, num_goats, num_chickens, num_sheep, num_pigs, num_rabbits, land_ownership, land_size, num_radio, num_phone, num_tv, fuel, water_source, floor, roof, walls, toilet
@@ -206,7 +206,7 @@ export function DataRegistration() {
                       </Alert>
 
                       <form onSubmit={handleCsvSubmit} className="space-y-6">
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#00A1DE] transition-colors">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
                           <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                           <Label htmlFor="csv-upload" className="cursor-pointer">
                             <div className="text-lg mb-2">
@@ -233,7 +233,7 @@ export function DataRegistration() {
                           </div>
                         )}
 
-                        <Button type="submit" className="w-full bg-[#00A651] hover:bg-[#008641]">
+                        <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
                           <Upload className="w-4 h-4 mr-2" />
                           Upload and Process CSV
                         </Button>
@@ -257,7 +257,7 @@ export function DataRegistration() {
                     <form onSubmit={handleManualSubmit} className="space-y-8">
                       {/* Personal Information */}
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold border-b pb-2 border-[#00A1DE]">Personal Information</h3>
+                        <h3 className="text-lg font-semibold border-b pb-2 border-primary">Personal Information</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="name">Full Name *</Label>
@@ -305,7 +305,7 @@ export function DataRegistration() {
 
                       {/* Household Information */}
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold border-b pb-2 border-[#FAD201]">Household Information</h3>
+                        <h3 className="text-lg font-semibold border-b pb-2 border-primary">Household Information</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label>Education Level *</Label>
@@ -362,7 +362,7 @@ export function DataRegistration() {
 
                       {/* Livestock Assets */}
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold border-b pb-2 border-[#00A651]">Livestock Assets</h3>
+                        <h3 className="text-lg font-semibold border-b pb-2 border-primary">Livestock Assets</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="num_cows">Number of Cows</Label>
@@ -429,7 +429,7 @@ export function DataRegistration() {
 
                       {/* Land & Housing */}
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold border-b pb-2 border-[#00A1DE]">Land & Housing</h3>
+                        <h3 className="text-lg font-semibold border-b pb-2 border-primary">Land & Housing</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="flex items-center space-x-2">
                             <Checkbox
@@ -543,7 +543,7 @@ export function DataRegistration() {
                         </div>
                       </div>
 
-                      <Button type="submit" className="w-full bg-[#00A651] hover:bg-[#008641]">
+                      <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
                         <UserPlus className="w-4 h-4 mr-2" />
                         Register Candidate
                       </Button>
@@ -569,8 +569,8 @@ export function DataRegistration() {
                   {/* Additional Info CSV Upload */}
                   <TabsContent value="csv-additional" className="mt-6">
                     <div className="space-y-6">
-                      <Alert className="border-[#00A651] bg-[#00A651]/10">
-                        <FileSpreadsheet className="h-4 w-4 text-[#00A651]" />
+                      <Alert className="border-primary bg-primary/10">
+                        <FileSpreadsheet className="h-4 w-4 text-primary" />
                         <AlertTitle>CSV Format Requirements</AlertTitle>
                         <AlertDescription>
                           Upload a CSV file with candidate ID and attendance score columns: candidate_id, attendance_score
@@ -578,7 +578,7 @@ export function DataRegistration() {
                       </Alert>
 
                       <form onSubmit={handleAdditionalCsvSubmit} className="space-y-6">
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#00A651] transition-colors">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
                           <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                           <Label htmlFor="additional-csv-upload" className="cursor-pointer">
                             <div className="text-lg mb-2">
@@ -605,7 +605,7 @@ export function DataRegistration() {
                           </div>
                         )}
 
-                        <Button type="submit" className="w-full bg-[#00A651] hover:bg-[#008641]">
+                        <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
                           <Upload className="w-4 h-4 mr-2" />
                           Upload and Process CSV
                         </Button>
@@ -627,8 +627,8 @@ export function DataRegistration() {
                   {/* Additional Info Manual Entry - Table of Candidates */}
                   <TabsContent value="manual-additional" className="mt-6">
                     <div className="space-y-4">
-                      <Alert className="border-[#00A651] bg-[#00A651]/10">
-                        <Database className="h-4 w-4 text-[#00A651]" />
+                      <Alert className="border-primary bg-primary/10">
+                        <Database className="h-4 w-4 text-primary" />
                         <AlertTitle>Attendance Score Management</AlertTitle>
                         <AlertDescription>
                           Edit attendance scores for registered candidates. Click the edit button to modify scores.
@@ -674,7 +674,7 @@ export function DataRegistration() {
                                       <Button
                                         size="sm"
                                         onClick={() => handleSave(candidate.id)}
-                                        className="bg-[#00A651] hover:bg-[#008641]"
+                                        className="bg-primary hover:bg-primary/90"
                                       >
                                         <Save className="w-4 h-4 mr-1" />
                                         Save

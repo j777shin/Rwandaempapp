@@ -13,7 +13,7 @@ const pathways = [
     level: "Beginner",
     icon: GraduationCap,
     completion: 45,
-    color: "bg-[#00A1DE]",
+    color: "bg-primary",
   },
   {
     id: 2,
@@ -23,7 +23,7 @@ const pathways = [
     level: "Intermediate",
     icon: Briefcase,
     completion: 30,
-    color: "bg-[#FAD201] text-black",
+    color: "bg-primary",
   },
   {
     id: 3,
@@ -33,7 +33,7 @@ const pathways = [
     level: "Advanced",
     icon: Rocket,
     completion: 15,
-    color: "bg-[#00A651]",
+    color: "bg-primary",
   },
 ];
 
@@ -75,12 +75,12 @@ export function PathwaysPage() {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-[#00A651] h-2 rounded-full"
+                      className="bg-primary h-2 rounded-full"
                       style={{ width: `${pathway.completion}%` }}
                     />
                   </div>
                 </div>
-                <Button className="w-full bg-[#00A1DE] hover:bg-[#0081B8]">
+                <Button className="w-full bg-primary hover:bg-primary/90">
                   Continue Learning
                 </Button>
               </CardContent>

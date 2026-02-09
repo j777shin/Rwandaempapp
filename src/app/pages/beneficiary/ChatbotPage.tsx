@@ -54,7 +54,7 @@ export function ChatbotPage() {
         </Link>
 
         <Card className="h-[600px] flex flex-col">
-          <CardHeader className="bg-gradient-to-r from-[#00A1DE] to-[#00A651] text-white">
+          <CardHeader className="bg-primary text-white">
             <CardTitle>AI Support Chatbot</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col p-4">
@@ -67,7 +67,7 @@ export function ChatbotPage() {
                   <div
                     className={`max-w-[70%] p-3 rounded-lg ${
                       message.sender === "user"
-                        ? "bg-[#00A1DE] text-white"
+                        ? "bg-primary text-white"
                         : "bg-gray-100 text-gray-900"
                     }`}
                   >
@@ -86,7 +86,7 @@ export function ChatbotPage() {
                 onKeyPress={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Type your message..."
               />
-              <Button onClick={handleSend} className="bg-[#00A1DE] hover:bg-[#0081B8]">
+              <Button onClick={handleSend} className="bg-primary hover:bg-primary/90">
                 <Send className="w-4 h-4" />
               </Button>
             </div>

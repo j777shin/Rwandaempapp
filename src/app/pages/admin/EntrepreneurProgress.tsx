@@ -7,17 +7,17 @@ import { Progress } from "@/app/components/ui/progress";
 
 export function EntrepreneurProgress() {
   const stats = [
-    { label: "Total Entrepreneur Track", value: "1,200", icon: Briefcase, color: "bg-[#00A651]" },
-    { label: "Chatbot Sessions", value: "4,580", icon: MessageSquare, color: "bg-[#00A1DE]" },
-    { label: "Business Plans", value: "850", icon: FileText, color: "bg-[#FAD201]" },
-    { label: "Avg Progress", value: "72%", icon: TrendingUp, color: "bg-[#00A651]" },
+    { label: "Total Entrepreneur Track", value: "1,200", icon: Briefcase, color: "bg-primary" },
+    { label: "Chatbot Sessions", value: "4,580", icon: MessageSquare, color: "bg-primary" },
+    { label: "Business Plans", value: "850", icon: FileText, color: "bg-primary" },
+    { label: "Avg Progress", value: "72%", icon: TrendingUp, color: "bg-primary" },
   ];
 
   const businessSectors = [
-    { sector: "Retail & Trade", total: 380, avgProgress: 75, color: "bg-[#00A651]" },
-    { sector: "Agriculture Business", total: 320, avgProgress: 68, color: "bg-[#00A1DE]" },
-    { sector: "Technology Startups", total: 280, avgProgress: 80, color: "bg-[#FAD201]" },
-    { sector: "Service Industry", total: 220, avgProgress: 70, color: "bg-[#00A651]" },
+    { sector: "Retail & Trade", total: 380, avgProgress: 75, color: "bg-primary" },
+    { sector: "Agriculture Business", total: 320, avgProgress: 68, color: "bg-primary" },
+    { sector: "Technology Startups", total: 280, avgProgress: 80, color: "bg-primary" },
+    { sector: "Service Industry", total: 220, avgProgress: 70, color: "bg-primary" },
   ];
 
   const recentActivity = [
@@ -47,7 +47,7 @@ export function EntrepreneurProgress() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-[#00A651] rounded-lg flex items-center justify-center">
+            <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
               <Briefcase className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -56,22 +56,22 @@ export function EntrepreneurProgress() {
             </div>
           </div>
           <div className="flex gap-3">
-            <Badge variant="outline" className="border-[#00A651] text-[#00A651]">Phase 2</Badge>
-            <Badge variant="outline" className="border-[#00A651] text-[#00A651]">Entrepreneurship Track</Badge>
+            <Badge variant="outline" className="border-primary text-primary">Phase 2</Badge>
+            <Badge variant="outline" className="border-primary text-primary">Entrepreneurship Track</Badge>
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
-            <Card key={index} className="border-l-4 border-l-[#00A651]">
+            <Card key={index} className="border-l-4 border-l-primary">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">{stat.label}</p>
                     <p className="text-3xl font-bold mt-2">{stat.value}</p>
                   </div>
-                  <div className={`w-12 h-12 ${stat.color} ${stat.color === "bg-[#FAD201]" ? "text-black" : "text-white"} rounded-lg flex items-center justify-center`}>
+                  <div className={`w-12 h-12 ${stat.color} text-white rounded-lg flex items-center justify-center`}>
                     <stat.icon className="w-6 h-6" />
                   </div>
                 </div>
@@ -97,7 +97,7 @@ export function EntrepreneurProgress() {
                     </div>
                     <div className="flex items-center gap-4">
                       <span className="text-sm text-muted-foreground">{sector.total} beneficiaries</span>
-                      <span className="font-bold text-[#00A651]">{sector.avgProgress}%</span>
+                      <span className="font-bold text-primary">{sector.avgProgress}%</span>
                     </div>
                   </div>
                   <Progress value={sector.avgProgress} className="h-3" />
@@ -119,7 +119,7 @@ export function EntrepreneurProgress() {
                 <div key={index} className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold">{milestone.title}</h4>
-                    <Badge variant="outline" className="border-[#00A651] text-[#00A651]">
+                    <Badge variant="outline" className="border-primary text-primary">
                       {milestone.percentage}%
                     </Badge>
                   </div>
@@ -147,13 +147,13 @@ export function EntrepreneurProgress() {
                   className="flex items-start justify-between p-4 bg-gray-50 rounded-lg border-2 border-gray-200"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-[#00A651] rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
                       {activity.name.split(" ").map((n) => n[0]).join("")}
                     </div>
                     <div>
                       <p className="font-semibold">{activity.name}</p>
                       <p className="text-sm text-muted-foreground">{activity.action}</p>
-                      <Badge variant="outline" className="mt-2 border-[#00A651] text-[#00A651]">
+                      <Badge variant="outline" className="mt-2 border-primary text-primary">
                         {activity.sector}
                       </Badge>
                     </div>
@@ -164,7 +164,7 @@ export function EntrepreneurProgress() {
             </div>
 
             <div className="mt-6 flex justify-center">
-              <Button variant="outline" className="border-[#00A651] text-[#00A651] hover:bg-[#00A651] hover:text-white">
+              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
                 <Users className="w-4 h-4 mr-2" />
                 View All Beneficiaries
               </Button>

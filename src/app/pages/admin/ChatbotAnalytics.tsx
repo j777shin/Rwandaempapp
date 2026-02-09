@@ -26,7 +26,7 @@ export function ChatbotAnalytics() {
               <CardTitle>Total Conversations</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-[#00A1DE]">1,847</div>
+              <div className="text-4xl font-bold text-primary">1,847</div>
             </CardContent>
           </Card>
           <Card>
@@ -34,7 +34,7 @@ export function ChatbotAnalytics() {
               <CardTitle>Avg Response Time</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-[#FAD201]">1.2s</div>
+              <div className="text-4xl font-bold text-primary">1.2s</div>
             </CardContent>
           </Card>
           <Card>
@@ -42,7 +42,7 @@ export function ChatbotAnalytics() {
               <CardTitle>Satisfaction Rate</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-[#00A651]">94%</div>
+              <div className="text-4xl font-bold text-primary">94%</div>
             </CardContent>
           </Card>
         </div>

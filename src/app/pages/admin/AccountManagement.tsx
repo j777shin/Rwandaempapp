@@ -104,11 +104,11 @@ const accounts = [
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Emp Track":
-      return "bg-[#00A1DE] text-white";
+      return "bg-primary text-white";
     case "Ent Track":
-      return "bg-[#00A651] text-white";
+      return "bg-primary text-white";
     case "Phase1":
-      return "bg-[#FAD201] text-black";
+      return "bg-primary text-white";
     case "Inactive":
       return "bg-gray-200 text-gray-700";
     default:
@@ -207,7 +207,7 @@ export function AccountManagement() {
               Back to Dashboard
             </Button>
           </Link>
-          <Button className="bg-[#00A651] hover:bg-[#008641]">
+          <Button className="bg-primary hover:bg-primary/90">
             <Download className="w-4 h-4 mr-2" />
             Export Accounts
           </Button>
@@ -376,7 +376,7 @@ export function AccountManagement() {
               <div className="space-y-6">
                 {/* Basic Information */}
                 <div>
-                  <h3 className="font-semibold text-lg mb-3 text-[#00A1DE]">Basic Information</h3>
+                  <h3 className="font-semibold text-lg mb-3 text-primary">Basic Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">ID</p>
@@ -422,7 +422,7 @@ export function AccountManagement() {
 
                 {/* Contact Information */}
                 <div>
-                  <h3 className="font-semibold text-lg mb-3 text-[#00A1DE]">Contact Information</h3>
+                  <h3 className="font-semibold text-lg mb-3 text-primary">Contact Information</h3>
                   <div className="grid grid-cols-1 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Email</p>
@@ -458,7 +458,7 @@ export function AccountManagement() {
 
                 {/* Education & Status */}
                 <div>
-                  <h3 className="font-semibold text-lg mb-3 text-[#00A1DE]">Education & Status</h3>
+                  <h3 className="font-semibold text-lg mb-3 text-primary">Education & Status</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Education Level</p>
@@ -501,7 +501,7 @@ export function AccountManagement() {
 
                 {/* Dates */}
                 <div>
-                  <h3 className="font-semibold text-lg mb-3 text-[#00A1DE]">Important Dates</h3>
+                  <h3 className="font-semibold text-lg mb-3 text-primary">Important Dates</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Account Created</p>
@@ -518,7 +518,7 @@ export function AccountManagement() {
 
                 {/* Performance Scores */}
                 <div>
-                  <h3 className="font-semibold text-lg mb-3 text-[#00A1DE]">Performance Scores</h3>
+                  <h3 className="font-semibold text-lg mb-3 text-primary">Performance Scores</h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">SkillCraft</p>
@@ -526,7 +526,7 @@ export function AccountManagement() {
                         type="number"
                         value={editedAccount.skillcraftScore}
                         onChange={(e) => updateField("skillcraftScore", parseInt(e.target.value))}
-                        className="text-2xl font-bold text-[#00A1DE]"
+                        className="text-2xl font-bold text-primary"
                       />
                     </div>
                     <div>
@@ -535,7 +535,7 @@ export function AccountManagement() {
                         type="number"
                         value={editedAccount.pathwaysScore}
                         onChange={(e) => updateField("pathwaysScore", parseInt(e.target.value))}
-                        className="text-2xl font-bold text-[#FAD201]"
+                        className="text-2xl font-bold text-primary"
                       />
                     </div>
                     <div>
@@ -544,7 +544,7 @@ export function AccountManagement() {
                         type="number"
                         value={editedAccount.eligibilityScore}
                         onChange={(e) => updateField("eligibilityScore", parseInt(e.target.value))}
-                        className="text-2xl font-bold text-[#00A651]"
+                        className="text-2xl font-bold text-primary"
                       />
                     </div>
                   </div>
@@ -554,7 +554,7 @@ export function AccountManagement() {
 
                 {/* Last Edited */}
                 <div>
-                  <h3 className="font-semibold text-lg mb-3 text-[#00A1DE]">Last Edited</h3>
+                  <h3 className="font-semibold text-lg mb-3 text-primary">Last Edited</h3>
                   <p className="font-semibold">{editedAccount.lastEdited}</p>
                 </div>
 
