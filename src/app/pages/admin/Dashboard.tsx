@@ -23,9 +23,9 @@ export function AdminDashboard() {
       icon: UserPlus,
     },
     { 
-      title: "Beneficiary Selection", 
-      description: "Select Phase 2 candidates based on eligibility", 
-      link: "/admin/selection", 
+      title: "Phase 1 Selection", 
+      description: "Select Phase 1 candidates based on eligibility", 
+      link: "/admin/phase1-selection", 
       icon: UserCheck,
     },
     { 
@@ -38,7 +38,13 @@ export function AdminDashboard() {
 
   const phase2Actions = [
     { 
-      title: "Track Assignment", 
+      title: "Phase 2 Selection", 
+      description: "Select Phase 2 candidates based on eligibility", 
+      link: "/admin/selection", 
+      icon: UserCheck,
+    },
+    { 
+      title: "Track Assignee View", 
       description: "Assign beneficiaries to Employment or Entrepreneur tracks", 
       link: "/admin/track-assignment", 
       icon: Award,

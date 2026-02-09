@@ -207,7 +207,7 @@ export function TrackAssignment() {
             <Award className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Track Assignment</h1>
+            <h1 className="text-3xl font-bold text-foreground">Track Assignee View</h1>
             <p className="text-muted-foreground">Assign Phase 2 beneficiaries to Employment or Entrepreneurship tracks</p>
           </div>
         </div>
@@ -287,30 +287,15 @@ export function TrackAssignment() {
                     {entrepreneurCandidates.map((candidate) => (
                       <div
                         key={candidate.id}
-                        className={`p-4 rounded-lg border transition-all ${
+                        onClick={() => setSelectedCandidate(candidate.id)}
+                        className={`p-4 rounded-lg border transition-all cursor-pointer ${
                           selectedCandidate === candidate.id
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/50 bg-white"
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <div
-                            onClick={() => setSelectedCandidate(candidate.id)}
-                            className="flex-1 cursor-pointer"
-                          >
-                            <p className="font-semibold text-foreground">{candidate.name}</p>
-                            <p className="text-sm text-muted-foreground">ID: {candidate.id}</p>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-neutral-300 hover:border-primary hover:text-primary"
-                            onClick={() => handleMoveToEmploymentTrack(candidate.id)}
-                          >
-                            <ArrowRightLeft className="w-4 h-4 mr-1" />
-                            Move Track
-                          </Button>
-                        </div>
+                        <p className="font-semibold text-foreground">{candidate.name}</p>
+                        <p className="text-sm text-muted-foreground">ID: {candidate.id}</p>
                       </div>
                     ))}
                   </div>
@@ -357,29 +342,15 @@ export function TrackAssignment() {
                     {employmentCandidates.map((candidate) => (
                       <div
                         key={candidate.id}
-                        className={`p-4 rounded-lg border transition-all ${
+                        onClick={() => setSelectedCandidate(candidate.id)}
+                        className={`p-4 rounded-lg border transition-all cursor-pointer ${
                           selectedCandidate === candidate.id
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/50 bg-white"
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-3">
-                          <div
-                            onClick={() => setSelectedCandidate(candidate.id)}
-                            className="flex-1 cursor-pointer"
-                          >
-                            <p className="font-semibold text-foreground">{candidate.name}</p>
-                            <p className="text-sm text-muted-foreground">ID: {candidate.id}</p>
-                          </div>
-                          <Button
-                            size="sm"
-                            className="bg-primary hover:bg-primary/90 text-white"
-                            onClick={() => handleMoveToEntrepreneurTrack(candidate.id)}
-                          >
-                            <ArrowRightLeft className="w-4 h-4 mr-1" />
-                            Move Track
-                          </Button>
-                        </div>
+                        <p className="font-semibold text-foreground">{candidate.name}</p>
+                        <p className="text-sm text-muted-foreground">ID: {candidate.id}</p>
                       </div>
                     ))}
                   </div>

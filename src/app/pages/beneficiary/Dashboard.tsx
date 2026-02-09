@@ -1,18 +1,20 @@
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { BookOpen, Route, Trophy, MessageCircle, FileText, LogOut, Lock, CheckCircle2, GraduationCap, Briefcase, Building2 } from "lucide-react";
+import { BookOpen, Route, Trophy, MessageCircle, FileText, LogOut, Lock, CheckCircle2, GraduationCap, Briefcase, Building2, Lightbulb } from "lucide-react";
 import { Progress } from "@/app/components/ui/progress";
 import { Badge } from "@/app/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/app/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 
 export function BeneficiaryDashboard() {
+  // Updated: Business Development added to Phase 1 features
   const user = {
     name: "Jean Baptiste",
     email: "jean.baptiste@example.com",
-    skillCraftProgress: 65,
+    skillCraftCompleted: true, // Changed to completed status
     pathwaysProgress: 45,
+    businessDevelopmentCompleted: false, // Added business development status
     currentPhase: 2, // 1 or 2
     phase2Track: "entrepreneurship", // "employment" or "entrepreneurship"
     selectedForPhase2: true, // true if user is selected for phase 2
@@ -32,10 +34,10 @@ export function BeneficiaryDashboard() {
       link: "/beneficiary/pathways",
     },
     {
-      title: "Track Assignment",
-      description: "View your assigned track (Employment or Entrepreneurship)",
-      icon: Trophy,
-      link: "/beneficiary/eligibility",
+      title: "Business Development",
+      description: "Express interest in entrepreneurship and set your business goals",
+      icon: Lightbulb,
+      link: "/beneficiary/business-development",
     },
   ];
 
@@ -86,7 +88,7 @@ export function BeneficiaryDashboard() {
       {/* Progress Overview */}
       <section>
         <h2 className="text-2xl font-bold mb-4 text-foreground">Your Progress</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="border-border bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-foreground">
@@ -96,10 +98,18 @@ export function BeneficiaryDashboard() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Progress</span>
-                <span className="font-bold text-foreground">{user.skillCraftProgress}%</span>
+                <span className="text-muted-foreground">Status</span>
+                <div className="flex items-center gap-2">
+                  {user.skillCraftCompleted ? (
+                    <>
+                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                      <span className="font-bold text-primary">Completed</span>
+                    </>
+                  ) : (
+                    <span className="font-bold text-neutral-500">Not Completed</span>
+                  )}
+                </div>
               </div>
-              <Progress value={user.skillCraftProgress} className="h-3" />
             </CardContent>
           </Card>
 
@@ -116,6 +126,30 @@ export function BeneficiaryDashboard() {
                 <span className="font-bold text-foreground">{user.pathwaysProgress}%</span>
               </div>
               <Progress value={user.pathwaysProgress} className="h-3" />
+            </CardContent>
+          </Card>
+
+          <Card className="border-border bg-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-foreground">
+                <Lightbulb className="w-5 h-5 text-primary" />
+                Business Development
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Status</span>
+                <div className="flex items-center gap-2">
+                  {user.businessDevelopmentCompleted ? (
+                    <>
+                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                      <span className="font-bold text-primary">Completed</span>
+                    </>
+                  ) : (
+                    <span className="font-bold text-neutral-500">Not Completed</span>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

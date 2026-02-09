@@ -42,7 +42,7 @@ export function AdminLayout() {
       icon: GraduationCap,
       children: [
         { title: "Data Registration", path: "/admin/registration" },
-        { title: "Beneficiary Selection", path: "/admin/selection" },
+        { title: "Phase 1 Selection", path: "/admin/phase1-selection" },
         { title: "Progress View", path: "/admin/progress" },
       ]
     },
@@ -50,7 +50,7 @@ export function AdminLayout() {
       title: "Phase 2 Management",
       icon: Award,
       children: [
-        { title: "Track Assignment", path: "/admin/track-assignment" },
+        { title: "Phase 2 Selection", path: "/admin/selection" },
         { title: "Employment Track View", path: "/admin/employment-progress" },
         { title: "Entrepreneur Track View", path: "/admin/entrepreneur-progress" },
       ]

@@ -9,6 +9,8 @@ import { PathwaysDeepDive } from "@/app/pages/beneficiary/PathwaysDeepDive";
 import { EligibilityScore } from "@/app/pages/beneficiary/EligibilityScore";
 import { ChatbotPage } from "@/app/pages/beneficiary/ChatbotPage";
 import { ResultReport } from "@/app/pages/beneficiary/ResultReport";
+import { BusinessDevelopment } from "@/app/pages/beneficiary/BusinessDevelopment";
+import { BusinessLearning } from "@/app/pages/beneficiary/BusinessLearning";
 import { AdminLayout } from "@/app/components/AdminLayout";
 import { AdminDashboard } from "@/app/pages/admin/Dashboard";
 import { DataRegistration } from "@/app/pages/admin/DataRegistration";
@@ -25,6 +27,7 @@ import { EmploymentProgress } from "@/app/pages/admin/EmploymentProgress";
 import { EntrepreneurProgress } from "@/app/pages/admin/EntrepreneurProgress";
 import { Phase1Dashboard } from "@/app/pages/admin/Phase1Dashboard";
 import { Phase2Dashboard } from "@/app/pages/admin/Phase2Dashboard";
+import { Phase1Selection } from "@/app/pages/admin/Phase1Selection";
 import { NotFound } from "@/app/pages/NotFound";
 
 export const router = createBrowserRouter([
@@ -44,6 +47,8 @@ export const router = createBrowserRouter([
           { path: "eligibility", Component: EligibilityScore },
           { path: "chatbot", Component: ChatbotPage },
           { path: "results", Component: ResultReport },
+          { path: "business-development", Component: BusinessDevelopment },
+          { path: "business-learning", Component: BusinessLearning },
         ],
       },
       {
@@ -65,6 +70,7 @@ export const router = createBrowserRouter([
           { path: "entrepreneurship", Component: EntrepreneurshipSelection },
           { path: "chatbot-analytics", Component: ChatbotAnalytics },
           { path: "analytics", Component: Analytics },
+          { path: "phase1-selection", Component: Phase1Selection },
         ],
       },
       { path: "*", Component: NotFound },

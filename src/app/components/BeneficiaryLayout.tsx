@@ -15,7 +15,8 @@ import {
   Menu,
   X,
   User,
-  GraduationCap
+  GraduationCap,
+  Lightbulb
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
@@ -39,7 +40,7 @@ export function BeneficiaryLayout() {
     name: "Jean Baptiste",
     email: "jean.baptiste@example.com",
     selectedForPhase2: true,
-    phase2Track: "entrepreneurship" // "employment" or "entrepreneurship"
+    phase2Track: "employment" // "employment" or "entrepreneurship"
   };
 
   const menuItems: MenuItem[] = [
@@ -54,7 +55,7 @@ export function BeneficiaryLayout() {
       children: [
         { title: "SkillCraft Test", path: "/beneficiary/skillcraft" },
         { title: "Pathways", path: "/beneficiary/pathways" },
-        { title: "Track Assignment", path: "/beneficiary/eligibility" },
+        { title: "Business Development", path: "/beneficiary/business-development" },
       ]
     },
     {
@@ -64,8 +65,6 @@ export function BeneficiaryLayout() {
       badge: user.phase2Track === "employment" ? "Active" : "Locked",
       children: [
         { title: "Pathways Deep Dive", path: "/beneficiary/pathways-deepdive" },
-        { title: "Employment Chatbot", path: "/beneficiary/chatbot" },
-        { title: "Results & Reports", path: "/beneficiary/results" },
       ]
     },
     {
@@ -74,6 +73,7 @@ export function BeneficiaryLayout() {
       locked: !user.selectedForPhase2 || user.phase2Track !== "entrepreneurship",
       badge: user.phase2Track === "entrepreneurship" ? "Active" : "Locked",
       children: [
+        { title: "Business Learning", path: "/beneficiary/business-learning" },
         { title: "Business Chatbot", path: "/beneficiary/chatbot" },
         { title: "Results & Reports", path: "/beneficiary/results" },
       ]

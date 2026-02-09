@@ -9,7 +9,7 @@ import { Badge } from "@/app/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { ScrollArea } from "@/app/components/ui/scroll-area";
 
-// Mock data for beneficiaries with business development writings
+// Mock data for Phase 1 beneficiaries with eligibility scores
 const allBeneficiaries = [
   { 
     id: "MVP001", 
@@ -17,10 +17,10 @@ const allBeneficiaries = [
     age: 24, 
     gender: "Male", 
     email: "jean.uwimana@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 85, 
-    trainingAttendanceScore: 18,
-    businessDevelopmentWriting: "I want to start a small agricultural business focusing on modern farming techniques. My goal is to produce high-quality vegetables for local markets and eventually export to neighboring countries. I have identified a need in my community for fresh, organic produce and believe I can fill this gap. I plan to start with 2 hectares of land and expand gradually over the next 3 years."
+    eligibilityScore: 85,
+    skillCraftScore: 85,
+    pathwayCompletion: 92,
+    offlineTraining: 78
   },
   { 
     id: "MVP002", 
@@ -28,10 +28,10 @@ const allBeneficiaries = [
     age: 28, 
     gender: "Female", 
     email: "marie.mukamana@example.com", 
-    fitnessCheck: "Fail", 
-    skillCraftScore: 72, 
-    trainingAttendanceScore: 16,
-    businessDevelopmentWriting: "I have experience in tailoring and would like to open a clothing shop. However, I am still uncertain about the market demand and need more research on customer preferences in my area."
+    eligibilityScore: 72,
+    skillCraftScore: 72,
+    pathwayCompletion: 68,
+    offlineTraining: 76
   },
   { 
     id: "MVP003", 
@@ -39,10 +39,10 @@ const allBeneficiaries = [
     age: 19, 
     gender: "Male", 
     email: "eric.nshimiyimana@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 91, 
-    trainingAttendanceScore: 20,
-    businessDevelopmentWriting: "I am passionate about technology and want to establish a computer training center in my district. Many young people lack basic digital skills, and I see this as a tremendous opportunity. I have already secured a partnership with a local internet provider and identified a suitable location. My business model includes both individual courses and corporate training packages. I project breaking even within 18 months."
+    eligibilityScore: 91,
+    skillCraftScore: 91,
+    pathwayCompletion: 95,
+    offlineTraining: 87
   },
   { 
     id: "MVP004", 
@@ -50,10 +50,10 @@ const allBeneficiaries = [
     age: 31, 
     gender: "Female", 
     email: "grace.uwera@example.com", 
-    fitnessCheck: "Fail", 
-    skillCraftScore: 68, 
-    trainingAttendanceScore: 14,
-    businessDevelopmentWriting: "I want to start a business but I'm not sure what kind yet. Maybe something with food or selling items."
+    eligibilityScore: 68,
+    skillCraftScore: 68,
+    pathwayCompletion: 65,
+    offlineTraining: 71
   },
   { 
     id: "MVP005", 
@@ -61,10 +61,10 @@ const allBeneficiaries = [
     age: 22, 
     gender: "Male", 
     email: "patrick.habimana@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 78, 
-    trainingAttendanceScore: 17,
-    businessDevelopmentWriting: "I plan to create a delivery service for small businesses in Kigali. With the rise of e-commerce, many small shops need reliable logistics support. I have analyzed the competition and found that current services are either too expensive or unreliable. My competitive advantage will be affordable pricing and guaranteed same-day delivery within the city. I need initial capital for 2 motorcycles and will hire 3 delivery personnel."
+    eligibilityScore: 78,
+    skillCraftScore: 78,
+    pathwayCompletion: 82,
+    offlineTraining: 74
   },
   { 
     id: "MVP006", 
@@ -72,10 +72,10 @@ const allBeneficiaries = [
     age: 26, 
     gender: "Female", 
     email: "aline.umutoni@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 88, 
-    trainingAttendanceScore: 19,
-    businessDevelopmentWriting: "My business idea is to establish a daycare center for working mothers in my community. I have noticed that many women struggle to find affordable, quality childcare. I have training in early childhood education and have worked at a nursery school for 4 years. I plan to start with capacity for 20 children and offer both full-day and half-day programs. The center will focus on educational activities and nutritious meals."
+    eligibilityScore: 88,
+    skillCraftScore: 88,
+    pathwayCompletion: 90,
+    offlineTraining: 86
   },
   { 
     id: "MVP007", 
@@ -83,10 +83,10 @@ const allBeneficiaries = [
     age: 20, 
     gender: "Male", 
     email: "emmanuel.nkusi@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 95, 
-    trainingAttendanceScore: 20,
-    businessDevelopmentWriting: "I want to build a mobile app that connects farmers directly with consumers, eliminating middlemen and ensuring fair prices for both parties. I have programming skills and have already developed a prototype. The app will include features for product listings, secure payments, and delivery tracking. I have conducted market research with 50 farmers and 100 potential customers, and the feedback has been overwhelmingly positive. My revenue model is a small commission on each transaction."
+    eligibilityScore: 95,
+    skillCraftScore: 95,
+    pathwayCompletion: 98,
+    offlineTraining: 92
   },
   { 
     id: "MVP008", 
@@ -94,10 +94,10 @@ const allBeneficiaries = [
     age: 29, 
     gender: "Female", 
     email: "sylvie.nyirahabimana@example.com", 
-    fitnessCheck: "Fail", 
-    skillCraftScore: 64, 
-    trainingAttendanceScore: 13,
-    businessDevelopmentWriting: "I think about opening a small shop near my house to sell basic items. I haven't planned much yet."
+    eligibilityScore: 64,
+    skillCraftScore: 64,
+    pathwayCompletion: 60,
+    offlineTraining: 68
   },
   { 
     id: "MVP009", 
@@ -105,10 +105,10 @@ const allBeneficiaries = [
     age: 25, 
     gender: "Male", 
     email: "didier.mugisha@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 82, 
-    trainingAttendanceScore: 18,
-    businessDevelopmentWriting: "I plan to start a poultry farming business specializing in egg production. I have identified a consistent demand from local restaurants and supermarkets. My research shows that I can start with 500 laying hens and scale up to 2,000 within two years. I have already secured land and completed a feasibility study. The business will focus on free-range, organic eggs to command premium pricing. I have established relationships with three major buyers."
+    eligibilityScore: 82,
+    skillCraftScore: 82,
+    pathwayCompletion: 85,
+    offlineTraining: 79
   },
   { 
     id: "MVP010", 
@@ -116,10 +116,10 @@ const allBeneficiaries = [
     age: 27, 
     gender: "Female", 
     email: "claudine.umulisa@example.com", 
-    fitnessCheck: "Fail", 
-    skillCraftScore: 76, 
-    trainingAttendanceScore: 15,
-    businessDevelopmentWriting: "I have some ideas about selling products online but need to learn more about how it works first."
+    eligibilityScore: 76,
+    skillCraftScore: 76,
+    pathwayCompletion: 73,
+    offlineTraining: 79
   },
   { 
     id: "MVP011", 
@@ -127,10 +127,10 @@ const allBeneficiaries = [
     age: 23, 
     gender: "Male", 
     email: "samuel.ntambara@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 89, 
-    trainingAttendanceScore: 19,
-    businessDevelopmentWriting: "I want to establish a carpentry workshop producing custom furniture for homes and offices. I have 5 years of experience as a carpenter and have identified a gap in the market for high-quality, affordable custom furniture. My competitive advantage is offering modern designs with traditional craftsmanship. I plan to hire 2 assistants and have already secured orders worth RWF 5 million from three clients. The workshop will also offer repair services to generate steady income."
+    eligibilityScore: 89,
+    skillCraftScore: 89,
+    pathwayCompletion: 91,
+    offlineTraining: 87
   },
   { 
     id: "MVP012", 
@@ -138,25 +138,22 @@ const allBeneficiaries = [
     age: 30, 
     gender: "Female", 
     email: "jeanne.mukeshimana@example.com", 
-    fitnessCheck: "Fail", 
-    skillCraftScore: 71, 
-    trainingAttendanceScore: 16,
-    businessDevelopmentWriting: "I would like to start a small business selling vegetables at the market. I know many people do this already."
+    eligibilityScore: 71,
+    skillCraftScore: 71,
+    pathwayCompletion: 69,
+    offlineTraining: 73
   },
 ];
 
-export function BeneficiarySelection() {
+export function Phase1Selection() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBeneficiaryIds, setSelectedBeneficiaryIds] = useState<Set<string>>(new Set());
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<typeof allBeneficiaries[0] | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  // Sort beneficiaries by skillCraftScore descending, then by trainingAttendanceScore descending
+  // Sort beneficiaries by eligibilityScore descending
   const sortedBeneficiaries = [...allBeneficiaries].sort((a, b) => {
-    if (b.skillCraftScore !== a.skillCraftScore) {
-      return b.skillCraftScore - a.skillCraftScore;
-    }
-    return b.trainingAttendanceScore - a.trainingAttendanceScore;
+    return b.eligibilityScore - a.eligibilityScore;
   });
 
   // Filtered beneficiaries based on search
@@ -201,9 +198,9 @@ export function BeneficiarySelection() {
                 <UserCheck className="w-6 h-6 text-white" />
               </div>
               <div>
-                <CardTitle className="text-2xl">Phase 2 Selection</CardTitle>
+                <CardTitle className="text-2xl">Phase 1 Selection</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Total Beneficiaries: {allBeneficiaries.length} | Sorted by SkillCraft Score (highest first)
+                  Total Beneficiaries: {allBeneficiaries.length} | Sorted by Eligibility Score (highest first)
                 </p>
               </div>
             </div>
@@ -232,16 +229,14 @@ export function BeneficiarySelection() {
                     <TableHead>Age</TableHead>
                     <TableHead>Gender</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead className="text-center">Fitness Check</TableHead>
-                    <TableHead className="text-center">SkillCraft Score</TableHead>
-                    <TableHead className="text-center">Training Attendance</TableHead>
+                    <TableHead className="text-center">Eligibility Score</TableHead>
                     <TableHead className="text-center">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredBeneficiaries.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+                      <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
                         No beneficiaries found
                       </TableCell>
                     </TableRow>
@@ -259,20 +254,8 @@ export function BeneficiarySelection() {
                           <TableCell>{beneficiary.gender}</TableCell>
                           <TableCell className="text-muted-foreground">{beneficiary.email}</TableCell>
                           <TableCell className="text-center">
-                            <Badge 
-                              variant="outline" 
-                              className={beneficiary.fitnessCheck === "Pass" ? "border-primary text-primary bg-primary/5" : "border-red-500 text-red-600 bg-red-50"}
-                            >
-                              {beneficiary.fitnessCheck}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span className="font-semibold text-foreground">{beneficiary.skillCraftScore}</span>
+                            <span className="font-semibold text-foreground">{beneficiary.eligibilityScore}</span>
                             <span className="text-xs text-muted-foreground">/100</span>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span className="font-semibold text-foreground">{beneficiary.trainingAttendanceScore}</span>
-                            <span className="text-xs text-muted-foreground">/20</span>
                           </TableCell>
                           <TableCell className="text-center">
                             <Button
@@ -304,37 +287,111 @@ export function BeneficiarySelection() {
           </CardContent>
         </Card>
 
-        {/* Business Development Dialog */}
+        {/* Candidate Information Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Business Development Submission</DialogTitle>
+              <DialogTitle className="text-2xl">Candidate Information</DialogTitle>
               <DialogDescription>
                 {selectedBeneficiary && (
                   <div className="flex items-center gap-2 mt-2">
                     <span className="font-semibold text-foreground">{selectedBeneficiary.name}</span>
                     <span className="text-muted-foreground">•</span>
-                    <span className="text-muted-foreground">{selectedBeneficiary.email}</span>
-                    <span className="text-muted-foreground">•</span>
-                    <Badge 
-                      variant="outline" 
-                      className={selectedBeneficiary.fitnessCheck === "Pass" ? "border-primary text-primary" : "border-red-500 text-red-600"}
-                    >
-                      Fitness Check: {selectedBeneficiary.fitnessCheck}
-                    </Badge>
+                    <span className="text-muted-foreground">{selectedBeneficiary.id}</span>
                   </div>
                 )}
               </DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[60vh] pr-4">
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-foreground mb-2">Business Plan Description:</h4>
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {selectedBeneficiary?.businessDevelopmentWriting}
-                  </p>
+              {selectedBeneficiary && (
+                <div className="space-y-6">
+                  {/* Basic Information */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="text-sm font-semibold text-muted-foreground mb-1">Full Name</h4>
+                      <p className="text-foreground">{selectedBeneficiary.name}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-muted-foreground mb-1">ID</h4>
+                      <p className="text-foreground">{selectedBeneficiary.id}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-muted-foreground mb-1">Age</h4>
+                      <p className="text-foreground">{selectedBeneficiary.age} years</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-muted-foreground mb-1">Gender</h4>
+                      <p className="text-foreground">{selectedBeneficiary.gender}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <h4 className="text-sm font-semibold text-muted-foreground mb-1">Email</h4>
+                      <p className="text-foreground">{selectedBeneficiary.email}</p>
+                    </div>
+                  </div>
+
+                  {/* Scores Section */}
+                  <div className="border-t border-border pt-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Performance Metrics</h3>
+                    <div className="space-y-4">
+                      {/* Eligibility Score */}
+                      <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-foreground">Eligibility Score</span>
+                          <span className="text-2xl font-bold text-primary">{selectedBeneficiary.eligibilityScore}/100</span>
+                        </div>
+                        <div className="w-full bg-neutral-200 rounded-full h-2">
+                          <div 
+                            className="bg-primary h-2 rounded-full transition-all"
+                            style={{ width: `${selectedBeneficiary.eligibilityScore}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* SkillCraft Score */}
+                      <div className="p-4 bg-neutral-50 border border-border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-neutral-700">SkillCraft Score</span>
+                          <span className="text-xl font-bold text-foreground">{selectedBeneficiary.skillCraftScore}/100</span>
+                        </div>
+                        <div className="w-full bg-neutral-200 rounded-full h-2">
+                          <div 
+                            className="bg-neutral-600 h-2 rounded-full transition-all"
+                            style={{ width: `${selectedBeneficiary.skillCraftScore}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Pathway Completion */}
+                      <div className="p-4 bg-neutral-50 border border-border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-neutral-700">Pathway Completion</span>
+                          <span className="text-xl font-bold text-foreground">{selectedBeneficiary.pathwayCompletion}%</span>
+                        </div>
+                        <div className="w-full bg-neutral-200 rounded-full h-2">
+                          <div 
+                            className="bg-neutral-600 h-2 rounded-full transition-all"
+                            style={{ width: `${selectedBeneficiary.pathwayCompletion}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Offline Training */}
+                      <div className="p-4 bg-neutral-50 border border-border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-neutral-700">Offline Training Completion</span>
+                          <span className="text-xl font-bold text-foreground">{selectedBeneficiary.offlineTraining}%</span>
+                        </div>
+                        <div className="w-full bg-neutral-200 rounded-full h-2">
+                          <div 
+                            className="bg-neutral-600 h-2 rounded-full transition-all"
+                            style={{ width: `${selectedBeneficiary.offlineTraining}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </ScrollArea>
           </DialogContent>
         </Dialog>
