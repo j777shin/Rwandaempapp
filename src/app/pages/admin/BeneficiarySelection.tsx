@@ -1,192 +1,111 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table";
-import { ArrowLeft, UserCheck, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, UserCheck, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Input } from "@/app/components/ui/input";
 import { Badge } from "@/app/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
-import { ScrollArea } from "@/app/components/ui/scroll-area";
+import { api } from "@/app/lib/api";
 
-// Mock data for beneficiaries with business development writings
-const allBeneficiaries = [
-  { 
-    id: "MVP001", 
-    name: "Jean Paul Uwimana", 
-    age: 24, 
-    gender: "Male", 
-    email: "jean.uwimana@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 85, 
-    trainingAttendanceScore: 18,
-    businessDevelopmentWriting: "I want to start a small agricultural business focusing on modern farming techniques. My goal is to produce high-quality vegetables for local markets and eventually export to neighboring countries. I have identified a need in my community for fresh, organic produce and believe I can fill this gap. I plan to start with 2 hectares of land and expand gradually over the next 3 years."
-  },
-  { 
-    id: "MVP002", 
-    name: "Marie Claire Mukamana", 
-    age: 28, 
-    gender: "Female", 
-    email: "marie.mukamana@example.com", 
-    fitnessCheck: "Fail", 
-    skillCraftScore: 72, 
-    trainingAttendanceScore: 16,
-    businessDevelopmentWriting: "I have experience in tailoring and would like to open a clothing shop. However, I am still uncertain about the market demand and need more research on customer preferences in my area."
-  },
-  { 
-    id: "MVP003", 
-    name: "Eric Nshimiyimana", 
-    age: 19, 
-    gender: "Male", 
-    email: "eric.nshimiyimana@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 91, 
-    trainingAttendanceScore: 20,
-    businessDevelopmentWriting: "I am passionate about technology and want to establish a computer training center in my district. Many young people lack basic digital skills, and I see this as a tremendous opportunity. I have already secured a partnership with a local internet provider and identified a suitable location. My business model includes both individual courses and corporate training packages. I project breaking even within 18 months."
-  },
-  { 
-    id: "MVP004", 
-    name: "Grace Uwera", 
-    age: 31, 
-    gender: "Female", 
-    email: "grace.uwera@example.com", 
-    fitnessCheck: "Fail", 
-    skillCraftScore: 68, 
-    trainingAttendanceScore: 14,
-    businessDevelopmentWriting: "I want to start a business but I'm not sure what kind yet. Maybe something with food or selling items."
-  },
-  { 
-    id: "MVP005", 
-    name: "Patrick Habimana", 
-    age: 22, 
-    gender: "Male", 
-    email: "patrick.habimana@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 78, 
-    trainingAttendanceScore: 17,
-    businessDevelopmentWriting: "I plan to create a delivery service for small businesses in Kigali. With the rise of e-commerce, many small shops need reliable logistics support. I have analyzed the competition and found that current services are either too expensive or unreliable. My competitive advantage will be affordable pricing and guaranteed same-day delivery within the city. I need initial capital for 2 motorcycles and will hire 3 delivery personnel."
-  },
-  { 
-    id: "MVP006", 
-    name: "Aline Umutoni", 
-    age: 26, 
-    gender: "Female", 
-    email: "aline.umutoni@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 88, 
-    trainingAttendanceScore: 19,
-    businessDevelopmentWriting: "My business idea is to establish a daycare center for working mothers in my community. I have noticed that many women struggle to find affordable, quality childcare. I have training in early childhood education and have worked at a nursery school for 4 years. I plan to start with capacity for 20 children and offer both full-day and half-day programs. The center will focus on educational activities and nutritious meals."
-  },
-  { 
-    id: "MVP007", 
-    name: "Emmanuel Nkusi", 
-    age: 20, 
-    gender: "Male", 
-    email: "emmanuel.nkusi@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 95, 
-    trainingAttendanceScore: 20,
-    businessDevelopmentWriting: "I want to build a mobile app that connects farmers directly with consumers, eliminating middlemen and ensuring fair prices for both parties. I have programming skills and have already developed a prototype. The app will include features for product listings, secure payments, and delivery tracking. I have conducted market research with 50 farmers and 100 potential customers, and the feedback has been overwhelmingly positive. My revenue model is a small commission on each transaction."
-  },
-  { 
-    id: "MVP008", 
-    name: "Sylvie Nyirahabimana", 
-    age: 29, 
-    gender: "Female", 
-    email: "sylvie.nyirahabimana@example.com", 
-    fitnessCheck: "Fail", 
-    skillCraftScore: 64, 
-    trainingAttendanceScore: 13,
-    businessDevelopmentWriting: "I think about opening a small shop near my house to sell basic items. I haven't planned much yet."
-  },
-  { 
-    id: "MVP009", 
-    name: "Didier Mugisha", 
-    age: 25, 
-    gender: "Male", 
-    email: "didier.mugisha@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 82, 
-    trainingAttendanceScore: 18,
-    businessDevelopmentWriting: "I plan to start a poultry farming business specializing in egg production. I have identified a consistent demand from local restaurants and supermarkets. My research shows that I can start with 500 laying hens and scale up to 2,000 within two years. I have already secured land and completed a feasibility study. The business will focus on free-range, organic eggs to command premium pricing. I have established relationships with three major buyers."
-  },
-  { 
-    id: "MVP010", 
-    name: "Claudine Umulisa", 
-    age: 27, 
-    gender: "Female", 
-    email: "claudine.umulisa@example.com", 
-    fitnessCheck: "Fail", 
-    skillCraftScore: 76, 
-    trainingAttendanceScore: 15,
-    businessDevelopmentWriting: "I have some ideas about selling products online but need to learn more about how it works first."
-  },
-  { 
-    id: "MVP011", 
-    name: "Samuel Ntambara", 
-    age: 23, 
-    gender: "Male", 
-    email: "samuel.ntambara@example.com", 
-    fitnessCheck: "Pass", 
-    skillCraftScore: 89, 
-    trainingAttendanceScore: 19,
-    businessDevelopmentWriting: "I want to establish a carpentry workshop producing custom furniture for homes and offices. I have 5 years of experience as a carpenter and have identified a gap in the market for high-quality, affordable custom furniture. My competitive advantage is offering modern designs with traditional craftsmanship. I plan to hire 2 assistants and have already secured orders worth RWF 5 million from three clients. The workshop will also offer repair services to generate steady income."
-  },
-  { 
-    id: "MVP012", 
-    name: "Jeanne Mukeshimana", 
-    age: 30, 
-    gender: "Female", 
-    email: "jeanne.mukeshimana@example.com", 
-    fitnessCheck: "Fail", 
-    skillCraftScore: 71, 
-    trainingAttendanceScore: 16,
-    businessDevelopmentWriting: "I would like to start a small business selling vegetables at the market. I know many people do this already."
-  },
-];
+interface Beneficiary {
+  id: string;
+  name: string;
+  age: number;
+  gender: string;
+  email: string;
+  skillcraftScore: number;
+  pathwaysRate: number;
+  offlineAttendance: number;
+  wantsEntrepreneurship: boolean;
+  businessGoal: string;
+  track: string;
+}
+
+function mapApiBeneficiary(raw: any): Beneficiary {
+  return {
+    id: raw.id,
+    name: raw.name || `${raw.first_name ?? ""} ${raw.last_name ?? ""}`.trim(),
+    age: raw.age ?? 0,
+    gender: raw.gender ?? "",
+    email: raw.email ?? "",
+    skillcraftScore: raw.skillcraft_score ?? 0,
+    pathwaysRate: raw.pathways_completion_rate ?? raw.pathways_completion ?? 0,
+    offlineAttendance: raw.offline_attendance ?? 0,
+    wantsEntrepreneurship: raw.wants_entrepreneurship ?? false,
+    businessGoal: raw.business_development_text ?? "",
+    track: raw.track ?? "",
+  };
+}
 
 export function BeneficiarySelection() {
+  const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedBeneficiaryIds, setSelectedBeneficiaryIds] = useState<Set<string>>(new Set());
-  const [selectedBeneficiary, setSelectedBeneficiary] = useState<typeof allBeneficiaries[0] | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
-  // Sort beneficiaries by skillCraftScore descending, then by trainingAttendanceScore descending
-  const sortedBeneficiaries = [...allBeneficiaries].sort((a, b) => {
-    if (b.skillCraftScore !== a.skillCraftScore) {
-      return b.skillCraftScore - a.skillCraftScore;
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [assigning, setAssigning] = useState(false);
+
+  const loadBeneficiaries = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await api.adminListBeneficiaries({
+        selection_status: "selected",
+        page_size: "10000",
+      });
+      const mapped = (data.items ?? data.beneficiaries ?? []).map(mapApiBeneficiary);
+      setBeneficiaries(mapped);
+    } catch (err: any) {
+      setError(err.message || "Failed to load beneficiaries");
+    } finally {
+      setLoading(false);
     }
-    return b.trainingAttendanceScore - a.trainingAttendanceScore;
+  };
+
+  useEffect(() => {
+    loadBeneficiaries();
+  }, []);
+
+  const filteredBeneficiaries = beneficiaries.filter(b => {
+    const q = searchQuery.toLowerCase();
+    return !q || b.name.toLowerCase().includes(q) || b.email.toLowerCase().includes(q);
   });
 
-  // Filtered beneficiaries based on search
-  const filteredBeneficiaries = sortedBeneficiaries.filter(beneficiary =>
-    beneficiary.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    beneficiary.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    beneficiary.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const toggleSelection = (beneficiaryId: string, event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent row click when clicking the button
-    setSelectedBeneficiaryIds(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(beneficiaryId)) {
-        newSet.delete(beneficiaryId);
-      } else {
-        newSet.add(beneficiaryId);
-      }
-      return newSet;
+  const toggleSelection = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
     });
   };
 
-  const handleRowClick = (beneficiary: typeof allBeneficiaries[0]) => {
-    setSelectedBeneficiary(beneficiary);
-    setIsDialogOpen(true);
+  const handleAssignTrack = async (track: string) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    try {
+      setAssigning(true);
+      await api.adminAssignTracks(ids, track);
+      await loadBeneficiaries();
+      setSelectedIds(new Set());
+    } catch (err: any) {
+      setError(err.message || `Failed to assign to ${track} track`);
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const trackLabel = (t: string) => {
+    if (t === "employment") return "Employment";
+    if (t === "entrepreneurship") return "Entrepreneurship";
+    return "—";
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1400px] mx-auto">
         <Link to="/admin">
           <Button variant="ghost" className="mb-6">
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -203,141 +122,139 @@ export function BeneficiarySelection() {
               <div>
                 <CardTitle className="text-2xl">Phase 2 Selection</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Total Beneficiaries: {allBeneficiaries.length} | Sorted by SkillCraft Score (highest first)
+                  Total: {beneficiaries.length} selected beneficiaries
                 </p>
               </div>
             </div>
-            {selectedBeneficiaryIds.size > 0 && (
+            {selectedIds.size > 0 && (
               <Badge variant="outline" className="border-primary text-primary ml-auto">
-                {selectedBeneficiaryIds.size} Selected
+                {selectedIds.size} Selected
               </Badge>
             )}
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Search */}
-            <Input
-              type="text"
-              placeholder="Search by name, email, or ID..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-md"
-            />
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between">
+                <span>{error}</span>
+                <Button variant="ghost" size="sm" onClick={() => setError(null)}>Dismiss</Button>
+              </div>
+            )}
 
-            {/* Beneficiaries Table */}
-            <div className="border rounded-lg overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Age</TableHead>
-                    <TableHead>Gender</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead className="text-center">Fitness Check</TableHead>
-                    <TableHead className="text-center">SkillCraft Score</TableHead>
-                    <TableHead className="text-center">Training Attendance</TableHead>
-                    <TableHead className="text-center">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredBeneficiaries.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
-                        No beneficiaries found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredBeneficiaries.map((beneficiary) => {
-                      const isSelected = selectedBeneficiaryIds.has(beneficiary.id);
-                      return (
-                        <TableRow 
-                          key={beneficiary.id}
-                          onClick={() => handleRowClick(beneficiary)}
-                          className={`cursor-pointer hover:bg-gray-100 ${!isSelected ? 'bg-gray-50' : 'bg-white'}`}
-                        >
-                          <TableCell className="font-medium">{beneficiary.name}</TableCell>
-                          <TableCell>{beneficiary.age}</TableCell>
-                          <TableCell>{beneficiary.gender}</TableCell>
-                          <TableCell className="text-muted-foreground">{beneficiary.email}</TableCell>
-                          <TableCell className="text-center">
-                            <Badge 
-                              variant="outline" 
-                              className={beneficiary.fitnessCheck === "Pass" ? "border-primary text-primary bg-primary/5" : "border-red-500 text-red-600 bg-red-50"}
-                            >
-                              {beneficiary.fitnessCheck}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span className="font-semibold text-foreground">{beneficiary.skillCraftScore}</span>
-                            <span className="text-xs text-muted-foreground">/100</span>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span className="font-semibold text-foreground">{beneficiary.trainingAttendanceScore}</span>
-                            <span className="text-xs text-muted-foreground">/20</span>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              size="sm"
-                              variant={isSelected ? "outline" : "default"}
-                              onClick={(e) => toggleSelection(beneficiary.id, e)}
-                              className={isSelected ? "border-red-500 text-red-600 hover:bg-red-50" : "bg-primary hover:bg-primary/90"}
-                            >
-                              {isSelected ? (
-                                <>
-                                  <XCircle className="w-4 h-4 mr-1" />
-                                  Remove
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircle2 className="w-4 h-4 mr-1" />
-                                  Select
-                                </>
-                              )}
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <Input
+                type="text"
+                placeholder="Search by name or email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-md"
+              />
+              {selectedIds.size > 0 && (
+                <div className="flex items-center gap-2 ml-auto">
+                  <Button
+                    onClick={() => handleAssignTrack("employment")}
+                    disabled={assigning}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {assigning && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    Assign Employment
+                  </Button>
+                  <Button
+                    onClick={() => handleAssignTrack("entrepreneurship")}
+                    disabled={assigning}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {assigning && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    Assign Entrepreneurship
+                  </Button>
+                </div>
+              )}
             </div>
+
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+                <p className="text-muted-foreground">Loading beneficiaries...</p>
+              </div>
+            ) : (
+              <div className="border rounded-lg overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-8"></TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Age</TableHead>
+                      <TableHead>Gender</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead className="text-center">SkillCraft</TableHead>
+                      <TableHead className="text-center">Pathways Rate</TableHead>
+                      <TableHead className="text-center">Attendance</TableHead>
+                      <TableHead className="text-center">Ent. Applied</TableHead>
+                      <TableHead>Business Goal</TableHead>
+                      <TableHead className="text-center">Track</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredBeneficiaries.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={11} className="text-center py-12 text-muted-foreground">
+                          No beneficiaries found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredBeneficiaries.map((b) => {
+                        const checked = selectedIds.has(b.id);
+                        return (
+                          <TableRow key={b.id} className={`hover:bg-gray-100 ${checked ? "bg-primary/5" : ""}`}>
+                            <TableCell>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={(e) => {
+                                  const next = new Set(selectedIds);
+                                  if (e.target.checked) next.add(b.id);
+                                  else next.delete(b.id);
+                                  setSelectedIds(next);
+                                }}
+                                className="h-4 w-4 rounded border-gray-300"
+                              />
+                            </TableCell>
+                            <TableCell className="font-medium">{b.name}</TableCell>
+                            <TableCell>{b.age}</TableCell>
+                            <TableCell>{b.gender}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{b.email}</TableCell>
+                            <TableCell className="text-center font-semibold">{b.skillcraftScore}</TableCell>
+                            <TableCell className="text-center font-semibold">{b.pathwaysRate}%</TableCell>
+                            <TableCell className="text-center font-semibold">{b.offlineAttendance}</TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant={b.wantsEntrepreneurship ? "default" : "secondary"}>
+                                {b.wantsEntrepreneurship ? "Yes" : "No"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground" title={b.businessGoal}>
+                              {b.businessGoal || "—"}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {b.track ? (
+                                <Badge variant="outline" className={
+                                  b.track === "employment" ? "border-blue-500 text-blue-600" :
+                                  b.track === "entrepreneurship" ? "border-green-500 text-green-600" : ""
+                                }>
+                                  {trackLabel(b.track)}
+                                </Badge>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </CardContent>
         </Card>
-
-        {/* Business Development Dialog */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">Business Development Submission</DialogTitle>
-              <DialogDescription>
-                {selectedBeneficiary && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="font-semibold text-foreground">{selectedBeneficiary.name}</span>
-                    <span className="text-muted-foreground">•</span>
-                    <span className="text-muted-foreground">{selectedBeneficiary.email}</span>
-                    <span className="text-muted-foreground">•</span>
-                    <Badge 
-                      variant="outline" 
-                      className={selectedBeneficiary.fitnessCheck === "Pass" ? "border-primary text-primary" : "border-red-500 text-red-600"}
-                    >
-                      Fitness Check: {selectedBeneficiary.fitnessCheck}
-                    </Badge>
-                  </div>
-                )}
-              </DialogDescription>
-            </DialogHeader>
-            <ScrollArea className="max-h-[60vh] pr-4">
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-foreground mb-2">Business Plan Description:</h4>
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {selectedBeneficiary?.businessDevelopmentWriting}
-                  </p>
-                </div>
-              </div>
-            </ScrollArea>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );

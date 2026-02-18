@@ -1,23 +1,69 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { ArrowLeft, Award, CheckCircle2, XCircle, Building2, Briefcase } from "lucide-react";
+import { ArrowLeft, Award, CheckCircle2, XCircle, Building2, Briefcase, Loader2 } from "lucide-react";
 import { Badge } from "@/app/components/ui/badge";
+import { api } from "@/app/lib/api";
 
 export function EligibilityScore() {
-  const user = {
-    selectedForPhase2: true, // true if user is selected for phase 2
-    phase2Track: "entrepreneurship", // "employment" or "entrepreneurship"
-    totalScore: 78,
-    criteria: [
-      { name: "Age Requirement", score: 100, met: true },
-      { name: "Education Level", score: 85, met: true },
-      { name: "SkillCraft Assessment", score: 72, met: true },
-      { name: "Pathway Completion", score: 65, met: true },
-    ],
+  const [dashboard, setDashboard] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const data = await api.getDashboard();
+      setDashboard(data);
+    } catch (err) {
+      console.error("Failed to load eligibility data:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const trackInfo = {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const beneficiary = dashboard?.beneficiary || {};
+  const phase1 = dashboard?.phase1_progress || {};
+
+  const selectedForPhase2 = beneficiary.selection_status === "phase2_selected";
+  const phase2Track = beneficiary.track || "employment";
+  const totalScore = beneficiary.eligibility_score ?? 0;
+
+  const criteria = [
+    {
+      name: "Age Requirement",
+      score: beneficiary.age >= 15 && beneficiary.age <= 35 ? 100 : 0,
+      met: beneficiary.age >= 15 && beneficiary.age <= 35,
+    },
+    {
+      name: "Education Level",
+      score: beneficiary.education_level ? 85 : 0,
+      met: !!beneficiary.education_level,
+    },
+    {
+      name: "SkillCraft Assessment",
+      score: phase1.skillcraft_score ?? 0,
+      met: !!phase1.skillcraft_score,
+    },
+    {
+      name: "Pathway Completion",
+      score: phase1.pathways_completion ?? 0,
+      met: (phase1.pathways_completion ?? 0) > 0,
+    },
+  ];
+
+  const trackInfo: Record<string, any> = {
     employment: {
       name: "Employment Track",
       color: "bg-primary",
@@ -46,7 +92,7 @@ export function EligibilityScore() {
     }
   };
 
-  const currentTrack = user.selectedForPhase2 ? trackInfo[user.phase2Track] : null;
+  const currentTrack = selectedForPhase2 ? trackInfo[phase2Track] : null;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -59,7 +105,7 @@ export function EligibilityScore() {
         </Link>
 
         {/* Track Assignment Card */}
-        {user.selectedForPhase2 && currentTrack && (
+        {selectedForPhase2 && currentTrack && (
           <Card className="mb-6 border-l-4 border-l-primary">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
@@ -81,7 +127,7 @@ export function EligibilityScore() {
               <div>
                 <h3 className="text-xl font-semibold mb-4">Track Benefits & Services</h3>
                 <div className="space-y-3">
-                  {currentTrack.benefits.map((benefit, index) => (
+                  {currentTrack.benefits.map((benefit: string, index: number) => (
                     <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                       <CheckCircle2 className="w-5 h-5 mt-0.5 text-primary" />
                       <span>{benefit}</span>
@@ -106,16 +152,16 @@ export function EligibilityScore() {
           </CardHeader>
           <CardContent>
             <div className="text-center mb-8">
-              <div className="text-6xl font-bold text-primary mb-2">{user.totalScore}</div>
+              <div className="text-6xl font-bold text-primary mb-2">{totalScore}</div>
               <div className="text-2xl text-muted-foreground mb-4">/100</div>
-              <div className={`inline-block px-6 py-2 rounded-full ${user.selectedForPhase2 ? "bg-primary" : "bg-primary"} text-white text-xl`}>
-                {user.selectedForPhase2 ? "Phase 2 Selected" : "Phase 1 Active"}
+              <div className={`inline-block px-6 py-2 rounded-full bg-primary text-white text-xl`}>
+                {selectedForPhase2 ? "Phase 2 Selected" : "Phase 1 Active"}
               </div>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-xl mb-4">Criteria Breakdown</h3>
-              {user.criteria.map((criterion, index) => (
+              {criteria.map((criterion, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     {criterion.met ? (
@@ -133,7 +179,7 @@ export function EligibilityScore() {
         </Card>
 
         {/* Phase 1 Message for Users Not Yet Selected */}
-        {!user.selectedForPhase2 && (
+        {!selectedForPhase2 && (
           <Card className="border-l-4 border-l-primary">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
@@ -141,7 +187,7 @@ export function EligibilityScore() {
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Continue Your Progress</h3>
                   <p className="text-muted-foreground mb-4">
-                    Complete all Phase 1 training requirements to be considered for Phase 2 selection. 
+                    Complete all Phase 1 training requirements to be considered for Phase 2 selection.
                     Based on your performance and preferences, you will be assigned to either the Employment Track or Entrepreneurship Track.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">

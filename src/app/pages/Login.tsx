@@ -5,18 +5,29 @@ import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
+import { useAuth } from "@/app/context/AuthContext";
 
 export function Login() {
   const navigate = useNavigate();
+  const { login, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleBeneficiaryLogin = () => {
-    navigate("/beneficiary");
-  };
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
 
-  const handleAdminLogin = () => {
-    navigate("/admin");
+    try {
+      const user = await login(email, password);
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/beneficiary");
+      }
+    } catch (err: any) {
+      setError(err.message || "Login failed. Please check your credentials.");
+    }
   };
 
   return (
@@ -39,53 +50,63 @@ export function Login() {
               <TabsTrigger value="beneficiary" className="data-[state=active]:bg-white">Beneficiary</TabsTrigger>
               <TabsTrigger value="admin" className="data-[state=active]:bg-white">Admin</TabsTrigger>
             </TabsList>
-            <TabsContent value="beneficiary" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="beneficiary-email">Email</Label>
-                <Input
-                  id="beneficiary-email"
-                  type="email"
-                  placeholder="your.email@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="beneficiary-password">Password</Label>
-                <Input
-                  id="beneficiary-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleBeneficiaryLogin} className="w-full bg-neutral-800 hover:bg-neutral-700">
-                Sign In as Beneficiary
-              </Button>
+            <TabsContent value="beneficiary">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="beneficiary-email">Email</Label>
+                  <Input
+                    id="beneficiary-email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="beneficiary-password">Password</Label>
+                  <Input
+                    id="beneficiary-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                <Button type="submit" className="w-full bg-neutral-800 hover:bg-neutral-700" disabled={loading}>
+                  {loading ? "Signing in..." : "Sign In as Beneficiary"}
+                </Button>
+              </form>
             </TabsContent>
-            <TabsContent value="admin" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="admin-email">Email</Label>
-                <Input
-                  id="admin-email"
-                  type="email"
-                  placeholder="admin@gov.rw"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="admin-password">Password</Label>
-                <Input
-                  id="admin-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleAdminLogin} className="w-full bg-neutral-800 hover:bg-neutral-700">
-                Sign In as Admin
-              </Button>
+            <TabsContent value="admin">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="admin-email">Email</Label>
+                  <Input
+                    id="admin-email"
+                    type="email"
+                    placeholder="admin@gov.rw"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin-password">Password</Label>
+                  <Input
+                    id="admin-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                <Button type="submit" className="w-full bg-neutral-800 hover:bg-neutral-700" disabled={loading}>
+                  {loading ? "Signing in..." : "Sign In as Admin"}
+                </Button>
+              </form>
             </TabsContent>
           </Tabs>
         </CardContent>

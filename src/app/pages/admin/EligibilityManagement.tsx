@@ -1,61 +1,83 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { ArrowLeft, Users, CheckCircle2, XCircle, TrendingUp } from "lucide-react";
+import { ArrowLeft, Users, CheckCircle2, XCircle, TrendingUp, Loader2 } from "lucide-react";
 import { Slider } from "@/app/components/ui/slider";
 import { Label } from "@/app/components/ui/label";
 import { Badge } from "@/app/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/app/components/ui/alert";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, Area, AreaChart } from "recharts";
-
-// Mock data - distribution of eligibility scores
-const generateScoreDistribution = () => {
-  const distribution = [];
-  for (let i = 0; i <= 100; i += 5) {
-    // Generate a realistic distribution with more scores in the 60-80 range
-    let count;
-    if (i >= 60 && i <= 80) {
-      count = Math.floor(Math.random() * 800) + 600;
-    } else if (i >= 40 && i < 60) {
-      count = Math.floor(Math.random() * 500) + 300;
-    } else if (i > 80 && i <= 95) {
-      count = Math.floor(Math.random() * 400) + 200;
-    } else {
-      count = Math.floor(Math.random() * 200) + 50;
-    }
-    distribution.push({
-      score: i,
-      count: count,
-      range: `${i}-${i + 4}`
-    });
-  }
-  return distribution;
-};
+import { api } from "@/app/lib/api";
 
 export function EligibilityManagement() {
-  const [cutoffScore, setCutoffScore] = useState([70]);
-  const scoreDistribution = generateScoreDistribution();
-  
-  // Calculate statistics based on cutoff
-  const totalCandidates = scoreDistribution.reduce((sum, item) => sum + item.count, 0);
-  const passedCandidates = scoreDistribution
-    .filter(item => item.score >= cutoffScore[0])
-    .reduce((sum, item) => sum + item.count, 0);
-  const failedCandidates = totalCandidates - passedCandidates;
-  const passRate = ((passedCandidates / totalCandidates) * 100).toFixed(1);
-  
-  // Prepare data with pass/fail coloring
-  const chartData = scoreDistribution.map(item => ({
-    ...item,
-    passed: item.score >= cutoffScore[0] ? item.count : 0,
-    failed: item.score < cutoffScore[0] ? item.count : 0,
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [cutoffScore, setCutoffScore] = useState([13]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await api.adminGetEligibilityStats();
+        setData(result);
+      } catch (err: any) {
+        setError(err.message || "Failed to load eligibility data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <Link to="/admin">
+            <Button variant="ghost" className="mb-6">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <p>Failed to load data: {error}</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  const distribution = (data?.distribution || []).map((bucket: any) => ({
+    range: bucket.range,
+    count: bucket.count,
   }));
 
-  const handleApplyCutoff = () => {
-    // In production, this would update the backend
-    alert(`Eligibility cutoff score updated to ${cutoffScore[0]}`);
-  };
+  // Parse range strings to calculate pass/fail based on cutoff
+  const chartData = distribution.map((item: any) => {
+    const rangeParts = item.range.split("-");
+    const low = parseFloat(rangeParts[0]);
+    return {
+      ...item,
+      passed: low >= cutoffScore[0] ? item.count : 0,
+      failed: low < cutoffScore[0] ? item.count : 0,
+    };
+  });
+
+  const totalCandidates = data?.total_scored || 0;
+  const passedCandidates = chartData.reduce((sum: number, item: any) => sum + item.passed, 0);
+  const failedCandidates = totalCandidates - passedCandidates;
+  const passRate = totalCandidates > 0 ? ((passedCandidates / totalCandidates) * 100).toFixed(1) : "0";
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -73,7 +95,7 @@ export function EligibilityManagement() {
             <CardHeader>
               <CardTitle className="text-2xl">Eligibility Score Management</CardTitle>
               <CardDescription>
-                Adjust the eligibility score cutoff and view the impact on candidate selection
+                View score distribution and adjust eligibility cutoff
               </CardDescription>
             </CardHeader>
           </Card>
@@ -84,12 +106,14 @@ export function EligibilityManagement() {
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Users className="w-4 h-4" />
-                  Total Candidates
+                  Total Scored
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">{totalCandidates.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground mt-1">All registered</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Avg: {data?.avg_score?.toFixed(2) ?? "N/A"}
+                </p>
               </CardContent>
             </Card>
 
@@ -123,12 +147,14 @@ export function EligibilityManagement() {
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-primary" />
-                  Current Cutoff
+                  Score Range
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-primary">{cutoffScore[0]}</div>
-                <p className="text-xs text-muted-foreground mt-1">Minimum score</p>
+                <div className="text-3xl font-bold text-primary">
+                  {data?.min_score?.toFixed(1) ?? "?"} - {data?.max_score?.toFixed(1) ?? "?"}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Min - Max</p>
               </CardContent>
             </Card>
           </div>
@@ -152,96 +178,75 @@ export function EligibilityManagement() {
                 <Slider
                   value={cutoffScore}
                   onValueChange={setCutoffScore}
-                  min={0}
-                  max={100}
-                  step={1}
+                  min={Math.floor(data?.min_score || 0)}
+                  max={Math.ceil(data?.max_score || 20)}
+                  step={0.5}
                   className="w-full"
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>0</span>
-                  <span>25</span>
-                  <span>50</span>
-                  <span>75</span>
-                  <span>100</span>
+                  <span>{Math.floor(data?.min_score || 0)}</span>
+                  <span>{Math.ceil(data?.max_score || 20)}</span>
                 </div>
               </div>
 
-              {cutoffScore[0] < 50 && (
+              {cutoffScore[0] < (data?.avg_score || 13) * 0.7 && (
                 <Alert className="border-red-500 bg-red-50">
                   <XCircle className="h-4 w-4 text-red-500" />
                   <AlertTitle>Low Cutoff Score</AlertTitle>
                   <AlertDescription>
-                    A cutoff below 50 may result in selecting candidates with insufficient readiness
+                    A cutoff well below average may result in selecting candidates with insufficient readiness
                   </AlertDescription>
                 </Alert>
               )}
-
-              {cutoffScore[0] > 85 && (
-                <Alert className="border-yellow-500 bg-yellow-50">
-                  <AlertTitle>High Cutoff Score</AlertTitle>
-                  <AlertDescription>
-                    A cutoff above 85 may exclude many qualified candidates. Only {passedCandidates.toLocaleString()} candidates will pass.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <Button 
-                onClick={handleApplyCutoff} 
-                className="w-full bg-primary hover:bg-primary/90"
-              >
-                Apply Cutoff Score
-              </Button>
             </CardContent>
           </Card>
 
-          {/* Score Distribution Chart - Bar Chart */}
+          {/* Score Distribution Chart */}
           <Card>
             <CardHeader>
-              <CardTitle>Score Distribution - Pass/Fail View</CardTitle>
+              <CardTitle>Score Distribution</CardTitle>
               <CardDescription>
                 Distribution of candidates by score range with pass/fail visualization
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="range" 
-                    label={{ value: 'Score Range', position: 'insideBottom', offset: -5 }}
-                  />
-                  <YAxis label={{ value: 'Number of Candidates', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip 
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        return (
-                          <div className="bg-white p-4 border border-gray-200 rounded shadow-lg">
-                            <p className="font-semibold">Score Range: {data.range}</p>
-                            <p className="text-primary">Passing: {data.passed.toLocaleString()}</p>
-                            <p className="text-red-500">Failing: {data.failed.toLocaleString()}</p>
-                            <p className="font-semibold mt-2">Total: {data.count.toLocaleString()}</p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Legend />
-                  <ReferenceLine 
-                    x={chartData.findIndex(d => d.score >= cutoffScore[0])} 
-                    stroke="#10b981" 
-                    strokeWidth={2}
-                    label={{ value: `Cutoff: ${cutoffScore[0]}`, fill: '#10b981', fontSize: 14, fontWeight: 'bold' }}
-                  />
-                  <Bar dataKey="passed" stackId="a" fill="#10b981" name="Passing" />
-                  <Bar dataKey="failed" stackId="a" fill="#ef4444" name="Not Passing" />
-                </BarChart>
-              </ResponsiveContainer>
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="range"
+                      label={{ value: "Score Range", position: "insideBottom", offset: -5 }}
+                    />
+                    <YAxis label={{ value: "Number of Candidates", angle: -90, position: "insideLeft" }} />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const d = payload[0].payload;
+                          return (
+                            <div className="bg-white p-4 border border-gray-200 rounded shadow-lg">
+                              <p className="font-semibold">Score Range: {d.range}</p>
+                              <p className="text-primary">Passing: {d.passed.toLocaleString()}</p>
+                              <p className="text-red-500">Failing: {d.failed.toLocaleString()}</p>
+                              <p className="font-semibold mt-2">Total: {d.count.toLocaleString()}</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="passed" stackId="a" fill="#10b981" name="Passing" />
+                    <Bar dataKey="failed" stackId="a" fill="#ef4444" name="Not Passing" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-12">No score data available</p>
+              )}
             </CardContent>
           </Card>
 
-          {/* Score Distribution Chart - Area Chart */}
+          {/* Cumulative Distribution */}
           <Card>
             <CardHeader>
               <CardTitle>Cumulative Score Distribution</CardTitle>
@@ -250,54 +255,29 @@ export function EligibilityManagement() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <AreaChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="range" 
-                    label={{ value: 'Score Range', position: 'insideBottom', offset: -5 }}
-                  />
-                  <YAxis label={{ value: 'Number of Candidates', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip 
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        return (
-                          <div className="bg-white p-4 border border-gray-200 rounded shadow-lg">
-                            <p className="font-semibold">Score Range: {data.range}</p>
-                            <p className="text-primary">Candidates: {data.count.toLocaleString()}</p>
-                            <p className={data.score >= cutoffScore[0] ? "text-primary" : "text-red-500"}>
-                              Status: {data.score >= cutoffScore[0] ? "Passing" : "Not Passing"}
-                            </p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <ReferenceLine 
-                    x={chartData.findIndex(d => d.score >= cutoffScore[0])} 
-                    stroke="#10b981" 
-                    strokeWidth={3}
-                    strokeDasharray="5 5"
-                    label={{ 
-                      value: `Cutoff: ${cutoffScore[0]}`, 
-                      fill: '#10b981', 
-                      fontSize: 14, 
-                      fontWeight: 'bold',
-                      position: 'top'
-                    }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="count" 
-                    stroke="#10b981" 
-                    fill="#10b981" 
-                    fillOpacity={0.6}
-                    name="Candidates"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={350}>
+                  <AreaChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="range"
+                      label={{ value: "Score Range", position: "insideBottom", offset: -5 }}
+                    />
+                    <YAxis label={{ value: "Number of Candidates", angle: -90, position: "insideLeft" }} />
+                    <Tooltip />
+                    <Area
+                      type="monotone"
+                      dataKey="count"
+                      stroke="#10b981"
+                      fill="#10b981"
+                      fillOpacity={0.6}
+                      name="Candidates"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-12">No score data available</p>
+              )}
             </CardContent>
           </Card>
         </div>

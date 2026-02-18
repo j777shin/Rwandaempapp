@@ -1,31 +1,58 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { ArrowLeft, Building2, TrendingUp, Users, CheckCircle2, Clock } from "lucide-react";
-import { Badge } from "@/app/components/ui/badge";
-import { Progress } from "@/app/components/ui/progress";
+import { ArrowLeft, Building2, Loader2, Search } from "lucide-react";
+import { Input } from "@/app/components/ui/input";
+import { api } from "@/app/lib/api";
+
+interface EmpBeneficiary {
+  id: string;
+  name: string;
+  email: string;
+  pathways_completion_rate: number | null;
+}
 
 export function EmploymentProgress() {
-  const stats = [
-    { label: "Total Employment Track", value: "1,800", icon: Building2, color: "bg-primary" },
-    { label: "Active in Training", value: "1,450", icon: Clock, color: "bg-primary" },
-    { label: "Completed Training", value: "350", icon: CheckCircle2, color: "bg-primary" },
-    { label: "Avg Progress", value: "68%", icon: TrendingUp, color: "bg-primary" },
-  ];
+  const [beneficiaries, setBeneficiaries] = useState<EmpBeneficiary[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
-  const pathwayProgress = [
-    { pathway: "Construction & Trades", total: 520, avgProgress: 72, color: "bg-primary" },
-    { pathway: "Hospitality & Tourism", total: 380, avgProgress: 65, color: "bg-primary" },
-    { pathway: "Technology & Digital", total: 450, avgProgress: 78, color: "bg-primary" },
-    { pathway: "Agriculture", total: 450, avgProgress: 60, color: "bg-primary" },
-  ];
+  useEffect(() => {
+    let cancelled = false;
+    async function fetch() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await api.adminGetEmploymentProgress();
+        if (cancelled) return;
+        // API returns an array directly
+        const items: EmpBeneficiary[] = (Array.isArray(data) ? data : data.items ?? []).map((b: any) => ({
+          id: b.id,
+          name: b.name || "",
+          email: b.email || "",
+          pathways_completion_rate: b.pathways_completion_rate ?? null,
+        }));
+        setBeneficiaries(items);
+        if (items.length > 0) setSelectedId(items[0].id);
+      } catch (err: any) {
+        if (!cancelled) setError(err.message || "Failed to load data");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    fetch();
+    return () => { cancelled = true; };
+  }, []);
 
-  const recentActivity = [
-    { name: "Jean Baptiste", action: "Completed module: Electrical Fundamentals", pathway: "Construction", time: "2 hours ago" },
-    { name: "Marie Claire", action: "Started module: Customer Service Excellence", pathway: "Hospitality", time: "4 hours ago" },
-    { name: "Patrick Uwase", action: "Completed pathway: Technology & Digital", pathway: "Technology", time: "1 day ago" },
-    { name: "Grace Mukamana", action: "Started module: Modern Farming", pathway: "Agriculture", time: "2 days ago" },
-  ];
+  const filtered = beneficiaries.filter(b => {
+    const q = search.toLowerCase();
+    return !q || b.name.toLowerCase().includes(q) || b.email.toLowerCase().includes(q);
+  });
+
+  const selected = beneficiaries.find(b => b.id === selectedId) || null;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -37,107 +64,118 @@ export function EmploymentProgress() {
           </Button>
         </Link>
 
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
-              <Building2 className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-4xl">Employment Track Progress</h1>
-              <p className="text-muted-foreground">Monitor progress of beneficiaries in the Employment Track</p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <Badge variant="outline" className="border-primary text-primary">Phase 2</Badge>
-            <Badge variant="outline" className="border-primary text-primary">Employment Track</Badge>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <Card key={index} className="border-l-4 border-l-primary">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-3xl font-bold mt-2">{stat.value}</p>
-                  </div>
-                  <div className={`w-12 h-12 ${stat.color} text-white rounded-lg flex items-center justify-center`}>
-                    <stat.icon className="w-6 h-6" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Pathway Progress */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Career Pathway Breakdown</CardTitle>
-            <CardDescription>Progress by career pathway within Employment Track</CardDescription>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl">Employment Track View</CardTitle>
+                <CardDescription>View pathways completion rate for employment track beneficiaries</CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {pathwayProgress.map((pathway, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-3 h-3 ${pathway.color} rounded-full`}></div>
-                      <span className="font-medium">{pathway.pathway}</span>
-                    </div>
+        </Card>
+
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-3 text-muted-foreground">Loading...</span>
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <p className="text-destructive mb-4">{error}</p>
+            <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+          </div>
+        )}
+
+        {!loading && !error && beneficiaries.length === 0 && (
+          <div className="flex items-center justify-center py-12">
+            <p className="text-muted-foreground">No employment track beneficiaries found.</p>
+          </div>
+        )}
+
+        {!loading && !error && beneficiaries.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left: List */}
+            <div className="lg:col-span-1">
+              <Card className="h-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Beneficiaries ({beneficiaries.length})</CardTitle>
+                  <div className="relative mt-2">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by name or email..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y max-h-[60vh] overflow-y-auto">
+                    {filtered.map((b) => (
+                      <button
+                        key={b.id}
+                        onClick={() => setSelectedId(b.id)}
+                        className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
+                          selectedId === b.id ? "bg-primary/10 border-l-4 border-l-primary" : ""
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            {b.name.split(" ").map(n => n[0]).join("")}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm truncate">{b.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{b.email}</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                    {filtered.length === 0 && (
+                      <p className="text-center text-sm text-muted-foreground py-8">No results found.</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right: Detail */}
+            <div className="lg:col-span-2">
+              {selected ? (
+                <Card>
+                  <CardHeader>
                     <div className="flex items-center gap-4">
-                      <span className="text-sm text-muted-foreground">{pathway.total} beneficiaries</span>
-                      <span className="font-bold text-primary">{pathway.avgProgress}%</span>
+                      <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white text-xl font-bold">
+                        {selected.name.split(" ").map(n => n[0]).join("")}
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl">{selected.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{selected.email}</p>
+                      </div>
                     </div>
-                  </div>
-                  <Progress value={pathway.avgProgress} className="h-3" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gray-50 rounded-lg p-6">
+                      <p className="text-sm text-muted-foreground mb-2">Pathways Completion Rate</p>
+                      <p className="text-4xl font-bold text-primary">
+                        {selected.pathways_completion_rate != null ? `${selected.pathways_completion_rate}%` : "—"}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="flex items-center justify-center py-12">
+                  <p className="text-muted-foreground">Select a beneficiary to view their details.</p>
                 </div>
-              ))}
+              )}
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest updates from Employment Track beneficiaries</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentActivity.map((activity, index) => (
-                <div
-                  key={index}
-                  className="flex items-start justify-between p-4 bg-gray-50 rounded-lg border-2 border-gray-200"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
-                      {activity.name.split(" ").map((n) => n[0]).join("")}
-                    </div>
-                    <div>
-                      <p className="font-semibold">{activity.name}</p>
-                      <p className="text-sm text-muted-foreground">{activity.action}</p>
-                      <Badge variant="outline" className="mt-2 border-primary text-primary">
-                        {activity.pathway}
-                      </Badge>
-                    </div>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{activity.time}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 flex justify-center">
-              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
-                <Users className="w-4 h-4 mr-2" />
-                View All Beneficiaries
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        )}
       </div>
     </div>
   );

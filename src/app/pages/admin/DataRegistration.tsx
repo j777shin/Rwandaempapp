@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
@@ -7,10 +7,11 @@ import { Label } from "@/app/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 import { Checkbox } from "@/app/components/ui/checkbox";
-import { ArrowLeft, UserPlus, Upload, FileSpreadsheet, User, Database, Edit2, Save } from "lucide-react";
+import { ArrowLeft, UserPlus, Upload, FileSpreadsheet, User, Database, Edit2, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/app/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table";
+import { api } from "@/app/lib/api";
 
 export function DataRegistration() {
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -51,17 +52,43 @@ export function DataRegistration() {
     toilet: false,
   });
 
-  // Mock registered candidates for Additional Info manual entry
-  const [candidates, setCandidates] = useState([
-    { id: "MVP001", name: "Jean Paul Uwimana", attendance: "85" },
-    { id: "MVP002", name: "Marie Claire Mukamana", attendance: "92" },
-    { id: "MVP003", name: "Eric Nshimiyimana", attendance: "78" },
-    { id: "MVP004", name: "Grace Uwera", attendance: "88" },
-    { id: "MVP005", name: "Patrick Habimana", attendance: "90" },
-  ]);
+  // Candidates for Additional Info manual entry - loaded from API
+  const [candidates, setCandidates] = useState<{ id: string; name: string; age: number; email: string; attendance: string }[]>([]);
+  const [candidatesLoading, setCandidatesLoading] = useState(false);
+  const [candidateSearch, setCandidateSearch] = useState("");
+
+  // Loading states for submit buttons
+  const [csvSubmitting, setCsvSubmitting] = useState(false);
+  const [manualSubmitting, setManualSubmitting] = useState(false);
+  const [additionalCsvSubmitting, setAdditionalCsvSubmitting] = useState(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+
+  // Load candidates from API for the Additional Info tab
+  useEffect(() => {
+    const loadCandidates = async () => {
+      setCandidatesLoading(true);
+      try {
+        const data = await api.adminListBeneficiaries();
+        const beneficiaries = Array.isArray(data) ? data : data.items ?? data.beneficiaries ?? [];
+        setCandidates(
+          beneficiaries.map((b: any) => ({
+            id: b.id ?? b.beneficiary_id ?? "",
+            name: b.name ?? `${b.first_name ?? ""} ${b.last_name ?? ""}`.trim(),
+            age: b.age ?? 0,
+            email: b.email ?? "",
+            attendance: String(b.offline_attendance ?? b.attendance_score ?? b.attendance ?? "0"),
+          }))
+        );
+      } catch (err: any) {
+        toast.error(err.message || "Failed to load candidates");
+      } finally {
+        setCandidatesLoading(false);
+      }
+    };
+    loadCandidates();
+  }, []);
 
   const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,58 +104,132 @@ export function DataRegistration() {
     }
   };
 
-  const handleCsvSubmit = (e: React.FormEvent) => {
+  const handleCsvSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (csvFile) {
-      toast.success(`Processing ${csvFile.name} for bulk registration...`);
-      // In production, this would upload and process the CSV file
-    } else {
+    if (!csvFile) {
       toast.error("Please select a CSV file to upload");
+      return;
+    }
+    setCsvSubmitting(true);
+    try {
+      const result = await api.adminUploadCsv(csvFile);
+      const count = result?.count ?? result?.registered ?? result?.total ?? "";
+      toast.success(
+        count
+          ? `Successfully registered ${count} candidates from ${csvFile.name}`
+          : `Successfully processed ${csvFile.name}`
+      );
+      setCsvFile(null);
+      // Reset the file input
+      const fileInput = document.getElementById("csv-upload") as HTMLInputElement;
+      if (fileInput) fileInput.value = "";
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload CSV file");
+    } finally {
+      setCsvSubmitting(false);
     }
   };
 
-  const handleAdditionalCsvSubmit = (e: React.FormEvent) => {
+  const handleAdditionalCsvSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (additionalCsvFile) {
-      toast.success(`Processing ${additionalCsvFile.name} for additional data...`);
-      // In production, this would upload and process the CSV file
-    } else {
+    if (!additionalCsvFile) {
       toast.error("Please select a CSV file to upload");
+      return;
+    }
+    setAdditionalCsvSubmitting(true);
+    try {
+      const result = await api.adminUploadCsv(additionalCsvFile);
+      const count = result?.count ?? result?.updated ?? result?.total ?? "";
+      toast.success(
+        count
+          ? `Successfully processed ${count} records from ${additionalCsvFile.name}`
+          : `Successfully processed ${additionalCsvFile.name}`
+      );
+      setAdditionalCsvFile(null);
+      const fileInput = document.getElementById("additional-csv-upload") as HTMLInputElement;
+      if (fileInput) fileInput.value = "";
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload additional CSV file");
+    } finally {
+      setAdditionalCsvSubmitting(false);
     }
   };
 
-  const handleManualSubmit = (e: React.FormEvent) => {
+  const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Candidate registered successfully!");
-    // Reset form
-    setFormData({
-      name: "",
-      age: "",
-      gender: "",
-      contact: "",
-      marriage_status: false,
-      disability: false,
-      education_level: "",
-      occupation: false,
-      informal_working: false,
-      num_cows: "0",
-      num_goats: "0",
-      num_chickens: "0",
-      num_sheep: "0",
-      num_pigs: "0",
-      num_rabbits: "0",
-      land_ownership: false,
-      land_size: "0",
-      num_radio: "0",
-      num_phone: "0",
-      num_tv: "0",
-      fuel: "",
-      water_source: "",
-      floor: false,
-      roof: false,
-      walls: false,
-      toilet: false,
-    });
+    setManualSubmitting(true);
+    try {
+      const nameParts = formData.name.trim().split(/\s+/);
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
+      const payload = {
+        first_name: firstName,
+        last_name: lastName,
+        age: parseInt(formData.age, 10),
+        gender: formData.gender,
+        contact: formData.contact,
+        marriage_status: formData.marriage_status,
+        disability: formData.disability,
+        education_level: formData.education_level,
+        occupation: formData.occupation,
+        informal_working: formData.informal_working,
+        num_cows: parseInt(formData.num_cows, 10),
+        num_goats: parseInt(formData.num_goats, 10),
+        num_chickens: parseInt(formData.num_chickens, 10),
+        num_sheep: parseInt(formData.num_sheep, 10),
+        num_pigs: parseInt(formData.num_pigs, 10),
+        num_rabbits: parseInt(formData.num_rabbits, 10),
+        land_ownership: formData.land_ownership,
+        land_size: parseFloat(formData.land_size),
+        num_radio: parseInt(formData.num_radio, 10),
+        num_phone: parseInt(formData.num_phone, 10),
+        num_tv: parseInt(formData.num_tv, 10),
+        fuel: formData.fuel,
+        water_source: formData.water_source,
+        floor: formData.floor,
+        roof: formData.roof,
+        walls: formData.walls,
+        toilet: formData.toilet,
+      };
+
+      await api.adminRegisterManual(payload);
+      toast.success("Candidate registered successfully!");
+
+      // Reset form
+      setFormData({
+        name: "",
+        age: "",
+        gender: "",
+        contact: "",
+        marriage_status: false,
+        disability: false,
+        education_level: "",
+        occupation: false,
+        informal_working: false,
+        num_cows: "0",
+        num_goats: "0",
+        num_chickens: "0",
+        num_sheep: "0",
+        num_pigs: "0",
+        num_rabbits: "0",
+        land_ownership: false,
+        land_size: "0",
+        num_radio: "0",
+        num_phone: "0",
+        num_tv: "0",
+        fuel: "",
+        water_source: "",
+        floor: false,
+        roof: false,
+        walls: false,
+        toilet: false,
+      });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to register candidate");
+    } finally {
+      setManualSubmitting(false);
+    }
   };
 
   const handleEdit = (id: string, currentValue: string) => {
@@ -136,12 +237,17 @@ export function DataRegistration() {
     setEditValue(currentValue);
   };
 
-  const handleSave = (id: string) => {
-    setCandidates(candidates.map(c => 
-      c.id === id ? { ...c, attendance: editValue } : c
-    ));
-    setEditingId(null);
-    toast.success("Attendance score updated!");
+  const handleSave = async (id: string) => {
+    try {
+      await api.adminUpdateBeneficiary(id, { offline_attendance: parseInt(editValue, 10) || 0 });
+      setCandidates(candidates.map(c =>
+        c.id === id ? { ...c, attendance: editValue } : c
+      ));
+      setEditingId(null);
+      toast.success("Attendance score updated!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save attendance score");
+    }
   };
 
   return (
@@ -176,7 +282,7 @@ export function DataRegistration() {
                 </TabsTrigger>
                 <TabsTrigger value="additional" className="flex items-center gap-2">
                   <Database className="w-4 h-4" />
-                  Additional Info
+                  Phase 1 Offline Training Info
                 </TabsTrigger>
               </TabsList>
 
@@ -233,9 +339,13 @@ export function DataRegistration() {
                           </div>
                         )}
 
-                        <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-                          <Upload className="w-4 h-4 mr-2" />
-                          Upload and Process CSV
+                        <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={csvSubmitting}>
+                          {csvSubmitting ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4 mr-2" />
+                          )}
+                          {csvSubmitting ? "Uploading..." : "Upload and Process CSV"}
                         </Button>
                       </form>
 
@@ -543,9 +653,13 @@ export function DataRegistration() {
                         </div>
                       </div>
 
-                      <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-                        <UserPlus className="w-4 h-4 mr-2" />
-                        Register Candidate
+                      <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={manualSubmitting}>
+                        {manualSubmitting ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <UserPlus className="w-4 h-4 mr-2" />
+                        )}
+                        {manualSubmitting ? "Registering..." : "Register Candidate"}
                       </Button>
                     </form>
                   </TabsContent>
@@ -605,9 +719,13 @@ export function DataRegistration() {
                           </div>
                         )}
 
-                        <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-                          <Upload className="w-4 h-4 mr-2" />
-                          Upload and Process CSV
+                        <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={additionalCsvSubmitting}>
+                          {additionalCsvSubmitting ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4 mr-2" />
+                          )}
+                          {additionalCsvSubmitting ? "Uploading..." : "Upload and Process CSV"}
                         </Button>
                       </form>
 
@@ -641,20 +759,54 @@ export function DataRegistration() {
                           <CardDescription>Update attendance scores for Phase 1 candidates</CardDescription>
                         </CardHeader>
                         <CardContent>
+                          <div className="mb-4">
+                            <Input
+                              type="text"
+                              placeholder="Search by name or email..."
+                              value={candidateSearch}
+                              onChange={(e) => setCandidateSearch(e.target.value)}
+                              className="max-w-md"
+                            />
+                          </div>
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Candidate ID</TableHead>
                                 <TableHead>Name</TableHead>
+                                <TableHead>Age</TableHead>
+                                <TableHead>Email</TableHead>
                                 <TableHead>Attendance Score</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {candidates.map((candidate) => (
+                              {candidatesLoading ? (
+                                <TableRow>
+                                  <TableCell colSpan={5} className="text-center py-8">
+                                    <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+                                    <p className="text-sm text-muted-foreground">Loading candidates...</p>
+                                  </TableCell>
+                                </TableRow>
+                              ) : candidates.filter(c => {
+                                if (!candidateSearch) return true;
+                                const q = candidateSearch.toLowerCase();
+                                return c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
+                              }).length === 0 ? (
+                                <TableRow>
+                                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                                    {candidates.length === 0
+                                      ? "No candidates found. Register candidates first using the Candidate Info tab."
+                                      : "No candidates match your search."}
+                                  </TableCell>
+                                </TableRow>
+                              ) : candidates.filter(c => {
+                                if (!candidateSearch) return true;
+                                const q = candidateSearch.toLowerCase();
+                                return c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
+                              }).map((candidate) => (
                                 <TableRow key={candidate.id}>
-                                  <TableCell className="font-medium">{candidate.id}</TableCell>
-                                  <TableCell>{candidate.name}</TableCell>
+                                  <TableCell className="font-medium">{candidate.name}</TableCell>
+                                  <TableCell>{candidate.age}</TableCell>
+                                  <TableCell className="text-muted-foreground">{candidate.email}</TableCell>
                                   <TableCell>
                                     {editingId === candidate.id ? (
                                       <Input
@@ -666,7 +818,7 @@ export function DataRegistration() {
                                         className="w-24"
                                       />
                                     ) : (
-                                      <span>{candidate.attendance}%</span>
+                                      <span>{candidate.attendance}</span>
                                     )}
                                   </TableCell>
                                   <TableCell className="text-right">

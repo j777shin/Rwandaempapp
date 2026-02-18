@@ -1,27 +1,62 @@
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { BookOpen, Route, Trophy, MessageCircle, FileText, LogOut, Lock, CheckCircle2, GraduationCap, Briefcase, Building2, Lightbulb } from "lucide-react";
+import { BookOpen, Route, Trophy, MessageCircle, FileText, LogOut, Lock, CheckCircle2, GraduationCap, Briefcase, Building2, Lightbulb, Loader2, ClipboardList } from "lucide-react";
 import { Progress } from "@/app/components/ui/progress";
 import { Badge } from "@/app/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/app/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { api } from "@/app/lib/api";
 
 export function BeneficiaryDashboard() {
-  // Updated: Business Development added to Phase 1 features
-  const user = {
-    name: "Jean Baptiste",
-    email: "jean.baptiste@example.com",
-    skillCraftCompleted: true, // Changed to completed status
-    pathwaysProgress: 45,
-    businessDevelopmentCompleted: false, // Added business development status
-    currentPhase: 2, // 1 or 2
-    phase2Track: "entrepreneurship", // "employment" or "entrepreneurship"
-    selectedForPhase2: true, // true if user is selected for phase 2
+  const [dashboard, setDashboard] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [employmentStatus, setEmploymentStatus] = useState<"self-employed" | "hired" | null>(null);
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const loadDashboard = async () => {
+    try {
+      const data = await api.getDashboard();
+      setDashboard(data);
+      // Initialize employment status from API data
+      if (data.beneficiary?.employment_status) {
+        setEmploymentStatus(data.beneficiary.employment_status);
+      }
+    } catch (err) {
+      console.error("Failed to load dashboard:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const [employmentStatus, setEmploymentStatus] = useState<"self-employed" | "hired" | null>(null);
+  if (loading) {
+    return (
+      <div className="p-8 bg-background flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Derive user data from dashboard API response
+  const beneficiary = dashboard?.beneficiary || {};
+  const phase1 = dashboard?.phase1_progress || {};
+  const phase2 = dashboard?.phase2_status || {};
+
+  const user = {
+    name: beneficiary.name || `${beneficiary.first_name || ""} ${beneficiary.last_name || ""}`.trim() || "User",
+    email: beneficiary.email || "",
+    skillCraftCompleted: !!phase1.skillcraft_score,
+    skillCraftScore: phase1.skillcraft_score,
+    pathwaysProgress: phase1.pathways_completion || 0,
+    businessDevelopmentCompleted: !!beneficiary.business_development_text,
+    currentPhase: beneficiary.selection_status === "phase2_selected" ? 2 : 1,
+    phase2Track: beneficiary.track || null,
+    selectedForPhase2: beneficiary.selection_status === "phase2_selected",
+  };
 
   const phase1Features = [
     {
@@ -42,6 +77,12 @@ export function BeneficiaryDashboard() {
       icon: Lightbulb,
       link: "/beneficiary/business-development",
     },
+    {
+      title: "Completion Survey",
+      description: "Complete the Phase 1 satisfaction survey",
+      icon: ClipboardList,
+      link: "/beneficiary/phase1-survey",
+    },
   ];
 
   const employmentFeatures = [
@@ -52,16 +93,10 @@ export function BeneficiaryDashboard() {
       link: "/beneficiary/pathways-deepdive",
     },
     {
-      title: "Employment Chatbot",
-      description: "Get AI-powered guidance for employment opportunities",
-      icon: MessageCircle,
-      link: "/beneficiary/chatbot",
-    },
-    {
-      title: "Results & Reports",
-      description: "View your comprehensive progress and achievements",
-      icon: FileText,
-      link: "/beneficiary/results",
+      title: "Completion Survey",
+      description: "Complete the Employment track satisfaction survey",
+      icon: ClipboardList,
+      link: "/beneficiary/employment-survey",
     },
   ];
 
@@ -74,11 +109,23 @@ export function BeneficiaryDashboard() {
     },
     {
       title: "Results & Reports",
-      description: "View your comprehensive progress and achievements",
+      description: "View your business goal and assessment summaries",
       icon: FileText,
       link: "/beneficiary/results",
     },
+    {
+      title: "Completion Survey",
+      description: "Complete the Entrepreneurship track satisfaction survey",
+      icon: ClipboardList,
+      link: "/beneficiary/entrepreneurship-survey",
+    },
   ];
+
+  const defaultTab = user.selectedForPhase2 && user.phase2Track === "employment"
+    ? "employment"
+    : user.selectedForPhase2 && user.phase2Track === "entrepreneurship"
+    ? "entrepreneurship"
+    : "training";
 
   return (
     <div className="p-8 space-y-6 bg-background">
@@ -113,6 +160,12 @@ export function BeneficiaryDashboard() {
                   )}
                 </div>
               </div>
+              {user.skillCraftScore != null && (
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Score</span>
+                  <span className="font-bold text-foreground">{user.skillCraftScore}/100</span>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -230,7 +283,7 @@ export function BeneficiaryDashboard() {
                 )}
               </label>
             </div>
-            
+
             {employmentStatus && (
               <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
                 <p className="text-sm text-foreground">
@@ -244,7 +297,7 @@ export function BeneficiaryDashboard() {
       </section>
 
       {/* Tab-based Phase Selection */}
-      <Tabs defaultValue={user.selectedForPhase2 && user.phase2Track === "employment" ? "employment" : user.selectedForPhase2 && user.phase2Track === "entrepreneurship" ? "entrepreneurship" : "training"} className="w-full">
+      <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 bg-neutral-100">
           <TabsTrigger value="training" className="data-[state=active]:bg-white">
             <GraduationCap className="w-4 h-4 mr-2" />
@@ -268,7 +321,7 @@ export function BeneficiaryDashboard() {
               <CardDescription>Complete your skills assessment and explore career pathways</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {phase1Features.map((feature, index) => (
                   <Link key={index} to={feature.link}>
                     <Card className="hover:shadow-md transition-all cursor-pointer border-border hover:border-primary/50 h-full">
@@ -343,7 +396,7 @@ export function BeneficiaryDashboard() {
                 <CardDescription>Access entrepreneurship resources and business guidance</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {entrepreneurshipFeatures.map((feature, index) => (
                     <Link key={index} to={feature.link}>
                       <Card className="hover:shadow-md transition-all cursor-pointer border-border hover:border-primary/50 h-full">

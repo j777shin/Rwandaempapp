@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link, useLocation, Outlet } from "react-router";
-import { 
+import { Link, useLocation, Outlet, useNavigate } from "react-router";
+import {
   Home,
   BookOpen,
   Route,
@@ -17,10 +17,10 @@ import {
   User,
   GraduationCap,
   Lightbulb,
-  Star
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
+import { useAuth } from "@/app/context/AuthContext";
 
 interface MenuItem {
   title: string;
@@ -33,15 +33,23 @@ interface MenuItem {
 
 export function BeneficiaryLayout() {
   const location = useLocation();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Phase 1: Training"]);
+  const navigate = useNavigate();
+  const { user: authUser, logout } = useAuth();
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Phase 1: Training", "Phase 2: Employment", "Phase 2: Entrepreneur"]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Mock user data - in real app, this would come from context/state
+  // Use auth context data, fall back to defaults for display
+  const beneficiary = authUser?.beneficiary;
   const user = {
-    name: "Jean Baptiste",
-    email: "jean.baptiste@example.com",
-    selectedForPhase2: true,
-    phase2Track: "employment" // "employment" or "entrepreneurship"
+    name: beneficiary?.name || authUser?.email || "User",
+    email: authUser?.email || "",
+    selectedForPhase2: beneficiary?.selection_status === "selected",
+    phase2Track: beneficiary?.track || null,
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
   const menuItems: MenuItem[] = [
@@ -63,8 +71,6 @@ export function BeneficiaryLayout() {
     {
       title: "Phase 2: Employment",
       icon: Building2,
-      locked: !user.selectedForPhase2 || user.phase2Track !== "employment",
-      badge: user.phase2Track === "employment" ? "Active" : "Locked",
       children: [
         { title: "Pathways Deep Dive", path: "/beneficiary/pathways-deepdive" },
         { title: "Completion Survey", path: "/beneficiary/employment-survey" },
@@ -73,10 +79,7 @@ export function BeneficiaryLayout() {
     {
       title: "Phase 2: Entrepreneur",
       icon: Briefcase,
-      locked: !user.selectedForPhase2 || user.phase2Track !== "entrepreneurship",
-      badge: user.phase2Track === "entrepreneurship" ? "Active" : "Locked",
       children: [
-        { title: "Business Learning", path: "/beneficiary/business-learning" },
         { title: "Business Chatbot", path: "/beneficiary/chatbot" },
         { title: "Results & Reports", path: "/beneficiary/results" },
         { title: "Completion Survey", path: "/beneficiary/entrepreneurship-survey" },
@@ -213,12 +216,10 @@ export function BeneficiaryLayout() {
             <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
               {user.name.split(' ').map(n => n[0]).join('')}
             </div>
-            <Link to="/">
-              <Button variant="ghost" size="sm" className="text-foreground hover:text-primary">
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
-            </Link>
+            <Button variant="ghost" size="sm" className="text-foreground hover:text-primary" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
           </div>
         </header>
 

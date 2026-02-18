@@ -1,115 +1,275 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { api } from "@/app/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { ArrowLeft, Users, TrendingUp, MessageSquare, Target, Home, Coins, GraduationCap, Activity, BarChart3, PieChart as PieChartIcon } from "lucide-react";
+import { ArrowLeft, Users, TrendingUp, MessageSquare, Target, Home, Coins, GraduationCap, Activity, BarChart3, PieChart as PieChartIcon, Loader2 } from "lucide-react";
 import { Separator } from "@/app/components/ui/separator";
-import { 
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, 
-  PolarAngleAxis, PolarRadiusAxis, AreaChart, Area, ComposedChart, 
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+import {
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid,
+  PolarAngleAxis, PolarRadiusAxis, AreaChart, Area, ComposedChart,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 
-// Mock data for charts
-const phaseDistributionData = [
-  { name: "Phase 1 - Active", value: 2755, color: "#10b981" },
-  { name: "Phase 1 - Completed", value: 6245, color: "#059669" },
-  { name: "Phase 2 - Active", value: 3000, color: "#047857" },
-];
+// Color palettes used across charts
+const PIE_COLORS = ["#10b981", "#059669", "#047857", "#065f46", "#064e3b"];
+const GENDER_COLORS = ["#10b981", "#059669"];
 
-const ageDistributionData = [
-  { ageGroup: "18-22", count: 2850 },
-  { ageGroup: "23-27", count: 4230 },
-  { ageGroup: "28-32", count: 3150 },
-  { ageGroup: "33-35", count: 1770 },
-];
+// Helper to safely map an array from the API, returning [] if data is missing or not an array
+function safeArray<T>(data: unknown, mapper?: (item: any) => T): T[] {
+  if (!Array.isArray(data)) return [];
+  if (mapper) return data.map(mapper);
+  return data as T[];
+}
 
-const genderDistributionData = [
-  { name: "Female", value: 6450, color: "#10b981" },
-  { name: "Male", value: 5550, color: "#059669" },
-];
+// Helper to format large numbers for display (e.g. 12000 -> "12,000")
+function fmt(val: number | undefined | null): string {
+  if (val == null) return "--";
+  return val.toLocaleString();
+}
 
-const educationLevelData = [
-  { level: "Primary", count: 1200 },
-  { level: "Secondary", count: 5850 },
-  { level: "Vocational", count: 3150 },
-  { level: "University", count: 1800 },
-];
+// Helper to format a percentage value for display
+function fmtPct(val: number | undefined | null, suffix = "%"): string {
+  if (val == null) return "--";
+  return `${val}${suffix}`;
+}
 
-const householdIncomeData = [
-  { range: "<50k RWF", count: 3250 },
-  { range: "50k-100k", count: 4125 },
-  { range: "100k-200k", count: 2850 },
-  { range: "200k-500k", count: 1350 },
-  { range: ">500k", count: 425 },
-];
+interface OverviewData {
+  total_beneficiaries?: number;
+  completion_rate?: number;
+  avg_eligibility?: number;
+  chatbot_sessions?: number;
+  phase_distribution?: any[];
+  monthly_activity?: any[];
+}
 
-const livestockOwnershipData = [
-  { category: "Cattle", owners: 2340, percentage: 19.5 },
-  { category: "Goats", owners: 4125, percentage: 34.4 },
-  { category: "Poultry", owners: 6850, percentage: 57.1 },
-  { category: "None", owners: 3285, percentage: 27.4 },
-];
+interface DemographicsData {
+  total_beneficiaries?: number;
+  female_percentage?: number;
+  female_count?: number;
+  avg_age?: number;
+  age_distribution?: any[];
+  gender_distribution?: any[];
+  education_distribution?: any[];
+  district_distribution?: any[];
+  pathway_progress?: any[];
+}
 
-const landOwnershipData = [
-  { category: "No Land", value: 2845, color: "#ef4444" },
-  { category: "<0.5 ha", value: 4125, color: "#f59e0b" },
-  { category: "0.5-1 ha", value: 3250, color: "#10b981" },
-  { category: "1-2 ha", value: 1580, color: "#059669" },
-  { category: ">2 ha", value: 200, color: "#047857" },
-];
+interface EngagementData {
+  daily_active_users?: number;
+  daily_active_pct?: number;
+  avg_chatbot_sessions?: number;
+  test_completion_pct?: number;
+  weekly_engagement_pct?: number;
+  chatbot_usage?: any[];
+  test_completion?: any[];
+  engagement_rate?: any[];
+  monthly_activity?: any[];
+}
 
-const housingQualityData = [
-  { quality: "Poor", count: 1850 },
-  { quality: "Fair", count: 5250 },
-  { quality: "Good", count: 4125 },
-  { quality: "Excellent", count: 775 },
-];
-
-const chatbotUsageData = [
-  { week: "Week 1", sessions: 1250 },
-  { week: "Week 2", sessions: 1850 },
-  { week: "Week 3", sessions: 2340 },
-  { week: "Week 4", sessions: 2680 },
-  { week: "Week 5", sessions: 2950 },
-  { week: "Week 6", sessions: 3125 },
-];
-
-const testCompletionData = [
-  { test: "Cognitive Skills", completed: 8450, inProgress: 550 },
-  { test: "Technical Aptitude", completed: 7820, inProgress: 1180 },
-  { test: "Problem Solving", completed: 8125, inProgress: 875 },
-  { test: "Entrepreneurship", completed: 2750, inProgress: 250 },
-];
-
-const pathwayProgressData = [
-  { subject: "Digital Literacy", value: 85 },
-  { subject: "Financial Management", value: 72 },
-  { subject: "Business Planning", value: 68 },
-  { subject: "Marketing Skills", value: 75 },
-  { subject: "Leadership", value: 78 },
-  { subject: "Technical Skills", value: 81 },
-];
-
-const monthlyActivityData = [
-  { month: "Aug", logins: 6250, testsCompleted: 3850, chatbotSessions: 0 },
-  { month: "Sep", logins: 7340, testsCompleted: 5230, chatbotSessions: 0 },
-  { month: "Oct", logins: 8125, testsCompleted: 6750, chatbotSessions: 0 },
-  { month: "Nov", logins: 8650, testsCompleted: 7425, chatbotSessions: 1250 },
-  { month: "Dec", logins: 8920, testsCompleted: 8125, chatbotSessions: 2340 },
-  { month: "Jan", logins: 9150, testsCompleted: 8550, chatbotSessions: 3125 },
-];
-
-const engagementRateData = [
-  { day: "Mon", rate: 78 },
-  { day: "Tue", rate: 82 },
-  { day: "Wed", rate: 85 },
-  { day: "Thu", rate: 88 },
-  { day: "Fri", rate: 84 },
-  { day: "Sat", rate: 65 },
-  { day: "Sun", rate: 58 },
-];
+interface SocioeconomicData {
+  avg_household_size?: number;
+  median_income?: number | string;
+  land_ownership_pct?: number;
+  livestock_ownership_pct?: number;
+  household_income?: any[];
+  land_ownership?: any[];
+  livestock_ownership?: any[];
+  housing_quality?: any[];
+}
 
 export function Analytics() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [overview, setOverview] = useState<OverviewData>({});
+  const [demographics, setDemographics] = useState<DemographicsData>({});
+  const [engagement, setEngagement] = useState<EngagementData>({});
+  const [socioeconomic, setSocioeconomic] = useState<SocioeconomicData>({});
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const [overviewRes, demographicsRes, engagementRes, socioeconomicRes] =
+          await Promise.allSettled([
+            api.adminGetOverview(),
+            api.adminGetDemographics(),
+            api.adminGetEngagement(),
+            api.adminGetSocioeconomic(),
+          ]);
+
+        if (overviewRes.status === "fulfilled") setOverview(overviewRes.value ?? {});
+        if (demographicsRes.status === "fulfilled") setDemographics(demographicsRes.value ?? {});
+        if (engagementRes.status === "fulfilled") setEngagement(engagementRes.value ?? {});
+        if (socioeconomicRes.status === "fulfilled") setSocioeconomic(socioeconomicRes.value ?? {});
+
+        // If every single request rejected, surface an error
+        if (
+          overviewRes.status === "rejected" &&
+          demographicsRes.status === "rejected" &&
+          engagementRes.status === "rejected" &&
+          socioeconomicRes.status === "rejected"
+        ) {
+          setError("Failed to load analytics data. Please try again.");
+        }
+      } catch (err) {
+        setError("Failed to load analytics data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  // ------------------------------------------------------------------
+  // Map API response data to chart-friendly formats
+  // ------------------------------------------------------------------
+
+  // Overview charts
+  const phaseDistributionData = safeArray(overview.phase_distribution, (item) => ({
+    name: item.name ?? item.label ?? item.phase ?? "Unknown",
+    value: item.value ?? item.count ?? 0,
+    color: item.color ?? PIE_COLORS[(overview.phase_distribution?.indexOf(item) ?? 0) % PIE_COLORS.length],
+  }));
+
+  const overviewMonthlyActivityData = safeArray(overview.monthly_activity, (item) => ({
+    month: item.month ?? item.label ?? "",
+    logins: item.logins ?? item.login_count ?? 0,
+    testsCompleted: item.testsCompleted ?? item.tests_completed ?? item.test_count ?? 0,
+    chatbotSessions: item.chatbotSessions ?? item.chatbot_sessions ?? item.chatbot_count ?? 0,
+  }));
+
+  // Demographics charts
+  const ageDistributionData = safeArray(demographics.age_distribution, (item) => ({
+    ageGroup: item.ageGroup ?? item.age_group ?? item.range ?? item.label ?? "",
+    count: item.count ?? item.value ?? 0,
+  }));
+
+  const totalBeneficiariesForGender = demographics.total_beneficiaries ?? overview.total_beneficiaries ?? 1;
+
+  const genderDistributionData = safeArray(demographics.gender_distribution, (item) => ({
+    name: item.name ?? item.gender ?? item.label ?? "",
+    value: item.value ?? item.count ?? 0,
+    color: item.color ?? GENDER_COLORS[(demographics.gender_distribution?.indexOf(item) ?? 0) % GENDER_COLORS.length],
+  }));
+
+  const educationLevelData = safeArray(demographics.education_distribution, (item) => ({
+    level: item.level ?? item.education ?? item.label ?? item.name ?? "",
+    count: item.count ?? item.value ?? 0,
+  }));
+
+  const pathwayProgressData = safeArray(demographics.pathway_progress ?? demographics.district_distribution, (item) => ({
+    subject: item.subject ?? item.name ?? item.pathway ?? item.district ?? item.label ?? "",
+    value: item.value ?? item.percentage ?? item.progress ?? item.count ?? 0,
+  }));
+
+  // Engagement charts
+  const chatbotUsageData = safeArray(engagement.chatbot_usage, (item) => ({
+    week: item.week ?? item.label ?? item.period ?? "",
+    sessions: item.sessions ?? item.count ?? item.value ?? 0,
+  }));
+
+  const testCompletionData = safeArray(engagement.test_completion, (item) => ({
+    test: item.test ?? item.name ?? item.label ?? "",
+    completed: item.completed ?? item.complete_count ?? 0,
+    inProgress: item.inProgress ?? item.in_progress ?? item.in_progress_count ?? 0,
+  }));
+
+  const engagementRateData = safeArray(engagement.engagement_rate, (item) => ({
+    day: item.day ?? item.label ?? "",
+    rate: item.rate ?? item.value ?? item.percentage ?? 0,
+  }));
+
+  const engagementMonthlyActivityData = safeArray(engagement.monthly_activity, (item) => ({
+    month: item.month ?? item.label ?? "",
+    logins: item.logins ?? item.login_count ?? 0,
+    testsCompleted: item.testsCompleted ?? item.tests_completed ?? item.test_count ?? 0,
+    chatbotSessions: item.chatbotSessions ?? item.chatbot_sessions ?? item.chatbot_count ?? 0,
+  }));
+
+  // Use whichever monthly activity source is available (prefer engagement, fall back to overview)
+  const monthlyActivityData =
+    engagementMonthlyActivityData.length > 0
+      ? engagementMonthlyActivityData
+      : overviewMonthlyActivityData;
+
+  // Socioeconomic charts
+  const householdIncomeData = safeArray(socioeconomic.household_income, (item) => ({
+    range: item.range ?? item.label ?? item.name ?? item.bracket ?? "",
+    count: item.count ?? item.value ?? 0,
+  }));
+
+  const landOwnershipData = safeArray(socioeconomic.land_ownership, (item) => ({
+    category: item.category ?? item.label ?? item.name ?? item.size ?? "",
+    value: item.value ?? item.count ?? 0,
+    color: item.color ?? PIE_COLORS[(socioeconomic.land_ownership?.indexOf(item) ?? 0) % PIE_COLORS.length],
+  }));
+
+  const livestockOwnershipData = safeArray(socioeconomic.livestock_ownership, (item) => ({
+    category: item.category ?? item.label ?? item.name ?? item.type ?? "",
+    owners: item.owners ?? item.count ?? item.value ?? 0,
+    percentage: item.percentage ?? item.pct ?? 0,
+  }));
+
+  const housingQualityData = safeArray(socioeconomic.housing_quality, (item) => ({
+    quality: item.quality ?? item.label ?? item.name ?? item.level ?? "",
+    count: item.count ?? item.value ?? 0,
+  }));
+
+  // ------------------------------------------------------------------
+  // Loading state
+  // ------------------------------------------------------------------
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <Link to="/admin">
+            <Button variant="ghost" className="mb-6">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+          <div className="flex items-center justify-center h-[60vh]">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
+              <p className="text-muted-foreground text-lg">Loading analytics data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ------------------------------------------------------------------
+  // Error state (only shown when all endpoints failed)
+  // ------------------------------------------------------------------
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <Link to="/admin">
+            <Button variant="ghost" className="mb-6">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+          <div className="flex items-center justify-center h-[60vh]">
+            <div className="flex flex-col items-center gap-4">
+              <p className="text-destructive text-lg">{error}</p>
+              <Button onClick={() => window.location.reload()}>Retry</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ------------------------------------------------------------------
+  // Main render
+  // ------------------------------------------------------------------
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -144,7 +304,9 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-4xl font-bold text-primary">12,000</div>
+                  <div className="text-4xl font-bold text-primary">
+                    {fmt(overview.total_beneficiaries)}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-2">All phases combined</p>
                 </CardContent>
               </Card>
@@ -157,7 +319,9 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-4xl font-bold text-primary">69.4%</div>
+                  <div className="text-4xl font-bold text-primary">
+                    {fmtPct(overview.completion_rate)}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-2">Phase 1 completion</p>
                 </CardContent>
               </Card>
@@ -170,7 +334,9 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-4xl font-bold text-primary">76.2</div>
+                  <div className="text-4xl font-bold text-primary">
+                    {overview.avg_eligibility != null ? overview.avg_eligibility : "--"}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-2">Out of 100</p>
                 </CardContent>
               </Card>
@@ -183,7 +349,9 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-4xl font-bold text-primary">13,320</div>
+                  <div className="text-4xl font-bold text-primary">
+                    {fmt(overview.chatbot_sessions)}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-2">Phase 2 total</p>
                 </CardContent>
               </Card>
@@ -232,7 +400,7 @@ export function Analytics() {
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={monthlyActivityData}>
+                    <LineChart data={overviewMonthlyActivityData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
@@ -263,7 +431,9 @@ export function Analytics() {
                   <CardTitle className="text-sm">Total Beneficiaries</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">12,000</div>
+                  <div className="text-3xl font-bold">
+                    {fmt(demographics.total_beneficiaries ?? overview.total_beneficiaries)}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">Across all programs</p>
                 </CardContent>
               </Card>
@@ -273,8 +443,14 @@ export function Analytics() {
                   <CardTitle className="text-sm">Female Beneficiaries</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-primary">53.8%</div>
-                  <p className="text-xs text-muted-foreground mt-1">6,450 women enrolled</p>
+                  <div className="text-3xl font-bold text-primary">
+                    {fmtPct(demographics.female_percentage)}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {demographics.female_count != null
+                      ? `${fmt(demographics.female_count)} women enrolled`
+                      : "Women enrolled"}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -283,7 +459,9 @@ export function Analytics() {
                   <CardTitle className="text-sm">Avg. Age</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-primary">26.4</div>
+                  <div className="text-3xl font-bold text-primary">
+                    {demographics.avg_age != null ? demographics.avg_age : "--"}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">Years old</p>
                 </CardContent>
               </Card>
@@ -328,7 +506,10 @@ export function Analytics() {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={(entry) => `${entry.name}: ${entry.value} (${((entry.value/12000)*100).toFixed(1)}%)`}
+                        label={(entry) => {
+                          const total = totalBeneficiariesForGender;
+                          return `${entry.name}: ${entry.value} (${((entry.value / total) * 100).toFixed(1)}%)`;
+                        }}
                         outerRadius={100}
                         fill="#8884d8"
                         dataKey="value"
@@ -405,7 +586,9 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-primary">5.2</div>
+                  <div className="text-3xl font-bold text-primary">
+                    {socioeconomic.avg_household_size != null ? socioeconomic.avg_household_size : "--"}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">Members per household</p>
                 </CardContent>
               </Card>
@@ -418,7 +601,9 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-primary">95k</div>
+                  <div className="text-3xl font-bold text-primary">
+                    {socioeconomic.median_income != null ? socioeconomic.median_income : "--"}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">RWF per month</p>
                 </CardContent>
               </Card>
@@ -428,7 +613,9 @@ export function Analytics() {
                   <CardTitle className="text-sm">Land Ownership</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-primary">76.3%</div>
+                  <div className="text-3xl font-bold text-primary">
+                    {fmtPct(socioeconomic.land_ownership_pct)}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">Own some land</p>
                 </CardContent>
               </Card>
@@ -438,7 +625,9 @@ export function Analytics() {
                   <CardTitle className="text-sm">Livestock Owners</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-primary">72.6%</div>
+                  <div className="text-3xl font-bold text-primary">
+                    {fmtPct(socioeconomic.livestock_ownership_pct)}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">Own livestock</p>
                 </CardContent>
               </Card>
@@ -563,8 +752,14 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-primary">7,245</div>
-                  <p className="text-xs text-muted-foreground mt-1">60.4% of total</p>
+                  <div className="text-3xl font-bold text-primary">
+                    {fmt(engagement.daily_active_users)}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {engagement.daily_active_pct != null
+                      ? `${engagement.daily_active_pct}% of total`
+                      : "Of total"}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -576,7 +771,9 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-primary">4.4</div>
+                  <div className="text-3xl font-bold text-primary">
+                    {engagement.avg_chatbot_sessions != null ? engagement.avg_chatbot_sessions : "--"}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">Per Phase 2 user</p>
                 </CardContent>
               </Card>
@@ -589,7 +786,9 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-primary">91.2%</div>
+                  <div className="text-3xl font-bold text-primary">
+                    {fmtPct(engagement.test_completion_pct)}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">All tests completed</p>
                 </CardContent>
               </Card>
@@ -602,7 +801,9 @@ export function Analytics() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-primary">79.8%</div>
+                  <div className="text-3xl font-bold text-primary">
+                    {fmtPct(engagement.weekly_engagement_pct)}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">Average rate</p>
                 </CardContent>
               </Card>

@@ -1,182 +1,164 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table";
-import { ArrowLeft, UserCheck, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, UserCheck, Loader2, Calculator, Play } from "lucide-react";
 import { Input } from "@/app/components/ui/input";
 import { Badge } from "@/app/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/app/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { ScrollArea } from "@/app/components/ui/scroll-area";
+import { api } from "@/app/lib/api";
 
-// Mock data for Phase 1 beneficiaries with eligibility scores
-const allBeneficiaries = [
-  { 
-    id: "MVP001", 
-    name: "Jean Paul Uwimana", 
-    age: 24, 
-    gender: "Male", 
-    email: "jean.uwimana@example.com", 
-    eligibilityScore: 85,
-    skillCraftScore: 85,
-    pathwayCompletion: 92,
-    offlineTraining: 78
-  },
-  { 
-    id: "MVP002", 
-    name: "Marie Claire Mukamana", 
-    age: 28, 
-    gender: "Female", 
-    email: "marie.mukamana@example.com", 
-    eligibilityScore: 72,
-    skillCraftScore: 72,
-    pathwayCompletion: 68,
-    offlineTraining: 76
-  },
-  { 
-    id: "MVP003", 
-    name: "Eric Nshimiyimana", 
-    age: 19, 
-    gender: "Male", 
-    email: "eric.nshimiyimana@example.com", 
-    eligibilityScore: 91,
-    skillCraftScore: 91,
-    pathwayCompletion: 95,
-    offlineTraining: 87
-  },
-  { 
-    id: "MVP004", 
-    name: "Grace Uwera", 
-    age: 31, 
-    gender: "Female", 
-    email: "grace.uwera@example.com", 
-    eligibilityScore: 68,
-    skillCraftScore: 68,
-    pathwayCompletion: 65,
-    offlineTraining: 71
-  },
-  { 
-    id: "MVP005", 
-    name: "Patrick Habimana", 
-    age: 22, 
-    gender: "Male", 
-    email: "patrick.habimana@example.com", 
-    eligibilityScore: 78,
-    skillCraftScore: 78,
-    pathwayCompletion: 82,
-    offlineTraining: 74
-  },
-  { 
-    id: "MVP006", 
-    name: "Aline Umutoni", 
-    age: 26, 
-    gender: "Female", 
-    email: "aline.umutoni@example.com", 
-    eligibilityScore: 88,
-    skillCraftScore: 88,
-    pathwayCompletion: 90,
-    offlineTraining: 86
-  },
-  { 
-    id: "MVP007", 
-    name: "Emmanuel Nkusi", 
-    age: 20, 
-    gender: "Male", 
-    email: "emmanuel.nkusi@example.com", 
-    eligibilityScore: 95,
-    skillCraftScore: 95,
-    pathwayCompletion: 98,
-    offlineTraining: 92
-  },
-  { 
-    id: "MVP008", 
-    name: "Sylvie Nyirahabimana", 
-    age: 29, 
-    gender: "Female", 
-    email: "sylvie.nyirahabimana@example.com", 
-    eligibilityScore: 64,
-    skillCraftScore: 64,
-    pathwayCompletion: 60,
-    offlineTraining: 68
-  },
-  { 
-    id: "MVP009", 
-    name: "Didier Mugisha", 
-    age: 25, 
-    gender: "Male", 
-    email: "didier.mugisha@example.com", 
-    eligibilityScore: 82,
-    skillCraftScore: 82,
-    pathwayCompletion: 85,
-    offlineTraining: 79
-  },
-  { 
-    id: "MVP010", 
-    name: "Claudine Umulisa", 
-    age: 27, 
-    gender: "Female", 
-    email: "claudine.umulisa@example.com", 
-    eligibilityScore: 76,
-    skillCraftScore: 76,
-    pathwayCompletion: 73,
-    offlineTraining: 79
-  },
-  { 
-    id: "MVP011", 
-    name: "Samuel Ntambara", 
-    age: 23, 
-    gender: "Male", 
-    email: "samuel.ntambara@example.com", 
-    eligibilityScore: 89,
-    skillCraftScore: 89,
-    pathwayCompletion: 91,
-    offlineTraining: 87
-  },
-  { 
-    id: "MVP012", 
-    name: "Jeanne Mukeshimana", 
-    age: 30, 
-    gender: "Female", 
-    email: "jeanne.mukeshimana@example.com", 
-    eligibilityScore: 71,
-    skillCraftScore: 71,
-    pathwayCompletion: 69,
-    offlineTraining: 73
-  },
-];
+interface Beneficiary {
+  id: string;
+  name: string;
+  age: number;
+  gender: string;
+  email: string;
+  eligibility_score: number | null;
+  skillcraft_score: number | null;
+  pathways_completion_rate: number | null;
+  selection_status: string | null;
+}
+
+function BeneficiaryTable({ beneficiaries, onRowClick }: { beneficiaries: Beneficiary[]; onRowClick: (b: Beneficiary) => void }) {
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Age</TableHead>
+            <TableHead>Gender</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead className="text-center">Eligibility Score</TableHead>
+            <TableHead className="text-center">Status</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {beneficiaries.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                No beneficiaries found
+              </TableCell>
+            </TableRow>
+          ) : (
+            beneficiaries.map((beneficiary) => (
+              <TableRow
+                key={beneficiary.id}
+                onClick={() => onRowClick(beneficiary)}
+                className="cursor-pointer hover:bg-gray-100"
+              >
+                <TableCell className="font-medium">{beneficiary.name}</TableCell>
+                <TableCell>{beneficiary.age}</TableCell>
+                <TableCell>{beneficiary.gender}</TableCell>
+                <TableCell className="text-muted-foreground">{beneficiary.email}</TableCell>
+                <TableCell className="text-center">
+                  {beneficiary.eligibility_score != null ? (
+                    <>
+                      <span className="font-semibold text-foreground">{beneficiary.eligibility_score}</span>
+                      <span className="text-xs text-muted-foreground">/100</span>
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground">--</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-center">
+                  {beneficiary.selection_status ? (
+                    <Badge variant={beneficiary.selection_status === "selected" || beneficiary.selection_status === "phase1_selected" ? "default" : "secondary"}>
+                      {beneficiary.selection_status}
+                    </Badge>
+                  ) : (
+                    <span className="text-muted-foreground">--</span>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
 
 export function Phase1Selection() {
+  const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedBeneficiaryIds, setSelectedBeneficiaryIds] = useState<Set<string>>(new Set());
-  const [selectedBeneficiary, setSelectedBeneficiary] = useState<typeof allBeneficiaries[0] | null>(null);
+  const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
-  // Sort beneficiaries by eligibilityScore descending
-  const sortedBeneficiaries = [...allBeneficiaries].sort((a, b) => {
-    return b.eligibilityScore - a.eligibilityScore;
-  });
+  const [selectionCount, setSelectionCount] = useState(9000);
+  const [calculatingScores, setCalculatingScores] = useState(false);
+  const [runningSelection, setRunningSelection] = useState(false);
 
-  // Filtered beneficiaries based on search
-  const filteredBeneficiaries = sortedBeneficiaries.filter(beneficiary =>
-    beneficiary.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    beneficiary.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    beneficiary.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const toggleSelection = (beneficiaryId: string, event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent row click when clicking the button
-    setSelectedBeneficiaryIds(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(beneficiaryId)) {
-        newSet.delete(beneficiaryId);
-      } else {
-        newSet.add(beneficiaryId);
-      }
-      return newSet;
-    });
+  const loadBeneficiaries = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await api.adminListBeneficiaries({ page_size: 10000 });
+      setBeneficiaries(data.items || data.beneficiaries || []);
+    } catch (err: any) {
+      setError(err.message || "Failed to load beneficiaries");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRowClick = (beneficiary: typeof allBeneficiaries[0]) => {
+  useEffect(() => {
+    loadBeneficiaries();
+  }, []);
+
+  const handleCalculateScores = async () => {
+    try {
+      setCalculatingScores(true);
+      setError(null);
+      await api.adminCalculateScores();
+      await loadBeneficiaries();
+    } catch (err: any) {
+      setError(err.message || "Failed to calculate scores");
+    } finally {
+      setCalculatingScores(false);
+    }
+  };
+
+  const handleRunSelection = async () => {
+    try {
+      setRunningSelection(true);
+      setError(null);
+      await api.adminRunPhase1Selection(selectionCount);
+      await loadBeneficiaries();
+    } catch (err: any) {
+      setError(err.message || "Failed to run Phase 1 selection");
+    } finally {
+      setRunningSelection(false);
+    }
+  };
+
+  // Sort beneficiaries by eligibility_score descending
+  const sortedBeneficiaries = [...beneficiaries].sort((a, b) => {
+    return (b.eligibility_score ?? 0) - (a.eligibility_score ?? 0);
+  });
+
+  // Detect if selection has been run
+  const selectionHasRun = beneficiaries.some(b => b.selection_status === "selected" || b.selection_status === "phase1_selected");
+  const selectedBens = sortedBeneficiaries.filter(b => b.selection_status === "selected" || b.selection_status === "phase1_selected");
+  const unselectedBens = sortedBeneficiaries.filter(b => b.selection_status !== "selected" && b.selection_status !== "phase1_selected");
+
+  // Filtered beneficiaries based on search
+  const filteredBeneficiaries = sortedBeneficiaries.filter(beneficiary => {
+    const fullName = (beneficiary.name || "").toLowerCase();
+    const query = searchQuery.toLowerCase();
+    return (
+      fullName.includes(query) ||
+      (beneficiary.email || "").toLowerCase().includes(query) ||
+      beneficiary.id.toString().toLowerCase().includes(query)
+    );
+  });
+
+  const handleRowClick = (beneficiary: Beneficiary) => {
     setSelectedBeneficiary(beneficiary);
     setIsDialogOpen(true);
   };
@@ -200,17 +182,61 @@ export function Phase1Selection() {
               <div>
                 <CardTitle className="text-2xl">Phase 1 Selection</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Total Beneficiaries: {allBeneficiaries.length} | Sorted by Eligibility Score (highest first)
+                  Total Beneficiaries: {beneficiaries.length} | Sorted by Eligibility Score (highest first)
                 </p>
               </div>
             </div>
-            {selectedBeneficiaryIds.size > 0 && (
+            {selectionHasRun && (
               <Badge variant="outline" className="border-primary text-primary ml-auto">
-                {selectedBeneficiaryIds.size} Selected
+                {selectedBens.length} Selected
               </Badge>
             )}
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Error Banner */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-4">
+              <Button
+                onClick={handleCalculateScores}
+                disabled={calculatingScores || loading}
+                variant="outline"
+              >
+                {calculatingScores ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Calculator className="w-4 h-4 mr-2" />
+                )}
+                {calculatingScores ? "Calculating..." : "Calculate Scores"}
+              </Button>
+
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  value={selectionCount}
+                  onChange={(e) => setSelectionCount(Number(e.target.value))}
+                  className="w-28"
+                  min={1}
+                />
+                <Button
+                  onClick={handleRunSelection}
+                  disabled={runningSelection || loading}
+                >
+                  {runningSelection ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Play className="w-4 h-4 mr-2" />
+                  )}
+                  {runningSelection ? "Running..." : "Run Phase 1 Selection"}
+                </Button>
+              </div>
+            </div>
+
             {/* Search */}
             <Input
               type="text"
@@ -220,70 +246,49 @@ export function Phase1Selection() {
               className="max-w-md"
             />
 
-            {/* Beneficiaries Table */}
-            <div className="border rounded-lg overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Age</TableHead>
-                    <TableHead>Gender</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead className="text-center">Eligibility Score</TableHead>
-                    <TableHead className="text-center">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredBeneficiaries.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                        No beneficiaries found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredBeneficiaries.map((beneficiary) => {
-                      const isSelected = selectedBeneficiaryIds.has(beneficiary.id);
-                      return (
-                        <TableRow 
-                          key={beneficiary.id}
-                          onClick={() => handleRowClick(beneficiary)}
-                          className={`cursor-pointer hover:bg-gray-100 ${!isSelected ? 'bg-gray-50' : 'bg-white'}`}
-                        >
-                          <TableCell className="font-medium">{beneficiary.name}</TableCell>
-                          <TableCell>{beneficiary.age}</TableCell>
-                          <TableCell>{beneficiary.gender}</TableCell>
-                          <TableCell className="text-muted-foreground">{beneficiary.email}</TableCell>
-                          <TableCell className="text-center">
-                            <span className="font-semibold text-foreground">{beneficiary.eligibilityScore}</span>
-                            <span className="text-xs text-muted-foreground">/100</span>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              size="sm"
-                              variant={isSelected ? "outline" : "default"}
-                              onClick={(e) => toggleSelection(beneficiary.id, e)}
-                              className={isSelected ? "border-red-500 text-red-600 hover:bg-red-50" : "bg-primary hover:bg-primary/90"}
-                            >
-                              {isSelected ? (
-                                <>
-                                  <XCircle className="w-4 h-4 mr-1" />
-                                  Remove
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircle2 className="w-4 h-4 mr-1" />
-                                  Select
-                                </>
-                              )}
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            {/* Loading State */}
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <span className="ml-3 text-muted-foreground">Loading beneficiaries...</span>
+              </div>
+            ) : selectionHasRun ? (
+              /* Tabbed view: Selected / Unselected */
+              <Tabs defaultValue="selected">
+                <TabsList>
+                  <TabsTrigger value="selected">
+                    Selected ({selectedBens.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="unselected">
+                    Unselected ({unselectedBens.length})
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="selected">
+                  <BeneficiaryTable
+                    beneficiaries={selectedBens.filter(b => {
+                      const q = searchQuery.toLowerCase();
+                      return !q || b.name.toLowerCase().includes(q) || (b.email || "").toLowerCase().includes(q);
+                    })}
+                    onRowClick={handleRowClick}
+                  />
+                </TabsContent>
+                <TabsContent value="unselected">
+                  <BeneficiaryTable
+                    beneficiaries={unselectedBens.filter(b => {
+                      const q = searchQuery.toLowerCase();
+                      return !q || b.name.toLowerCase().includes(q) || (b.email || "").toLowerCase().includes(q);
+                    })}
+                    onRowClick={handleRowClick}
+                  />
+                </TabsContent>
+              </Tabs>
+            ) : (
+              /* Single table before selection */
+              <BeneficiaryTable
+                beneficiaries={filteredBeneficiaries}
+                onRowClick={handleRowClick}
+              />
+            )}
           </CardContent>
         </Card>
 
@@ -295,7 +300,9 @@ export function Phase1Selection() {
               <DialogDescription>
                 {selectedBeneficiary && (
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="font-semibold text-foreground">{selectedBeneficiary.name}</span>
+                    <span className="font-semibold text-foreground">
+                      {selectedBeneficiary.name}
+                    </span>
                     <span className="text-muted-foreground">•</span>
                     <span className="text-muted-foreground">{selectedBeneficiary.id}</span>
                   </div>
@@ -309,7 +316,9 @@ export function Phase1Selection() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h4 className="text-sm font-semibold text-muted-foreground mb-1">Full Name</h4>
-                      <p className="text-foreground">{selectedBeneficiary.name}</p>
+                      <p className="text-foreground">
+                        {selectedBeneficiary.name}
+                      </p>
                     </div>
                     <div>
                       <h4 className="text-sm font-semibold text-muted-foreground mb-1">ID</h4>
@@ -337,12 +346,14 @@ export function Phase1Selection() {
                       <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-semibold text-foreground">Eligibility Score</span>
-                          <span className="text-2xl font-bold text-primary">{selectedBeneficiary.eligibilityScore}/100</span>
+                          <span className="text-2xl font-bold text-primary">
+                            {selectedBeneficiary.eligibility_score ?? "--"}/100
+                          </span>
                         </div>
                         <div className="w-full bg-neutral-200 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-primary h-2 rounded-full transition-all"
-                            style={{ width: `${selectedBeneficiary.eligibilityScore}%` }}
+                            style={{ width: `${selectedBeneficiary.eligibility_score ?? 0}%` }}
                           />
                         </div>
                       </div>
@@ -351,12 +362,14 @@ export function Phase1Selection() {
                       <div className="p-4 bg-neutral-50 border border-border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-semibold text-neutral-700">SkillCraft Score</span>
-                          <span className="text-xl font-bold text-foreground">{selectedBeneficiary.skillCraftScore}/100</span>
+                          <span className="text-xl font-bold text-foreground">
+                            {selectedBeneficiary.skillcraft_score ?? "--"}/100
+                          </span>
                         </div>
                         <div className="w-full bg-neutral-200 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-neutral-600 h-2 rounded-full transition-all"
-                            style={{ width: `${selectedBeneficiary.skillCraftScore}%` }}
+                            style={{ width: `${selectedBeneficiary.skillcraft_score ?? 0}%` }}
                           />
                         </div>
                       </div>
@@ -365,27 +378,33 @@ export function Phase1Selection() {
                       <div className="p-4 bg-neutral-50 border border-border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-semibold text-neutral-700">Pathway Completion</span>
-                          <span className="text-xl font-bold text-foreground">{selectedBeneficiary.pathwayCompletion}%</span>
+                          <span className="text-xl font-bold text-foreground">
+                            {selectedBeneficiary.pathways_completion_rate ?? "--"}%
+                          </span>
                         </div>
                         <div className="w-full bg-neutral-200 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-neutral-600 h-2 rounded-full transition-all"
-                            style={{ width: `${selectedBeneficiary.pathwayCompletion}%` }}
+                            style={{ width: `${selectedBeneficiary.pathways_completion_rate ?? 0}%` }}
                           />
                         </div>
                       </div>
 
-                      {/* Offline Training */}
+                      {/* Selection Status */}
                       <div className="p-4 bg-neutral-50 border border-border rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-neutral-700">Offline Training Completion</span>
-                          <span className="text-xl font-bold text-foreground">{selectedBeneficiary.offlineTraining}%</span>
-                        </div>
-                        <div className="w-full bg-neutral-200 rounded-full h-2">
-                          <div 
-                            className="bg-neutral-600 h-2 rounded-full transition-all"
-                            style={{ width: `${selectedBeneficiary.offlineTraining}%` }}
-                          />
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-neutral-700">Selection Status</span>
+                          <span className="text-xl font-bold text-foreground">
+                            {selectedBeneficiary.selection_status ? (
+                              <Badge
+                                variant={selectedBeneficiary.selection_status === "selected" ? "default" : "secondary"}
+                              >
+                                {selectedBeneficiary.selection_status}
+                              </Badge>
+                            ) : (
+                              "--"
+                            )}
+                          </span>
                         </div>
                       </div>
                     </div>

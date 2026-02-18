@@ -10,7 +10,6 @@ import { EligibilityScore } from "@/app/pages/beneficiary/EligibilityScore";
 import { ChatbotPage } from "@/app/pages/beneficiary/ChatbotPage";
 import { ResultReport } from "@/app/pages/beneficiary/ResultReport";
 import { BusinessDevelopment } from "@/app/pages/beneficiary/BusinessDevelopment";
-import { BusinessLearning } from "@/app/pages/beneficiary/BusinessLearning";
 import { Phase1Survey } from "@/app/pages/beneficiary/Phase1Survey";
 import { EmploymentSurvey } from "@/app/pages/beneficiary/EmploymentSurvey";
 import { EntrepreneurshipSurvey } from "@/app/pages/beneficiary/EntrepreneurshipSurvey";
@@ -31,6 +30,7 @@ import { EntrepreneurProgress } from "@/app/pages/admin/EntrepreneurProgress";
 import { Phase1Dashboard } from "@/app/pages/admin/Phase1Dashboard";
 import { Phase2Dashboard } from "@/app/pages/admin/Phase2Dashboard";
 import { Phase1Selection } from "@/app/pages/admin/Phase1Selection";
+import { SurveyResults } from "@/app/pages/admin/SurveyResults";
 import { NotFound } from "@/app/pages/NotFound";
 
 export const router = createBrowserRouter([
@@ -51,7 +51,6 @@ export const router = createBrowserRouter([
           { path: "chatbot", Component: ChatbotPage },
           { path: "results", Component: ResultReport },
           { path: "business-development", Component: BusinessDevelopment },
-          { path: "business-learning", Component: BusinessLearning },
           { path: "phase1-survey", Component: Phase1Survey },
           { path: "employment-survey", Component: EmploymentSurvey },
           { path: "entrepreneurship-survey", Component: EntrepreneurshipSurvey },
@@ -77,6 +76,7 @@ export const router = createBrowserRouter([
           { path: "chatbot-analytics", Component: ChatbotAnalytics },
           { path: "analytics", Component: Analytics },
           { path: "phase1-selection", Component: Phase1Selection },
+          { path: "surveys", Component: SurveyResults },
         ],
       },
       { path: "*", Component: NotFound },

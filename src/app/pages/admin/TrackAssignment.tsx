@@ -1,202 +1,132 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Button } from "@/app/components/ui/button";
-import { Award, Building2, Briefcase, CheckCircle2, XCircle, AlertCircle, ArrowRightLeft } from "lucide-react";
+import { Award, Building2, Briefcase, CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
 import { Badge } from "@/app/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 import { Progress } from "@/app/components/ui/progress";
-import { useState } from "react";
+import { api } from "@/app/lib/api";
+
+interface Candidate {
+  id: string;
+  name: string;
+  skillcraft_score: number | null;
+  pathways_completion_rate: number | null;
+  offline_attendance: number;
+  wants_entrepreneurship: boolean;
+}
 
 export function TrackAssignment() {
   const [selectedCandidate, setSelectedCandidate] = useState<string | null>(null);
-  
-  // Information completion percentage (change this to test locked/unlocked state)
-  const informationCompletion = 100; // Set to < 100 to see locked state
+  const [entrepreneurCandidates, setEntrepreneurCandidates] = useState<Candidate[]>([]);
+  const [employmentCandidates, setEmploymentCandidates] = useState<Candidate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock candidate data
-  const entrepreneurCandidates = [
-    {
-      id: "ENT001",
-      name: "Jean Baptiste Mugisha",
-      skillcraftScore: 85,
-      pathwaysCompletionRate: 92,
-      offlineTrainingCompletionRate: 100,
-      businessConceptStatus: "pass"
-    },
-    {
-      id: "ENT002",
-      name: "Marie Claire Uwase",
-      skillcraftScore: 78,
-      pathwaysCompletionRate: 88,
-      offlineTrainingCompletionRate: 95,
-      businessConceptStatus: "pass"
-    },
-    {
-      id: "ENT003",
-      name: "Patrick Niyonzima",
-      skillcraftScore: 92,
-      pathwaysCompletionRate: 96,
-      offlineTrainingCompletionRate: 100,
-      businessConceptStatus: "pass"
-    },
-    {
-      id: "ENT004",
-      name: "Grace Mukamana",
-      skillcraftScore: 74,
-      pathwaysCompletionRate: 85,
-      offlineTrainingCompletionRate: 90,
-      businessConceptStatus: "fail"
-    },
-    {
-      id: "ENT005",
-      name: "Emmanuel Habimana",
-      skillcraftScore: 88,
-      pathwaysCompletionRate: 94,
-      offlineTrainingCompletionRate: 98,
-      businessConceptStatus: "pass"
-    },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [entRes, empRes] = await Promise.all([
+          api.adminListBeneficiaries({ track: "entrepreneurship", page_size: "100" }),
+          api.adminListBeneficiaries({ track: "employment", page_size: "100" }),
+        ]);
+        setEntrepreneurCandidates(entRes.items || []);
+        setEmploymentCandidates(empRes.items || []);
+      } catch (err: any) {
+        setError(err.message || "Failed to load candidates");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  const employmentCandidates = [
-    {
-      id: "EMP001",
-      name: "Alice Uwineza",
-      skillcraftScore: 82,
-      pathwaysCompletionRate: 90,
-      offlineTrainingCompletionRate: 95,
-      businessConceptStatus: "fail"
-    },
-    {
-      id: "EMP002",
-      name: "David Kalisa",
-      skillcraftScore: 76,
-      pathwaysCompletionRate: 86,
-      offlineTrainingCompletionRate: 92,
-      businessConceptStatus: "fail"
-    },
-    {
-      id: "EMP003",
-      name: "Sarah Ingabire",
-      skillcraftScore: 80,
-      pathwaysCompletionRate: 88,
-      offlineTrainingCompletionRate: 90,
-      businessConceptStatus: "fail"
-    },
-    {
-      id: "EMP004",
-      name: "James Nkusi",
-      skillcraftScore: 85,
-      pathwaysCompletionRate: 91,
-      offlineTrainingCompletionRate: 96,
-      businessConceptStatus: "fail"
-    },
-    {
-      id: "EMP005",
-      name: "Linda Mukamazimpaka",
-      skillcraftScore: 79,
-      pathwaysCompletionRate: 87,
-      offlineTrainingCompletionRate: 93,
-      businessConceptStatus: "fail"
-    },
-  ];
-
-  const handleMoveToEntrepreneurTrack = (candidateId: string) => {
-    console.log("Moving candidate to entrepreneur track:", candidateId);
-  };
-
-  const handleMoveToEmploymentTrack = (candidateId: string) => {
-    console.log("Moving candidate to employment track:", candidateId);
-  };
-
-  const renderCandidateDetails = (candidate: any) => {
+  const renderCandidateDetails = (candidate: Candidate | undefined) => {
     if (!candidate) return null;
 
     return (
       <div className="space-y-4">
         <div className="pb-4 border-b border-border">
           <h3 className="text-xl font-bold text-foreground">{candidate.name}</h3>
-          <p className="text-sm text-muted-foreground">ID: {candidate.id}</p>
+          <p className="text-sm text-muted-foreground">ID: {candidate.id.substring(0, 8)}...</p>
         </div>
 
         {/* SkillCraft Score */}
         <div className="p-4 bg-neutral-50 rounded-lg border border-border">
           <div className="flex items-center justify-between mb-2">
             <span className="font-semibold text-neutral-700">SkillCraft Score</span>
-            <span className="text-2xl font-bold text-foreground">{candidate.skillcraftScore}/100</span>
+            <span className="text-2xl font-bold text-foreground">
+              {candidate.skillcraft_score != null ? `${candidate.skillcraft_score}/100` : "N/A"}
+            </span>
           </div>
-          <Progress value={candidate.skillcraftScore} className="h-2" />
+          <Progress value={candidate.skillcraft_score || 0} className="h-2" />
         </div>
 
         {/* Pathways Completion Rate */}
         <div className="p-4 bg-neutral-50 rounded-lg border border-border">
           <div className="flex items-center justify-between mb-2">
             <span className="font-semibold text-neutral-700">Pathways Completion Rate</span>
-            <span className="text-2xl font-bold text-foreground">{candidate.pathwaysCompletionRate}%</span>
+            <span className="text-2xl font-bold text-foreground">
+              {candidate.pathways_completion_rate != null ? `${candidate.pathways_completion_rate}%` : "N/A"}
+            </span>
           </div>
-          <Progress value={candidate.pathwaysCompletionRate} className="h-2" />
+          <Progress value={candidate.pathways_completion_rate || 0} className="h-2" />
         </div>
 
-        {/* Offline Training Completion Rate */}
+        {/* Offline Training Attendance */}
         <div className="p-4 bg-neutral-50 rounded-lg border border-border">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-neutral-700">Offline Training Completion Rate</span>
-            <span className="text-2xl font-bold text-foreground">{candidate.offlineTrainingCompletionRate}%</span>
+            <span className="font-semibold text-neutral-700">Offline Attendance</span>
+            <span className="text-2xl font-bold text-foreground">{candidate.offline_attendance}%</span>
           </div>
-          <Progress value={candidate.offlineTrainingCompletionRate} className="h-2" />
+          <Progress value={candidate.offline_attendance} className="h-2" />
         </div>
 
-        {/* Business Concept Status */}
+        {/* Business Interest */}
         <div className={`p-4 rounded-lg border ${
-          candidate.businessConceptStatus === "pass" 
-            ? "bg-primary/5 border-primary" 
+          candidate.wants_entrepreneurship
+            ? "bg-primary/5 border-primary"
             : "bg-red-50 border-red-500"
         }`}>
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-foreground">Business Concept</span>
+            <span className="font-semibold text-foreground">Business Interest</span>
             <div className="flex items-center gap-2">
-              {candidate.businessConceptStatus === "pass" ? (
+              {candidate.wants_entrepreneurship ? (
                 <>
                   <CheckCircle2 className="w-5 h-5 text-primary" />
-                  <span className="font-bold text-primary">PASS</span>
+                  <span className="font-bold text-primary">YES</span>
                 </>
               ) : (
                 <>
                   <XCircle className="w-5 h-5 text-red-500" />
-                  <span className="font-bold text-red-500">FAIL</span>
+                  <span className="font-bold text-red-500">NO</span>
                 </>
               )}
-            </div>
-          </div>
-        </div>
-
-        {/* Eligibility Summary */}
-        <div className={`p-4 rounded-lg border ${
-          candidate.businessConceptStatus === "pass" 
-            ? "bg-primary/10 border-primary" 
-            : "bg-red-50 border-red-500"
-        }`}>
-          <div className="flex items-start gap-3">
-            {candidate.businessConceptStatus === "pass" ? (
-              <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-            ) : (
-              <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
-            )}
-            <div>
-              <h4 className="font-semibold mb-1 text-foreground">
-                {candidate.businessConceptStatus === "pass" 
-                  ? "Eligible for Entrepreneur Track" 
-                  : "Not Eligible for Entrepreneur Track"}
-              </h4>
-              <p className="text-sm text-muted-foreground">
-                {candidate.businessConceptStatus === "pass" 
-                  ? "This candidate meets all criteria for the entrepreneurship track." 
-                  : "This candidate failed the business concept test and should be assigned to the employment track."}
-              </p>
             </div>
           </div>
         </div>
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <p>Failed to load candidates: {error}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 bg-background">
@@ -208,82 +138,49 @@ export function TrackAssignment() {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-foreground">Track Assignee View</h1>
-            <p className="text-muted-foreground">Assign Phase 2 beneficiaries to Employment or Entrepreneurship tracks</p>
+            <p className="text-muted-foreground">View Phase 2 beneficiaries in Employment or Entrepreneurship tracks</p>
           </div>
         </div>
         <Badge variant="outline" className="border-primary text-primary">Phase 2</Badge>
       </div>
 
-      {/* Information Completion Status */}
-      <Card className="mb-6 bg-white border-border">
-        <CardHeader>
-          <CardTitle className="text-foreground">Information Completion Status</CardTitle>
-          <CardDescription>All candidate information must be 100% complete before track assignment</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-foreground">Completion Progress</span>
-              <span className="text-2xl font-bold text-primary">{informationCompletion}%</span>
-            </div>
-            <Progress value={informationCompletion} className="h-3" />
-            
-            {informationCompletion < 100 ? (
-              <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-500 rounded-lg">
-                <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
+      {/* Track Tabs */}
+      <Tabs defaultValue="entrepreneur" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2 mb-6 bg-neutral-100">
+          <TabsTrigger value="entrepreneur" className="flex items-center gap-2 data-[state=active]:bg-white">
+            <Briefcase className="w-4 h-4" />
+            Entrepreneur ({entrepreneurCandidates.length})
+          </TabsTrigger>
+          <TabsTrigger value="employment" className="flex items-center gap-2 data-[state=active]:bg-white">
+            <Building2 className="w-4 h-4" />
+            Employment ({employmentCandidates.length})
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Entrepreneur Track Tab */}
+        <TabsContent value="entrepreneur">
+          <Card className="bg-white border-border">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <Briefcase className="w-6 h-6 text-primary" />
                 <div>
-                  <h4 className="font-semibold text-red-500 mb-1">Track Assignment Locked</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Complete all candidate information to unlock track assignment functionality.
-                  </p>
+                  <CardTitle className="text-foreground">Entrepreneur Track Candidates</CardTitle>
+                  <CardDescription>Beneficiaries assigned to the entrepreneurship track</CardDescription>
                 </div>
               </div>
-            ) : (
-              <div className="flex items-start gap-3 p-4 bg-primary/10 border border-primary rounded-lg">
-                <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-primary mb-1">Track Assignment Unlocked</h4>
-                  <p className="text-sm text-muted-foreground">
-                    All information is complete. You can now assign candidates to tracks.
-                  </p>
+            </CardHeader>
+            <CardContent>
+              {entrepreneurCandidates.length === 0 ? (
+                <div className="text-center py-12">
+                  <AlertCircle className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+                  <p className="text-muted-foreground">No candidates assigned to this track yet</p>
                 </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Track Assignment Tabs */}
-      {informationCompletion === 100 ? (
-        <Tabs defaultValue="entrepreneur" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6 bg-neutral-100">
-            <TabsTrigger value="entrepreneur" className="flex items-center gap-2 data-[state=active]:bg-white">
-              <Briefcase className="w-4 h-4" />
-              Entrepreneur Track
-            </TabsTrigger>
-            <TabsTrigger value="employment" className="flex items-center gap-2 data-[state=active]:bg-white">
-              <Building2 className="w-4 h-4" />
-              Employment Track
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Entrepreneur Track Tab */}
-          <TabsContent value="entrepreneur">
-            <Card className="bg-white border-border">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <Briefcase className="w-6 h-6 text-primary" />
-                  <div>
-                    <CardTitle className="text-foreground">Entrepreneur Track Candidates</CardTitle>
-                    <CardDescription>Review and manage candidates assigned to the entrepreneurship track</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
+              ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Left Side - Candidate List */}
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg mb-4 text-foreground">Candidates ({entrepreneurCandidates.length})</h3>
+                  <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                    <h3 className="font-semibold text-lg mb-4 text-foreground">
+                      Candidates ({entrepreneurCandidates.length})
+                    </h3>
                     {entrepreneurCandidates.map((candidate) => (
                       <div
                         key={candidate.id}
@@ -295,12 +192,13 @@ export function TrackAssignment() {
                         }`}
                       >
                         <p className="font-semibold text-foreground">{candidate.name}</p>
-                        <p className="text-sm text-muted-foreground">ID: {candidate.id}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Score: {candidate.skillcraft_score ?? "N/A"} | Pathways: {candidate.pathways_completion_rate ?? "N/A"}%
+                        </p>
                       </div>
                     ))}
                   </div>
 
-                  {/* Right Side - Candidate Details */}
                   <div className="border border-border rounded-lg p-6 bg-white min-h-[500px]">
                     {selectedCandidate ? (
                       renderCandidateDetails(
@@ -310,35 +208,41 @@ export function TrackAssignment() {
                       <div className="h-full flex items-center justify-center text-center">
                         <div>
                           <Award className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                          <p className="text-muted-foreground">
-                            Select a candidate to view their details
-                          </p>
+                          <p className="text-muted-foreground">Select a candidate to view their details</p>
                         </div>
                       </div>
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          {/* Employment Track Tab */}
-          <TabsContent value="employment">
-            <Card className="bg-white border-border">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <Building2 className="w-6 h-6 text-neutral-700" />
-                  <div>
-                    <CardTitle className="text-foreground">Employment Track Candidates</CardTitle>
-                    <CardDescription>Review and manage candidates assigned to the employment track</CardDescription>
-                  </div>
+        {/* Employment Track Tab */}
+        <TabsContent value="employment">
+          <Card className="bg-white border-border">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <Building2 className="w-6 h-6 text-neutral-700" />
+                <div>
+                  <CardTitle className="text-foreground">Employment Track Candidates</CardTitle>
+                  <CardDescription>Beneficiaries assigned to the employment track</CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {employmentCandidates.length === 0 ? (
+                <div className="text-center py-12">
+                  <AlertCircle className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+                  <p className="text-muted-foreground">No candidates assigned to this track yet</p>
+                </div>
+              ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Left Side - Candidate List */}
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg mb-4 text-foreground">Candidates ({employmentCandidates.length})</h3>
+                  <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                    <h3 className="font-semibold text-lg mb-4 text-foreground">
+                      Candidates ({employmentCandidates.length})
+                    </h3>
                     {employmentCandidates.map((candidate) => (
                       <div
                         key={candidate.id}
@@ -350,12 +254,13 @@ export function TrackAssignment() {
                         }`}
                       >
                         <p className="font-semibold text-foreground">{candidate.name}</p>
-                        <p className="text-sm text-muted-foreground">ID: {candidate.id}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Score: {candidate.skillcraft_score ?? "N/A"} | Pathways: {candidate.pathways_completion_rate ?? "N/A"}%
+                        </p>
                       </div>
                     ))}
                   </div>
 
-                  {/* Right Side - Candidate Details */}
                   <div className="border border-border rounded-lg p-6 bg-white min-h-[500px]">
                     {selectedCandidate ? (
                       renderCandidateDetails(
@@ -365,31 +270,17 @@ export function TrackAssignment() {
                       <div className="h-full flex items-center justify-center text-center">
                         <div>
                           <Award className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                          <p className="text-muted-foreground">
-                            Select a candidate to view their details
-                          </p>
+                          <p className="text-muted-foreground">Select a candidate to view their details</p>
                         </div>
                       </div>
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      ) : (
-        <Card className="bg-white border-border">
-          <CardContent className="py-12">
-            <div className="text-center">
-              <AlertCircle className="w-20 h-20 text-neutral-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2 text-foreground">Track Assignment Unavailable</h3>
-              <p className="text-muted-foreground">
-                Complete all candidate information to access track assignment functionality.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -1,50 +1,83 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { ArrowLeft, BarChart3, Building2, Briefcase } from "lucide-react";
+import { ArrowLeft, BarChart3, Building2, Briefcase, Loader2 } from "lucide-react";
 import { Badge } from "@/app/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { api } from "@/app/lib/api";
 
 export function Phase2Dashboard() {
-  // Employment Track Data
-  const employmentCompletionRates = [
-    { completionRange: "0-20%", users: 180 },
-    { completionRange: "21-40%", users: 360 },
-    { completionRange: "41-60%", users: 540 },
-    { completionRange: "61-80%", users: 450 },
-    { completionRange: "81-100%", users: 270 },
-  ];
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [chatbotData, setChatbotData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const employmentCoursesDistribution = [
-    { coursesCount: "1 course", users: 270 },
-    { coursesCount: "2 courses", users: 360 },
-    { coursesCount: "3 courses", users: 540 },
-    { coursesCount: "4 courses", users: 450 },
-    { coursesCount: "5+ courses", users: 180 },
-  ];
-
-  // Entrepreneurship Track Data
-  const chatbotUsageTimeDistribution = [
-    { timeRange: "0-5 min", users: 180 },
-    { timeRange: "6-10 min", users: 300 },
-    { timeRange: "11-20 min", users: 420 },
-    { timeRange: "21-30 min", users: 240 },
-    { timeRange: "31+ min", users: 60 },
-  ];
-
-  const stageCompletionDistribution = [
-    { stage: "Stage 1", completed: 1050, inProgress: 150 },
-    { stage: "Stage 2", completed: 840, inProgress: 210 },
-    { stage: "Stage 3", completed: 600, inProgress: 240 },
-    { stage: "Stage 4", completed: 360, inProgress: 240 },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [dash, chatbot] = await Promise.all([
+          api.adminGetPhase2Dashboard(),
+          api.adminGetChatbotAnalytics(),
+        ]);
+        setDashboardData(dash);
+        setChatbotData(chatbot);
+      } catch (err: any) {
+        setError(err.message || "Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const COLORS = {
     blue: "#00A1DE",
     green: "#00A651",
     yellow: "#FAD201",
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <Link to="/admin">
+            <Button variant="ghost" className="mb-6">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <p>Failed to load dashboard: {error}</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  const emp = dashboardData?.employment_track || {};
+  const ent = dashboardData?.entrepreneurship_track || {};
+  const stageData = (chatbotData?.stage_completion || []).map((s: any) => ({
+    stage: `Stage ${s.stage}`,
+    completed: s.completed,
+    remaining: s.total - s.completed,
+  }));
+
+  const readinessData = Object.entries(chatbotData?.readiness_distribution || {}).map(([level, count]) => ({
+    level,
+    count: count as number,
+  }));
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -70,7 +103,6 @@ export function Phase2Dashboard() {
           <Badge variant="outline" className="border-[#00A651] text-[#00A651]">Phase 2 - Track Phase</Badge>
         </div>
 
-        {/* Tabs for Employment and Entrepreneurship Tracks */}
         <Tabs defaultValue="employment" className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
             <TabsTrigger value="employment" className="flex items-center gap-2">
@@ -91,39 +123,35 @@ export function Phase2Dashboard() {
                   <Building2 className="w-6 h-6 text-[#00A1DE]" />
                   <div>
                     <CardTitle>Employment Track Analytics</CardTitle>
-                    <CardDescription>Distribution of completion rates and courses taken - 1,800 beneficiaries</CardDescription>
+                    <CardDescription>{emp.total?.toLocaleString() || 0} beneficiaries</CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Completion Rate Distribution */}
-                  <div>
-                    <h3 className="font-semibold mb-4 text-[#00A1DE]">Distribution by Completion Rate</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={employmentCompletionRates}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="completionRange" />
-                        <YAxis />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="users" stroke={COLORS.blue} strokeWidth={3} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  {/* Courses Taken Distribution */}
-                  <div>
-                    <h3 className="font-semibold mb-4 text-[#00A651]">Distribution by Courses Taken</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={employmentCoursesDistribution}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="coursesCount" />
-                        <YAxis />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="users" stroke={COLORS.green} strokeWidth={3} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground">Total in Track</p>
+                      <p className="text-3xl font-bold text-[#00A1DE]">{emp.total?.toLocaleString() || 0}</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground">Hired</p>
+                      <p className="text-3xl font-bold text-[#00A651]">{emp.hired?.toLocaleString() || 0}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {((emp.hire_rate || 0) * 100).toFixed(1)}% hire rate
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground">Not Yet Hired</p>
+                      <p className="text-3xl font-bold text-muted-foreground">
+                        {((emp.total || 0) - (emp.hired || 0)).toLocaleString()}
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
               </CardContent>
             </Card>
@@ -131,49 +159,88 @@ export function Phase2Dashboard() {
 
           {/* Entrepreneurship Track Tab */}
           <TabsContent value="entrepreneurship">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <Briefcase className="w-6 h-6 text-[#00A651]" />
-                  <div>
-                    <CardTitle>Entrepreneurship Track Analytics</CardTitle>
-                    <CardDescription>Chatbot usage and stage completion distribution - 1,200 beneficiaries</CardDescription>
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Briefcase className="w-6 h-6 text-[#00A651]" />
+                    <div>
+                      <CardTitle>Entrepreneurship Track Analytics</CardTitle>
+                      <CardDescription>{ent.total?.toLocaleString() || 0} beneficiaries</CardDescription>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Chatbot Usage Time Distribution */}
-                  <div>
-                    <h3 className="font-semibold mb-4 text-[#00A1DE]">Chatbot Usage Time Distribution</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={chatbotUsageTimeDistribution}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="timeRange" />
-                        <YAxis />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="users" stroke={COLORS.blue} strokeWidth={3} />
-                      </LineChart>
-                    </ResponsiveContainer>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <Card>
+                      <CardContent className="p-4">
+                        <p className="text-sm text-muted-foreground">Total in Track</p>
+                        <p className="text-3xl font-bold text-[#00A651]">{ent.total?.toLocaleString() || 0}</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <p className="text-sm text-muted-foreground">Reports Completed</p>
+                        <p className="text-3xl font-bold text-[#00A1DE]">{ent.reports_completed?.toLocaleString() || 0}</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <p className="text-sm text-muted-foreground">Avg Score</p>
+                        <p className="text-3xl font-bold text-[#FAD201]">
+                          {ent.avg_score?.toFixed(1) ?? "N/A"}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <p className="text-sm text-muted-foreground">Self-Employed</p>
+                        <p className="text-3xl font-bold text-[#00A651]">{ent.self_employed?.toLocaleString() || 0}</p>
+                      </CardContent>
+                    </Card>
                   </div>
 
-                  {/* Stage Completion Distribution */}
-                  <div>
-                    <h3 className="font-semibold mb-4 text-[#00A651]">Stage Completion Distribution</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={stageCompletionDistribution}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="stage" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="completed" fill={COLORS.green} name="Completed" />
-                        <Bar dataKey="inProgress" fill={COLORS.yellow} name="In Progress" />
-                      </BarChart>
-                    </ResponsiveContainer>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Stage Completion */}
+                    <div>
+                      <h3 className="font-semibold mb-4 text-[#00A651]">Stage Completion</h3>
+                      {stageData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={300}>
+                          <BarChart data={stageData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="stage" />
+                            <YAxis />
+                            <Tooltip />
+                            <Bar dataKey="completed" fill={COLORS.green} name="Completed" />
+                            <Bar dataKey="remaining" fill={COLORS.yellow} name="Remaining" />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <p className="text-sm text-muted-foreground text-center py-8">No stage data yet</p>
+                      )}
+                    </div>
+
+                    {/* Readiness Distribution */}
+                    <div>
+                      <h3 className="font-semibold mb-4 text-[#00A1DE]">Readiness Distribution</h3>
+                      {readinessData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={300}>
+                          <BarChart data={readinessData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="level" />
+                            <YAxis />
+                            <Tooltip />
+                            <Bar dataKey="count" fill={COLORS.blue} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <p className="text-sm text-muted-foreground text-center py-8">No readiness data yet</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

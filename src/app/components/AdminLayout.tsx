@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, Outlet } from "react-router";
+import { Link, useLocation, Outlet, useNavigate } from "react-router";
 import { 
   Users, 
   Settings, 
@@ -18,6 +18,7 @@ import {
   X
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
+import { useAuth } from "@/app/context/AuthContext";
 
 interface MenuItem {
   title: string;
@@ -28,8 +29,15 @@ interface MenuItem {
 
 export function AdminLayout() {
   const location = useLocation();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Phase 1 Management"]);
+  const navigate = useNavigate();
+  const { user: authUser, logout } = useAuth();
+  const [expandedItems, setExpandedItems] = useState<string[]>(["General Management", "Phase 1 Management", "Phase 2 Management"]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   const menuItems: MenuItem[] = [
     {
@@ -38,10 +46,19 @@ export function AdminLayout() {
       path: "/admin"
     },
     {
+      title: "General Management",
+      icon: Settings,
+      children: [
+        { title: "Data Registration", path: "/admin/registration" },
+        { title: "Account Management", path: "/admin/accounts" },
+        { title: "Analytics", path: "/admin/analytics" },
+        { title: "Survey Results", path: "/admin/surveys" },
+      ]
+    },
+    {
       title: "Phase 1 Management",
       icon: GraduationCap,
       children: [
-        { title: "Data Registration", path: "/admin/registration" },
         { title: "Phase 1 Selection", path: "/admin/phase1-selection" },
         { title: "Progress View", path: "/admin/progress" },
       ]
@@ -53,14 +70,6 @@ export function AdminLayout() {
         { title: "Phase 2 Selection", path: "/admin/selection" },
         { title: "Employment Track View", path: "/admin/employment-progress" },
         { title: "Entrepreneur Track View", path: "/admin/entrepreneur-progress" },
-      ]
-    },
-    {
-      title: "General Management",
-      icon: Settings,
-      children: [
-        { title: "Account Management", path: "/admin/accounts" },
-        { title: "Analytics", path: "/admin/analytics" },
       ]
     }
   ];
@@ -161,18 +170,16 @@ export function AdminLayout() {
           </Button>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm font-medium">Admin User</p>
+              <p className="text-sm font-medium">{authUser?.email || "Admin"}</p>
               <p className="text-xs text-muted-foreground">Government Official</p>
             </div>
             <div className="w-10 h-10 rounded-full bg-neutral-200 text-neutral-700 flex items-center justify-center font-semibold">
-              AU
+              {(authUser?.email || "A")[0].toUpperCase()}
             </div>
-            <Link to="/">
-              <Button variant="ghost" size="sm" className="text-foreground hover:text-primary">
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
-            </Link>
+            <Button variant="ghost" size="sm" className="text-foreground hover:text-primary" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
           </div>
         </header>
 

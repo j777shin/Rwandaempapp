@@ -1,133 +1,105 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { Progress } from "@/app/components/ui/progress";
-import { ArrowLeft, User, Award, BookOpen, Route, Trophy, CheckCircle2, Clock, Calendar } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
-import { Label } from "@/app/components/ui/label";
+import { ArrowLeft, Loader2, Search, RefreshCw, CheckCircle2, Clock } from "lucide-react";
 import { Badge } from "@/app/components/ui/badge";
-import { Separator } from "@/app/components/ui/separator";
+import { Input } from "@/app/components/ui/input";
+import { api } from "@/app/lib/api";
 
-// Mock beneficiaries data
-const beneficiaries = [
-  { 
-    id: "1",
-    name: "Jean Baptiste",
-    email: "jean.baptiste@example.com",
-    age: 28,
-    gender: "Male",
-    phase: 2,
-    skillcraft: 85,
-    pathways: 72,
-    eligibility: 78,
-    overall: 78,
-    chatbotSessions: 12,
-    lastActive: "2026-01-28",
-    enrollmentDate: "2025-11-15",
-    completedModules: 8,
-    totalModules: 12,
-    skillcraftTests: [
-      { name: "Cognitive Skills", score: 88, date: "2025-12-01" },
-      { name: "Technical Aptitude", score: 82, date: "2025-12-15" },
-      { name: "Problem Solving", score: 85, date: "2026-01-10" },
-    ],
-    pathwaysCompleted: [
-      { name: "Digital Literacy", progress: 100, date: "2025-12-20" },
-      { name: "Entrepreneurship Basics", progress: 85, date: "2026-01-05" },
-      { name: "Financial Management", progress: 45, date: "ongoing" },
-    ],
-    businessConcept: "I plan to start a mobile phone repair and accessories shop in Kigali. The shop will offer affordable repair services for smartphones and sell protective cases, chargers, and screen protectors. My target customers are young professionals and students who rely heavily on their phones for daily activities."
-  },
-  { 
-    id: "2",
-    name: "Marie Claire",
-    email: "marie.claire@example.com",
-    age: 32,
-    gender: "Female",
-    phase: 2,
-    skillcraft: 92,
-    pathways: 88,
-    eligibility: 90,
-    overall: 90,
-    chatbotSessions: 18,
-    lastActive: "2026-01-29",
-    enrollmentDate: "2025-11-10",
-    completedModules: 11,
-    totalModules: 12,
-    skillcraftTests: [
-      { name: "Cognitive Skills", score: 95, date: "2025-11-28" },
-      { name: "Technical Aptitude", score: 90, date: "2025-12-12" },
-      { name: "Problem Solving", score: 91, date: "2026-01-08" },
-    ],
-    pathwaysCompleted: [
-      { name: "Digital Literacy", progress: 100, date: "2025-12-15" },
-      { name: "Entrepreneurship Basics", progress: 100, date: "2025-12-30" },
-      { name: "Financial Management", progress: 65, date: "ongoing" },
-    ],
-    businessConcept: "My business idea is a tailoring and fashion design studio specializing in modern African wear. I will create custom outfits for special occasions like weddings and graduations, combining traditional Rwandan patterns with contemporary styles. I also plan to offer sewing classes to young women in my community."
-  },
-  { 
-    id: "3",
-    name: "Patrick Nkusi",
-    email: "patrick.nkusi@example.com",
-    age: 25,
-    gender: "Male",
-    phase: 1,
-    skillcraft: 75,
-    pathways: 68,
-    eligibility: 71,
-    overall: 71,
-    chatbotSessions: 0,
-    lastActive: "2026-01-27",
-    enrollmentDate: "2025-11-20",
-    completedModules: 7,
-    totalModules: 12,
-    skillcraftTests: [
-      { name: "Cognitive Skills", score: 78, date: "2025-12-05" },
-      { name: "Technical Aptitude", score: 72, date: "2025-12-18" },
-      { name: "Problem Solving", score: 75, date: "2026-01-12" },
-    ],
-    pathwaysCompleted: [
-      { name: "Digital Literacy", progress: 100, date: "2025-12-25" },
-      { name: "Entrepreneurship Basics", progress: 60, date: "ongoing" },
-      { name: "Financial Management", progress: 45, date: "ongoing" },
-    ],
-    businessConcept: "I want to establish a small-scale poultry farm focusing on egg production. The farm will supply fresh eggs to local markets and shops in my district. I believe there is high demand for quality eggs, and this business can be scaled up over time to include chicken meat production."
-  },
-  { 
-    id: "4",
-    name: "Ange Uwase",
-    email: "ange.uwase@example.com",
-    age: 29,
-    gender: "Female",
-    phase: 2,
-    skillcraft: 88,
-    pathways: 82,
-    eligibility: 85,
-    overall: 85,
-    chatbotSessions: 15,
-    lastActive: "2026-01-29",
-    enrollmentDate: "2025-11-12",
-    completedModules: 10,
-    totalModules: 12,
-    skillcraftTests: [
-      { name: "Cognitive Skills", score: 90, date: "2025-11-30" },
-      { name: "Technical Aptitude", score: 85, date: "2025-12-14" },
-      { name: "Problem Solving", score: 89, date: "2026-01-09" },
-    ],
-    pathwaysCompleted: [
-      { name: "Digital Literacy", progress: 100, date: "2025-12-18" },
-      { name: "Entrepreneurship Basics", progress: 95, date: "2026-01-02" },
-      { name: "Financial Management", progress: 52, date: "ongoing" },
-    ],
-    businessConcept: "My business concept is a home-based bakery specializing in birthday cakes, cupcakes, and pastries. I will take custom orders through social media and deliver within Kigali. The bakery will focus on quality ingredients and creative designs to stand out in the market."
-  },
-];
+interface CourseInfo {
+  course_name: string;
+  order_number: number;
+  completed: boolean;
+}
+
+interface PathwayInfo {
+  pathway_name: string;
+  order_number?: number;
+  courses: Record<string, CourseInfo>;
+}
+
+interface Beneficiary {
+  id: string;
+  name: string;
+  email: string;
+  skillcraftScore: number | null;
+  pathwaysRate: number | null;
+  businessGoal: string;
+  offlineAttendance: number;
+  hired: boolean;
+  courseProgress: Record<string, PathwayInfo> | null;
+}
+
+function mapApiBeneficiary(b: any): Beneficiary {
+  return {
+    id: b.id ?? b._id ?? "",
+    name: b.name || [b.first_name, b.last_name].filter(Boolean).join(" ") || "Unknown",
+    email: b.email || "",
+    skillcraftScore: b.skillcraft_score ?? null,
+    pathwaysRate: b.pathways_completion_rate ?? b.pathways_completion ?? null,
+    businessGoal: b.business_development_text || "",
+    offlineAttendance: b.offline_attendance ?? 0,
+    hired: b.hired ?? false,
+    courseProgress: b.pathways_course_progress ?? null,
+  };
+}
 
 export function BeneficiaryProgress() {
-  const [selectedBeneficiaryId, setSelectedBeneficiaryId] = useState<string>(beneficiaries[0].id);
-  const selectedBeneficiary = beneficiaries.find(b => b.id === selectedBeneficiaryId) || beneficiaries[0];
+  const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function fetch() {
+      try {
+        setLoading(true);
+        setError(null);
+        // Fetch selected beneficiaries (Phase 1 selected)
+        const data = await api.adminListBeneficiaries({ page_size: "10000", selection_status: "selected" });
+        if (cancelled) return;
+        const mapped = (data.items || data.beneficiaries || []).map(mapApiBeneficiary);
+        setBeneficiaries(mapped);
+        if (mapped.length > 0) setSelectedId(mapped[0].id);
+      } catch (err: any) {
+        if (cancelled) return;
+        setError(err.message || "Failed to load beneficiaries");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    fetch();
+    return () => { cancelled = true; };
+  }, []);
+
+  async function handleSyncPathways() {
+    try {
+      setSyncing(true);
+      setSyncResult(null);
+      const result = await api.adminSyncPathways();
+      setSyncResult(`Synced: ${result.matched} matched, ${result.updated} updated`);
+      // Reload beneficiaries to show updated rates
+      const data = await api.adminListBeneficiaries({ page_size: "10000", selection_status: "selected" });
+      const mapped = (data.items || data.beneficiaries || []).map(mapApiBeneficiary);
+      setBeneficiaries(mapped);
+    } catch (err: any) {
+      setSyncResult(`Sync failed: ${err.message}`);
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  const filteredList = beneficiaries.filter(b => {
+    const q = search.toLowerCase();
+    return !q || b.name.toLowerCase().includes(q) || b.email.toLowerCase().includes(q);
+  });
+
+  const selected = beneficiaries.find(b => b.id === selectedId) || null;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -139,157 +111,205 @@ export function BeneficiaryProgress() {
           </Button>
         </Link>
 
-        {/* Page Header */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-2xl">Beneficiary Progress Tracking - Phase 1</CardTitle>
-            <CardDescription>Select a beneficiary from the list to view their detailed progress</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl">Progress View</CardTitle>
+                <CardDescription>View selected beneficiaries and their progress details</CardDescription>
+              </div>
+              <div className="flex items-center gap-3">
+                {syncResult && (
+                  <span className={`text-sm ${syncResult.startsWith("Sync failed") ? "text-destructive" : "text-green-600"}`}>
+                    {syncResult}
+                  </span>
+                )}
+                <Button onClick={handleSyncPathways} disabled={syncing} variant="outline">
+                  <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
+                  {syncing ? "Syncing..." : "Sync Pathways"}
+                </Button>
+              </div>
+            </div>
           </CardHeader>
         </Card>
 
-        {/* Main Split Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Candidate List */}
-          <div className="lg:col-span-1">
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle className="text-lg">Beneficiaries ({beneficiaries.length})</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y">
-                  {beneficiaries.map((beneficiary) => (
-                    <button
-                      key={beneficiary.id}
-                      onClick={() => setSelectedBeneficiaryId(beneficiary.id)}
-                      className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
-                        selectedBeneficiaryId === beneficiary.id ? 'bg-primary/10 border-l-4 border-l-primary' : ''
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
-                          {beneficiary.name.split(' ').map(n => n[0]).join('')}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm truncate">{beneficiary.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{beneficiary.email}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-muted-foreground">Overall: {beneficiary.overall}%</span>
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-3 text-muted-foreground">Loading beneficiaries...</span>
           </div>
+        )}
 
-          {/* Right Column - Beneficiary Details */}
-          <div className="lg:col-span-2">
-            <div className="space-y-6">
-              {/* Beneficiary Information Card */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                        {selectedBeneficiary.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl">{selectedBeneficiary.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{selectedBeneficiary.email}</p>
-                        <div className="flex items-center gap-4 mt-1">
-                          <p className="text-sm text-muted-foreground">Age: {selectedBeneficiary.age}</p>
-                          <span className="text-muted-foreground">•</span>
-                          <p className="text-sm text-muted-foreground">Gender: {selectedBeneficiary.gender}</p>
-                        </div>
-                      </div>
-                    </div>
+        {error && !loading && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <p className="text-destructive mb-4">{error}</p>
+            <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+          </div>
+        )}
+
+        {!loading && !error && beneficiaries.length === 0 && (
+          <div className="flex items-center justify-center py-12">
+            <p className="text-muted-foreground">No selected beneficiaries found.</p>
+          </div>
+        )}
+
+        {!loading && !error && beneficiaries.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left: Beneficiary List */}
+            <div className="lg:col-span-1">
+              <Card className="h-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Beneficiaries ({beneficiaries.length})</CardTitle>
+                  <div className="relative mt-2">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by name or email..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="pl-9"
+                    />
                   </div>
                 </CardHeader>
-              </Card>
-
-              {/* SkillCraft Test Details */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    SkillCraft Test Results
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {selectedBeneficiary.skillcraftTests.map((test, index) => (
-                      <div key={index}>
-                        <div className="flex items-center justify-between mb-2">
-                          <div>
-                            <p className="font-semibold">{test.name}</p>
-                            <p className="text-xs text-muted-foreground">Completed: {test.date}</p>
+                <CardContent className="p-0">
+                  <div className="divide-y max-h-[60vh] overflow-y-auto">
+                    {filteredList.map((b) => (
+                      <button
+                        key={b.id}
+                        onClick={() => setSelectedId(b.id)}
+                        className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
+                          selectedId === b.id ? "bg-primary/10 border-l-4 border-l-primary" : ""
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            {b.name.split(" ").map(n => n[0]).join("")}
                           </div>
-                          <Badge variant="outline" className="text-base px-3 py-1">
-                            {test.score}%
-                          </Badge>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm truncate">{b.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{b.email}</p>
+                          </div>
                         </div>
-                        <Progress value={test.score} className="h-2" />
-                        {index < selectedBeneficiary.skillcraftTests.length - 1 && <Separator className="mt-4" />}
-                      </div>
+                      </button>
                     ))}
+                    {filteredList.length === 0 && (
+                      <p className="text-center text-sm text-muted-foreground py-8">No results found.</p>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Pathways Progress Details */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Route className="w-5 h-5 text-primary" />
-                    Pathways Progress Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {selectedBeneficiary.pathwaysCompleted.map((pathway, index) => (
-                      <div key={index}>
-                        <div className="flex items-center justify-between mb-2">
-                          <div>
-                            <p className="font-semibold">{pathway.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {pathway.progress === 100 ? `Completed: ${pathway.date}` : `Status: ${pathway.date}`}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {pathway.progress === 100 && <CheckCircle2 className="w-5 h-5 text-primary" />}
-                            <Badge 
-                              variant={pathway.progress === 100 ? "default" : "outline"}
-                              className={pathway.progress === 100 ? "bg-primary text-base px-3 py-1" : "text-base px-3 py-1"}
-                            >
-                              {pathway.progress}%
-                            </Badge>
-                          </div>
-                        </div>
-                        <Progress value={pathway.progress} className="h-2" />
-                        {index < selectedBeneficiary.pathwaysCompleted.length - 1 && <Separator className="mt-4" />}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Business Concept */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="w-5 h-5 text-primary" />
-                    Business Concept
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{selectedBeneficiary.businessConcept}</p>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Right: Details Panel */}
+            <div className="lg:col-span-2">
+              {selected ? (
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white text-xl font-bold">
+                        {selected.name.split(" ").map(n => n[0]).join("")}
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl">{selected.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{selected.email}</p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* SkillCraft Score */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <p className="text-sm text-muted-foreground mb-1">SkillCraft Score</p>
+                        <p className="text-2xl font-bold text-foreground">
+                          {selected.skillcraftScore != null ? selected.skillcraftScore : "—"}
+                        </p>
+                      </div>
+
+                      {/* Pathways Completion Rate */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <p className="text-sm text-muted-foreground mb-1">Pathways Completion Rate</p>
+                        <p className="text-2xl font-bold text-foreground">
+                          {selected.pathwaysRate != null ? `${selected.pathwaysRate}%` : "—"}
+                        </p>
+                      </div>
+
+                      {/* Offline Attendance Score */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <p className="text-sm text-muted-foreground mb-1">Offline Attendance Score</p>
+                        <p className="text-2xl font-bold text-foreground">
+                          {selected.offlineAttendance}
+                        </p>
+                      </div>
+
+                      {/* Hired Status */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <p className="text-sm text-muted-foreground mb-1">Hired Status</p>
+                        <p className={`text-2xl font-bold ${selected.hired ? "text-green-600" : "text-foreground"}`}>
+                          {selected.hired ? "Yes" : "No"}
+                        </p>
+                      </div>
+
+                      {/* Business Goal */}
+                      <div className="bg-gray-50 rounded-lg p-4 sm:col-span-2">
+                        <p className="text-sm text-muted-foreground mb-1">Business Goal</p>
+                        <p className="text-sm text-foreground leading-relaxed">
+                          {selected.businessGoal || "No business goal submitted yet."}
+                        </p>
+                      </div>
+
+                      {/* Per-Course Progress */}
+                      {selected.courseProgress && Object.keys(selected.courseProgress).length > 0 && (
+                        <div className="bg-gray-50 rounded-lg p-4 sm:col-span-2">
+                          <p className="text-sm text-muted-foreground mb-3">Course Progress</p>
+                          <div className="space-y-4">
+                            {Object.entries(selected.courseProgress)
+                              .sort(([, a], [, b]) => (a.order_number ?? 0) - (b.order_number ?? 0))
+                              .map(([pathwayId, pathway]) => {
+                                const courses = Object.entries(pathway.courses)
+                                  .sort(([, a], [, b]) => a.order_number - b.order_number);
+                                const done = courses.filter(([, c]) => c.completed).length;
+                                return (
+                                  <div key={pathwayId}>
+                                    <div className="flex items-center justify-between mb-2">
+                                      <p className="font-semibold text-sm">{pathway.pathway_name}</p>
+                                      <span className="text-xs text-muted-foreground">{done}/{courses.length}</span>
+                                    </div>
+                                    <div className="space-y-1">
+                                      {courses.map(([courseId, course]) => (
+                                        <div key={courseId} className="flex items-center justify-between text-sm py-1">
+                                          <span className="flex items-center gap-2">
+                                            {course.completed
+                                              ? <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                                              : <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                            }
+                                            {course.order_number}. {course.course_name}
+                                          </span>
+                                          <Badge variant="outline" className={
+                                            course.completed
+                                              ? "bg-green-50 text-green-700 border-green-300 text-xs"
+                                              : "bg-gray-50 text-gray-500 border-gray-300 text-xs"
+                                          }>
+                                            {course.completed ? "Done" : "Pending"}
+                                          </Badge>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="flex items-center justify-center py-12">
+                  <p className="text-muted-foreground">Select a beneficiary to view their details.</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
