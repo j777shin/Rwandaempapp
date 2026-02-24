@@ -594,12 +594,12 @@ export function AccountManagement() {
                       <div>
                         <h4 className="text-sm font-medium text-muted-foreground mb-2">Personal</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 rounded-lg p-3">
-                          <div><span className="text-xs text-muted-foreground">Name</span><p className="text-sm font-medium">{detailedInfo.name || `${detailedInfo.first_name || ""} ${detailedInfo.last_name || ""}`.trim()}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Name</span><p className="text-sm font-medium">{detailedInfo.name || "—"}</p></div>
                           <div><span className="text-xs text-muted-foreground">Age</span><p className="text-sm font-medium">{detailedInfo.age ?? "—"}</p></div>
                           <div><span className="text-xs text-muted-foreground">Gender</span><p className="text-sm font-medium">{detailedInfo.gender || "—"}</p></div>
                           <div><span className="text-xs text-muted-foreground">Education</span><p className="text-sm font-medium">{detailedInfo.education_level || "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Marital Status</span><p className="text-sm font-medium">{detailedInfo.marital_status || "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Disability</span><p className="text-sm font-medium">{detailedInfo.disability || "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Marriage Status</span><p className="text-sm font-medium">{detailedInfo.marriage_status ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Disability</span><p className="text-sm font-medium">{detailedInfo.disability ? "Yes" : "No"}</p></div>
                         </div>
                       </div>
 
@@ -608,11 +608,8 @@ export function AccountManagement() {
                         <h4 className="text-sm font-medium text-muted-foreground mb-2">Contact</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 rounded-lg p-3">
                           <div><span className="text-xs text-muted-foreground">Email</span><p className="text-sm font-medium">{detailedInfo.email || "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Phone</span><p className="text-sm font-medium">{detailedInfo.contact || detailedInfo.phone || "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Phone</span><p className="text-sm font-medium">{detailedInfo.contact || "—"}</p></div>
                           <div><span className="text-xs text-muted-foreground">District</span><p className="text-sm font-medium">{detailedInfo.district || "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Sector</span><p className="text-sm font-medium">{detailedInfo.sector || "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Cell</span><p className="text-sm font-medium">{detailedInfo.cell || "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Village</span><p className="text-sm font-medium">{detailedInfo.village || "—"}</p></div>
                         </div>
                       </div>
 
@@ -621,9 +618,34 @@ export function AccountManagement() {
                         <h4 className="text-sm font-medium text-muted-foreground mb-2">Household</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 rounded-lg p-3">
                           <div><span className="text-xs text-muted-foreground">Household Size</span><p className="text-sm font-medium">{detailedInfo.household_size ?? "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Dependents</span><p className="text-sm font-medium">{detailedInfo.dependents ?? "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Income Source</span><p className="text-sm font-medium">{detailedInfo.income_source || "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Monthly Income</span><p className="text-sm font-medium">{detailedInfo.monthly_income ?? "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Children Under 18</span><p className="text-sm font-medium">{detailedInfo.children_under_18 ?? "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Occupation</span><p className="text-sm font-medium">{detailedInfo.occupation ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Informal Working</span><p className="text-sm font-medium">{detailedInfo.informal_working ? "Yes" : "No"}</p></div>
+                        </div>
+                      </div>
+
+                      {/* Household Head */}
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Household Head</h4>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 rounded-lg p-3">
+                          <div><span className="text-xs text-muted-foreground">University Education</span><p className="text-sm font-medium">{detailedInfo.hh_head_university ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Primary Education</span><p className="text-sm font-medium">{detailedInfo.hh_head_primary ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Secondary Education</span><p className="text-sm font-medium">{detailedInfo.hh_head_secondary ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Married</span><p className="text-sm font-medium">{detailedInfo.hh_head_married ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Widow</span><p className="text-sm font-medium">{detailedInfo.hh_head_widow ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Divorced</span><p className="text-sm font-medium">{detailedInfo.hh_head_divorced ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Female</span><p className="text-sm font-medium">{detailedInfo.hh_head_female ? "Yes" : "No"}</p></div>
+                        </div>
+                      </div>
+
+                      {/* Livestock */}
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Livestock</h4>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 rounded-lg p-3">
+                          <div><span className="text-xs text-muted-foreground">Cattle</span><p className="text-sm font-medium">{detailedInfo.num_cattle ?? "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Goats</span><p className="text-sm font-medium">{detailedInfo.num_goats ?? "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Sheep</span><p className="text-sm font-medium">{detailedInfo.num_sheep ?? "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Pigs</span><p className="text-sm font-medium">{detailedInfo.num_pigs ?? "—"}</p></div>
                         </div>
                       </div>
 
@@ -631,12 +653,17 @@ export function AccountManagement() {
                       <div>
                         <h4 className="text-sm font-medium text-muted-foreground mb-2">Assets & Housing</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 rounded-lg p-3">
-                          <div><span className="text-xs text-muted-foreground">Land Ownership</span><p className="text-sm font-medium">{detailedInfo.land_ownership || "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Livestock</span><p className="text-sm font-medium">{detailedInfo.livestock || "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Housing Type</span><p className="text-sm font-medium">{detailedInfo.housing_type || "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Water Source</span><p className="text-sm font-medium">{detailedInfo.water_source || "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Electricity</span><p className="text-sm font-medium">{detailedInfo.electricity ? "Yes" : "No"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Ubudehe Category</span><p className="text-sm font-medium">{detailedInfo.ubudehe_category ?? "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Land Ownership</span><p className="text-sm font-medium">{detailedInfo.land_ownership ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Land Size</span><p className="text-sm font-medium">{detailedInfo.land_size ?? "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Radios</span><p className="text-sm font-medium">{detailedInfo.num_radio ?? "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Phones</span><p className="text-sm font-medium">{detailedInfo.num_phone ?? "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">TVs</span><p className="text-sm font-medium">{detailedInfo.num_tv ?? "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Cooking (Firewood)</span><p className="text-sm font-medium">{detailedInfo.cooking_firewood ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Cooking (Gas)</span><p className="text-sm font-medium">{detailedInfo.cooking_gas ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Cooking (Charcoal)</span><p className="text-sm font-medium">{detailedInfo.cooking_charcoal ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Floor (Earth/Sand)</span><p className="text-sm font-medium">{detailedInfo.floor_earth_sand ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Floor (Tiles)</span><p className="text-sm font-medium">{detailedInfo.floor_tiles ? "Yes" : "No"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Lighting</span><p className="text-sm font-medium">{detailedInfo.lighting ? "Yes" : "No"}</p></div>
                         </div>
                       </div>
 
@@ -645,13 +672,22 @@ export function AccountManagement() {
                         <h4 className="text-sm font-medium text-muted-foreground mb-2">Scores & Status</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 rounded-lg p-3">
                           <div><span className="text-xs text-muted-foreground">SkillCraft Score</span><p className="text-sm font-medium">{detailedInfo.skillcraft_score ?? "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Pathways Rate</span><p className="text-sm font-medium">{detailedInfo.pathways_completion_rate ?? "—"}%</p></div>
+                          <div><span className="text-xs text-muted-foreground">Pathways Rate</span><p className="text-sm font-medium">{detailedInfo.pathways_completion_rate != null ? `${detailedInfo.pathways_completion_rate}%` : "—"}</p></div>
                           <div><span className="text-xs text-muted-foreground">Eligibility Score</span><p className="text-sm font-medium">{detailedInfo.eligibility_score ?? "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Offline Attendance</span><p className="text-sm font-medium">{detailedInfo.offline_attendance ?? "—"}</p></div>
                           <div><span className="text-xs text-muted-foreground">Selection Status</span><p className="text-sm font-medium">{detailedInfo.selection_status || "—"}</p></div>
                           <div><span className="text-xs text-muted-foreground">Track</span><p className="text-sm font-medium">{detailedInfo.track || "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Offline Attendance</span><p className="text-sm font-medium">{detailedInfo.offline_attendance ?? "—"}</p></div>
+                        </div>
+                      </div>
+
+                      {/* Employment & Entrepreneurship */}
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Employment & Entrepreneurship</h4>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 rounded-lg p-3">
+                          <div><span className="text-xs text-muted-foreground">Self Employed</span><p className="text-sm font-medium">{detailedInfo.self_employed ? "Yes" : "No"}</p></div>
                           <div><span className="text-xs text-muted-foreground">Hired</span><p className="text-sm font-medium">{detailedInfo.hired ? "Yes" : "No"}</p></div>
                           <div><span className="text-xs text-muted-foreground">Wants Entrepreneurship</span><p className="text-sm font-medium">{detailedInfo.wants_entrepreneurship ? "Yes" : "No"}</p></div>
+                          <div className="col-span-2"><span className="text-xs text-muted-foreground">Business Development</span><p className="text-sm font-medium">{detailedInfo.business_development_text || "—"}</p></div>
                         </div>
                       </div>
                     </div>
