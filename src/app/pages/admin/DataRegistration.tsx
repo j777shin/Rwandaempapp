@@ -18,8 +18,8 @@ export function DataRegistration() {
   const [additionalCsvFile, setAdditionalCsvFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     // Personal Information
-    email: "uwimana.ishimwe@example.com",
-    name: "Uwimana Ishimwe",
+    email: "test.user@example.com",
+    name: "Test User",
     age: "24",
     gender: "female",
     contact: "+250788123456",

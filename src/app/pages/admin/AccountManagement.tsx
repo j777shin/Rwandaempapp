@@ -420,7 +420,7 @@ export function AccountManagement() {
                               <SelectValue placeholder="Status" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="all">All Statuses</SelectItem>
+                              <SelectItem value="all">All status</SelectItem>
                               <SelectItem value="pending">Pending</SelectItem>
                               <SelectItem value="selected">Selected</SelectItem>
                               <SelectItem value="rejected">Rejected</SelectItem>
