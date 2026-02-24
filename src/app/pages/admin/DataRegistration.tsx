@@ -18,38 +18,39 @@ export function DataRegistration() {
   const [additionalCsvFile, setAdditionalCsvFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     // Personal Information
-    name: "",
-    age: "",
-    gender: "",
-    contact: "",
-    
+    email: "uwimana.ishimwe@example.com",
+    name: "Uwimana Ishimwe",
+    age: "24",
+    gender: "female",
+    contact: "+250788123456",
+
     // Household Information
     marriage_status: false,
     disability: false,
-    education_level: "",
-    occupation: false,
-    informal_working: false,
-    
+    education_level: "secondary",
+    occupation: true,
+    informal_working: true,
+
     // Livestock Assets
     num_cows: "0",
-    num_goats: "0",
+    num_goats: "2",
     num_chickens: "0",
     num_sheep: "0",
-    num_pigs: "0",
+    num_pigs: "1",
     num_rabbits: "0",
-    
+
     // Land & Housing
-    land_ownership: false,
-    land_size: "0",
-    num_radio: "0",
-    num_phone: "0",
+    land_ownership: true,
+    land_size: "0.5",
+    num_radio: "1",
+    num_phone: "1",
     num_tv: "0",
-    fuel: "",
-    water_source: "",
+    fuel: "EU4",
+    water_source: "WS1",
     floor: false,
-    roof: false,
+    roof: true,
     walls: false,
-    toilet: false,
+    toilet: true,
   });
 
   // Candidates for Additional Info manual entry - loaded from API
@@ -159,13 +160,9 @@ export function DataRegistration() {
     e.preventDefault();
     setManualSubmitting(true);
     try {
-      const nameParts = formData.name.trim().split(/\s+/);
-      const firstName = nameParts[0] || "";
-      const lastName = nameParts.slice(1).join(" ") || "";
-
       const payload = {
-        first_name: firstName,
-        last_name: lastName,
+        email: formData.email,
+        name: formData.name,
         age: parseInt(formData.age, 10),
         gender: formData.gender,
         contact: formData.contact,
@@ -174,23 +171,21 @@ export function DataRegistration() {
         education_level: formData.education_level,
         occupation: formData.occupation,
         informal_working: formData.informal_working,
-        num_cows: parseInt(formData.num_cows, 10),
+        num_cattle: parseInt(formData.num_cows, 10),
         num_goats: parseInt(formData.num_goats, 10),
-        num_chickens: parseInt(formData.num_chickens, 10),
         num_sheep: parseInt(formData.num_sheep, 10),
         num_pigs: parseInt(formData.num_pigs, 10),
-        num_rabbits: parseInt(formData.num_rabbits, 10),
         land_ownership: formData.land_ownership,
         land_size: parseFloat(formData.land_size),
         num_radio: parseInt(formData.num_radio, 10),
         num_phone: parseInt(formData.num_phone, 10),
         num_tv: parseInt(formData.num_tv, 10),
-        fuel: formData.fuel,
-        water_source: formData.water_source,
-        floor: formData.floor,
-        roof: formData.roof,
-        walls: formData.walls,
-        toilet: formData.toilet,
+        cooking_firewood: formData.fuel === "EU4",
+        cooking_gas: formData.fuel === "EU8",
+        cooking_charcoal: formData.fuel === "EU9",
+        floor_earth_sand: !formData.floor,
+        floor_tiles: formData.floor,
+        lighting: formData.roof,
       };
 
       await api.adminRegisterManual(payload);
@@ -198,6 +193,7 @@ export function DataRegistration() {
 
       // Reset form
       setFormData({
+        email: "",
         name: "",
         age: "",
         gender: "",
@@ -288,7 +284,7 @@ export function DataRegistration() {
 
               {/* Candidate Info Tab */}
               <TabsContent value="candidate">
-                <Tabs defaultValue="csv" className="w-full">
+                <Tabs defaultValue="manual" className="w-full">
                   <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
                     <TabsTrigger value="csv" className="flex items-center gap-2">
                       <FileSpreadsheet className="w-4 h-4" />
@@ -369,6 +365,16 @@ export function DataRegistration() {
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold border-b pb-2 border-primary">Personal Information</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email *</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              value={formData.email}
+                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                              required
+                            />
+                          </div>
                           <div className="space-y-2">
                             <Label htmlFor="name">Full Name *</Label>
                             <Input

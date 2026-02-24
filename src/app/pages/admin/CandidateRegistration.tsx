@@ -123,7 +123,7 @@ export function CandidateRegistration() {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="csv" className="w-full">
+            <Tabs defaultValue="manual" className="w-full">
               <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
                 <TabsTrigger value="csv" className="flex items-center gap-2">
                   <FileSpreadsheet className="w-4 h-4" />

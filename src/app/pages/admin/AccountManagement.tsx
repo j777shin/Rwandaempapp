@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table";
-import { ArrowLeft, Download, X, Search, Filter, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Download, X, Search, Filter, Loader2, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
 import { Badge } from "@/app/components/ui/badge";
@@ -153,6 +153,9 @@ export function AccountManagement() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // Delete state
+  const [deleting, setDeleting] = useState(false);
+
   // Filter state
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -178,6 +181,8 @@ export function AccountManagement() {
     const params: Record<string, string> = {
       page: String(page),
       page_size: String(PAGE_SIZE),
+      sort_by: "name",
+      sort_order: "asc",
     };
     if (debouncedSearch) {
       params.search = debouncedSearch;
@@ -288,6 +293,23 @@ export function AccountManagement() {
       alert(`Failed to save: ${err.message || "Unknown error"}`);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedAccount) return;
+    if (!confirm(`Are you sure you want to permanently delete "${selectedAccount.name}"? This cannot be undone.`)) return;
+
+    setDeleting(true);
+    try {
+      await api.adminDeleteAccount(selectedAccount.id);
+      await fetchAccounts();
+      handleCloseDialog();
+    } catch (err: any) {
+      console.error("Failed to delete account:", err);
+      alert(`Failed to delete: ${err.message || "Unknown error"}`);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -636,6 +658,25 @@ export function AccountManagement() {
                   ) : (
                     <p className="text-sm text-muted-foreground">Failed to load detailed information.</p>
                   )}
+                </div>
+
+                <Separator />
+
+                {/* Delete Account */}
+                <div className="flex justify-end">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                  >
+                    {deleting ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-2" />
+                    )}
+                    {deleting ? "Deleting..." : "Delete Account"}
+                  </Button>
                 </div>
               </div>
             )}

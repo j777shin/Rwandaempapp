@@ -161,6 +161,8 @@ export const api = {
     request<any>(`/admin/accounts/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   adminDeactivateAccount: (id: string) =>
     request<any>(`/admin/accounts/${id}`, { method: "DELETE" }),
+  adminDeleteAccount: (id: string) =>
+    request<any>(`/admin/beneficiaries/${id}`, { method: "DELETE" }),
 
   // Admin - Registration
   adminUploadCsv: (file: File) => uploadFile<any>("/admin/registration/csv", file),

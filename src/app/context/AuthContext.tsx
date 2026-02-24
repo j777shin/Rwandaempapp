@@ -59,16 +59,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    // Call backend to reset test account data before clearing local state
-    try {
-      await api.logout();
-    } catch {
-      // Ignore errors (e.g. expired token) — still clear local state
-    }
+    // Save token before clearing, so we can still call the backend
+    const savedToken = localStorage.getItem("token");
+
+    // Clear local state immediately
     setToken(null);
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
+    // Call backend to reset test account data using the saved token directly
+    if (savedToken) {
+      try {
+        await fetch("http://localhost:8001/auth/logout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${savedToken}`,
+          },
+        });
+      } catch {
+        // Ignore errors (e.g. expired token, network issues)
+      }
+    }
   };
 
   const refreshUser = async () => {
