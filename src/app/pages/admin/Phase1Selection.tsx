@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table";
-import { ArrowLeft, UserCheck, Loader2, Calculator, Play } from "lucide-react";
+import { ArrowLeft, UserCheck, Loader2, Calculator, Play, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/app/components/ui/input";
 import { Badge } from "@/app/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/app/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { ScrollArea } from "@/app/components/ui/scroll-area";
 import { api } from "@/app/lib/api";
 
@@ -22,6 +22,8 @@ interface Beneficiary {
   pathways_completion_rate: number | null;
   selection_status: string | null;
 }
+
+const PAGE_SIZE = 50;
 
 function BeneficiaryTable({ beneficiaries, onRowClick }: { beneficiaries: Beneficiary[]; onRowClick: (b: Beneficiary) => void }) {
   return (
@@ -83,39 +85,158 @@ function BeneficiaryTable({ beneficiaries, onRowClick }: { beneficiaries: Benefi
   );
 }
 
+function PaginationControls({ page, totalPages, totalCount, onPrev, onNext }: {
+  page: number;
+  totalPages: number;
+  totalCount: number;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between mt-4 pt-4 border-t">
+      <p className="text-sm text-muted-foreground">
+        Page {page} of {totalPages} ({totalCount.toLocaleString()} total)
+      </p>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" disabled={page <= 1} onClick={onPrev}>
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Previous
+        </Button>
+        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={onNext}>
+          Next
+          <ChevronRight className="h-4 w-4 ml-1" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function Phase1Selection() {
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectionCount, setSelectionCount] = useState(9000);
   const [calculatingScores, setCalculatingScores] = useState(false);
   const [runningSelection, setRunningSelection] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
-  const loadBeneficiaries = async () => {
+  // Pagination & filter state
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  // Search with debounce
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Tab state for selected/unselected (server-side filter)
+  const [selectionHasRun, setSelectionHasRun] = useState(false);
+  const [activeTab, setActiveTab] = useState<"selected" | "unselected">("selected");
+  const [selectedCount, setSelectedCount] = useState(0);
+  const [unselectedCount, setUnselectedCount] = useState(0);
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Build API params
+  const buildParams = useCallback(() => {
+    const params: Record<string, string> = {
+      page: String(page),
+      page_size: String(PAGE_SIZE),
+      sort_by: "eligibility_score",
+      sort_order: "asc",
+    };
+    if (debouncedSearch) {
+      params.search = debouncedSearch;
+    }
+    if (selectionHasRun) {
+      params.selection_status = activeTab === "selected" ? "selected" : "rejected";
+    }
+    return params;
+  }, [page, debouncedSearch, selectionHasRun, activeTab]);
+
+  // Check if selection has been run (by fetching count of "selected")
+  const checkSelectionStatus = useCallback(async () => {
+    try {
+      const selRes = await api.adminListBeneficiaries({
+        selection_status: "selected",
+        page: "1",
+        page_size: "1",
+      });
+      const selTotal = selRes.total ?? selRes.count ?? 0;
+      setSelectedCount(selTotal);
+
+      if (selTotal > 0) {
+        setSelectionHasRun(true);
+        const unselRes = await api.adminListBeneficiaries({
+          selection_status: "rejected",
+          page: "1",
+          page_size: "1",
+        });
+        setUnselectedCount(unselRes.total ?? unselRes.count ?? 0);
+      } else {
+        setSelectionHasRun(false);
+      }
+    } catch {
+      // Ignore — we'll just show the flat list
+    }
+  }, []);
+
+  // Fetch beneficiaries
+  const loadBeneficiaries = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await api.adminListBeneficiaries({ page_size: 10000 });
-      setBeneficiaries(data.items || data.beneficiaries || []);
+      const params = buildParams();
+      const data = await api.adminListBeneficiaries(params);
+
+      let items: any[];
+      if (Array.isArray(data)) {
+        items = data;
+        setTotalCount(data.length);
+      } else if (data.items) {
+        items = data.items;
+        setTotalCount(data.total ?? data.count ?? data.items.length);
+      } else {
+        items = [];
+        setTotalCount(0);
+      }
+
+      setBeneficiaries(items);
     } catch (err: any) {
       setError(err.message || "Failed to load beneficiaries");
     } finally {
       setLoading(false);
     }
-  };
+  }, [buildParams]);
 
+  // Initial load: check selection status, then load data
+  useEffect(() => {
+    checkSelectionStatus();
+  }, [checkSelectionStatus]);
+
+  // Reload when params change
   useEffect(() => {
     loadBeneficiaries();
-  }, []);
+  }, [loadBeneficiaries]);
 
   const handleCalculateScores = async () => {
     try {
       setCalculatingScores(true);
       setError(null);
       await api.adminCalculateScores();
+      setPage(1);
+      await checkSelectionStatus();
       await loadBeneficiaries();
     } catch (err: any) {
       setError(err.message || "Failed to calculate scores");
@@ -129,6 +250,9 @@ export function Phase1Selection() {
       setRunningSelection(true);
       setError(null);
       await api.adminRunPhase1Selection(selectionCount);
+      setPage(1);
+      setActiveTab("selected");
+      await checkSelectionStatus();
       await loadBeneficiaries();
     } catch (err: any) {
       setError(err.message || "Failed to run Phase 1 selection");
@@ -137,26 +261,26 @@ export function Phase1Selection() {
     }
   };
 
-  // Sort beneficiaries by eligibility_score descending
-  const sortedBeneficiaries = [...beneficiaries].sort((a, b) => {
-    return (b.eligibility_score ?? 0) - (a.eligibility_score ?? 0);
-  });
+  const handleReset = async () => {
+    try {
+      setResetting(true);
+      setError(null);
+      await api.adminResetSelection();
+      setIsResetDialogOpen(false);
+      setPage(1);
+      await checkSelectionStatus();
+      await loadBeneficiaries();
+    } catch (err: any) {
+      setError(err.message || "Failed to reset selection");
+    } finally {
+      setResetting(false);
+    }
+  };
 
-  // Detect if selection has been run
-  const selectionHasRun = beneficiaries.some(b => b.selection_status === "selected" || b.selection_status === "phase1_selected");
-  const selectedBens = sortedBeneficiaries.filter(b => b.selection_status === "selected" || b.selection_status === "phase1_selected");
-  const unselectedBens = sortedBeneficiaries.filter(b => b.selection_status !== "selected" && b.selection_status !== "phase1_selected");
-
-  // Filtered beneficiaries based on search
-  const filteredBeneficiaries = sortedBeneficiaries.filter(beneficiary => {
-    const fullName = (beneficiary.name || "").toLowerCase();
-    const query = searchQuery.toLowerCase();
-    return (
-      fullName.includes(query) ||
-      (beneficiary.email || "").toLowerCase().includes(query) ||
-      beneficiary.id.toString().toLowerCase().includes(query)
-    );
-  });
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as "selected" | "unselected");
+    setPage(1);
+  };
 
   const handleRowClick = (beneficiary: Beneficiary) => {
     setSelectedBeneficiary(beneficiary);
@@ -182,13 +306,13 @@ export function Phase1Selection() {
               <div>
                 <CardTitle className="text-2xl">Phase 1 Selection</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Total Beneficiaries: {beneficiaries.length} | Sorted by Eligibility Score (highest first)
+                  Total Beneficiaries: {totalCount.toLocaleString()} | Sorted by Eligibility Score (lowest first)
                 </p>
               </div>
             </div>
             {selectionHasRun && (
               <Badge variant="outline" className="border-primary text-primary ml-auto">
-                {selectedBens.length} Selected
+                {selectedCount.toLocaleString()} Selected
               </Badge>
             )}
           </CardHeader>
@@ -235,12 +359,25 @@ export function Phase1Selection() {
                   {runningSelection ? "Running..." : "Run Phase 1 Selection"}
                 </Button>
               </div>
+
+              <Button
+                variant="destructive"
+                onClick={() => setIsResetDialogOpen(true)}
+                disabled={resetting || loading}
+              >
+                {resetting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                )}
+                {resetting ? "Resetting..." : "Reset Selection"}
+              </Button>
             </div>
 
             {/* Search */}
             <Input
               type="text"
-              placeholder="Search by name, email, or ID..."
+              placeholder="Search by name or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="max-w-md"
@@ -254,43 +391,78 @@ export function Phase1Selection() {
               </div>
             ) : selectionHasRun ? (
               /* Tabbed view: Selected / Unselected */
-              <Tabs defaultValue="selected">
+              <Tabs value={activeTab} onValueChange={handleTabChange}>
                 <TabsList>
                   <TabsTrigger value="selected">
-                    Selected ({selectedBens.length})
+                    Selected ({selectedCount.toLocaleString()})
                   </TabsTrigger>
                   <TabsTrigger value="unselected">
-                    Unselected ({unselectedBens.length})
+                    Rejected ({unselectedCount.toLocaleString()})
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="selected">
-                  <BeneficiaryTable
-                    beneficiaries={selectedBens.filter(b => {
-                      const q = searchQuery.toLowerCase();
-                      return !q || b.name.toLowerCase().includes(q) || (b.email || "").toLowerCase().includes(q);
-                    })}
-                    onRowClick={handleRowClick}
+                  <BeneficiaryTable beneficiaries={beneficiaries} onRowClick={handleRowClick} />
+                  <PaginationControls
+                    page={page}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    onPrev={() => setPage((p) => Math.max(1, p - 1))}
+                    onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
                   />
                 </TabsContent>
                 <TabsContent value="unselected">
-                  <BeneficiaryTable
-                    beneficiaries={unselectedBens.filter(b => {
-                      const q = searchQuery.toLowerCase();
-                      return !q || b.name.toLowerCase().includes(q) || (b.email || "").toLowerCase().includes(q);
-                    })}
-                    onRowClick={handleRowClick}
+                  <BeneficiaryTable beneficiaries={beneficiaries} onRowClick={handleRowClick} />
+                  <PaginationControls
+                    page={page}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    onPrev={() => setPage((p) => Math.max(1, p - 1))}
+                    onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
                   />
                 </TabsContent>
               </Tabs>
             ) : (
               /* Single table before selection */
-              <BeneficiaryTable
-                beneficiaries={filteredBeneficiaries}
-                onRowClick={handleRowClick}
-              />
+              <>
+                <BeneficiaryTable beneficiaries={beneficiaries} onRowClick={handleRowClick} />
+                <PaginationControls
+                  page={page}
+                  totalPages={totalPages}
+                  totalCount={totalCount}
+                  onPrev={() => setPage((p) => Math.max(1, p - 1))}
+                  onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+                />
+              </>
             )}
           </CardContent>
         </Card>
+
+        {/* Reset Confirmation Dialog */}
+        <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reset Phase 1 Selection</DialogTitle>
+              <DialogDescription>
+                This will erase all eligibility scores, reset selection statuses to
+                "pending", and clear track assignments for all beneficiaries
+                (except test accounts). This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsResetDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleReset} disabled={resetting}>
+                {resetting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                )}
+                {resetting ? "Resetting..." : "Confirm Reset"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Candidate Information Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

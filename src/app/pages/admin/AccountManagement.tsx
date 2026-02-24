@@ -40,18 +40,28 @@ interface Account {
  * Derive a display status from the API's selection_status and track fields.
  */
 function deriveStatus(selectionStatus: string, track: string): string {
-  if (selectionStatus === "inactive" || selectionStatus === "rejected") {
-    return "Inactive";
-  }
+  if (selectionStatus === "rejected") return "Rejected";
   if (track === "employment") return "Emp Track";
   if (track === "entrepreneurship") return "Ent Track";
   if (selectionStatus === "selected") return "Selected";
-  if (selectionStatus === "phase1_selected" || selectionStatus === "registered") {
-    return "Phase1";
-  }
   if (selectionStatus === "pending") return "Pending";
   if (selectionStatus === "waitlist") return "Waitlist";
   return selectionStatus || "Pending";
+}
+
+/**
+ * Map a UI status filter value to API query params.
+ */
+function statusToApiParams(status: string): Record<string, string> {
+  switch (status) {
+    case "pending": return { selection_status: "pending" };
+    case "selected": return { selection_status: "selected" };
+    case "rejected": return { selection_status: "rejected" };
+    case "waitlist": return { selection_status: "waitlist" };
+    case "employment": return { track: "employment" };
+    case "entrepreneurship": return { track: "entrepreneurship" };
+    default: return {};
+  }
 }
 
 /**
@@ -109,16 +119,14 @@ const getStatusColor = (status: string) => {
       return "bg-blue-600 text-white";
     case "Ent Track":
       return "bg-purple-600 text-white";
-    case "Phase1":
-      return "bg-primary text-white";
     case "Selected":
       return "bg-green-600 text-white";
     case "Pending":
       return "bg-yellow-500 text-white";
     case "Waitlist":
       return "bg-orange-500 text-white";
-    case "Inactive":
-      return "bg-gray-200 text-gray-700";
+    case "Rejected":
+      return "bg-red-200 text-red-700";
     default:
       return "bg-gray-200 text-gray-700";
   }
@@ -149,7 +157,7 @@ export function AccountManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [genderFilters, setGenderFilters] = useState<string[]>(["M", "F"]);
-  const [statusFilters, setStatusFilters] = useState<string[]>(["Pending", "Selected", "Phase1", "Emp Track", "Ent Track", "Waitlist", "Inactive"]);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   // Debounce search input so we don't fire a request on every keystroke
   useEffect(() => {
@@ -160,6 +168,11 @@ export function AccountManagement() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Reset page when status filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter]);
+
   // Build API params from current filter/pagination state
   const buildParams = useCallback(() => {
     const params: Record<string, string> = {
@@ -169,8 +182,11 @@ export function AccountManagement() {
     if (debouncedSearch) {
       params.search = debouncedSearch;
     }
+    if (statusFilter !== "all") {
+      Object.assign(params, statusToApiParams(statusFilter));
+    }
     return params;
-  }, [page, debouncedSearch]);
+  }, [page, debouncedSearch, statusFilter]);
 
   // Fetch data from API
   const fetchAccounts = useCallback(async () => {
@@ -210,11 +226,9 @@ export function AccountManagement() {
     fetchAccounts();
   }, [fetchAccounts]);
 
-  // Client-side filter for gender and status (since API may not support these directly)
+  // Client-side filter for gender (status is now server-side)
   const filteredAccounts = accounts.filter((account) => {
-    const matchesGender = genderFilters.includes(account.gender);
-    const matchesStatus = statusFilters.includes(account.status);
-    return matchesGender && matchesStatus;
+    return genderFilters.includes(account.gender);
   });
 
   // Toggle gender filter
@@ -226,14 +240,6 @@ export function AccountManagement() {
     );
   };
 
-  // Toggle status filter
-  const toggleStatusFilter = (status: string) => {
-    setStatusFilters((prev) =>
-      prev.includes(status)
-        ? prev.filter((s) => s !== status)
-        : [...prev, status]
-    );
-  };
 
   const handleRowClick = async (account: Account) => {
     setSelectedAccount(account);
@@ -387,31 +393,20 @@ export function AccountManagement() {
                       </TableHead>
                       <TableHead>
                         <div className="flex items-center gap-2">
-                          Status
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                <Filter className="h-3 w-3" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-48">
-                              <div className="space-y-2">
-                                <Label className="font-semibold">Filter by Status</Label>
-                                {["Pending", "Selected", "Phase1", "Emp Track", "Ent Track", "Waitlist", "Inactive"].map((status) => (
-                                  <div key={status} className="flex items-center space-x-2">
-                                    <Checkbox
-                                      id={`status-${status}`}
-                                      checked={statusFilters.includes(status)}
-                                      onCheckedChange={() => toggleStatusFilter(status)}
-                                    />
-                                    <label htmlFor={`status-${status}`} className="text-sm cursor-pointer">
-                                      {status}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
+                          <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="h-7 w-[140px] text-xs">
+                              <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Statuses</SelectItem>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="selected">Selected</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                              <SelectItem value="employment">Emp Track</SelectItem>
+                              <SelectItem value="entrepreneurship">Ent Track</SelectItem>
+                              <SelectItem value="waitlist">Waitlist</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </TableHead>
                       <TableHead>Details</TableHead>

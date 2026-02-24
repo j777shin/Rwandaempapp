@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation, Outlet, useNavigate } from "react-router";
-import { 
-  Users, 
-  Settings, 
-  BarChart3, 
+import {
+  Users,
+  Settings,
+  BarChart3,
   UserCheck,
   Award,
   Building2,
@@ -15,7 +15,8 @@ import {
   LogOut,
   LayoutDashboard,
   Menu,
-  X
+  X,
+  ClipboardCheck,
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { useAuth } from "@/app/context/AuthContext";
@@ -34,8 +35,8 @@ export function AdminLayout() {
   const [expandedItems, setExpandedItems] = useState<string[]>(["General Management", "Phase 1 Management", "Phase 2 Management"]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/");
   };
 
@@ -51,7 +52,7 @@ export function AdminLayout() {
       children: [
         { title: "Data Registration", path: "/admin/registration" },
         { title: "Account Management", path: "/admin/accounts" },
-        { title: "Analytics", path: "/admin/analytics" },
+        { title: "Analytics", path: "/admin/analysis" },
         { title: "Survey Results", path: "/admin/surveys" },
       ]
     },
@@ -82,7 +83,12 @@ export function AdminLayout() {
     );
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    if (path.includes("?")) {
+      return location.pathname + location.search === path;
+    }
+    return location.pathname === path;
+  };
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">

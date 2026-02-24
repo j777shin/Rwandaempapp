@@ -89,9 +89,14 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
   getMe: () => request<any>("/auth/me"),
+  logout: () => request<any>("/auth/logout", { method: "POST" }),
 
   // Beneficiary Dashboard
   getDashboard: () => request<any>("/beneficiary/dashboard"),
+
+  // Employment Status
+  updateEmploymentStatus: (data: { status: string; hired_company_name?: string; self_employed_description?: string }) =>
+    request<any>("/beneficiary/dashboard/employment-status", { method: "POST", body: JSON.stringify(data) }),
 
   // SkillCraft
   getSkillcraftStatus: () => request<any>("/beneficiary/skillcraft/status"),
@@ -114,6 +119,16 @@ export const api = {
     request<any>("/beneficiary/chatbot/message", {
       method: "POST",
       body: JSON.stringify({ message, conversation_history: conversationHistory }),
+    }),
+  finishChatbotStage: (conversationHistory: { message: string; is_user: boolean }[] = []) =>
+    request<any>("/beneficiary/chatbot/finish-stage", {
+      method: "POST",
+      body: JSON.stringify({ conversation_history: conversationHistory }),
+    }),
+  goToChatbotStage: (stageNumber: number) =>
+    request<any>("/beneficiary/chatbot/go-to-stage", {
+      method: "POST",
+      body: JSON.stringify({ stage_number: stageNumber }),
     }),
   getChatbotStages: () => request<any>("/beneficiary/chatbot/stages"),
   getChatbotReport: () => request<any>("/beneficiary/chatbot/report"),
@@ -164,12 +179,21 @@ export const api = {
       body: JSON.stringify({ beneficiary_ids, track }),
     }),
   adminGetEligibilityStats: () => request<any>("/admin/selection/eligibility/stats"),
+  adminResetSelection: () =>
+    request<any>("/admin/selection/reset", { method: "POST" }),
+  adminResetPhase2: () =>
+    request<any>("/admin/selection/reset-phase2", { method: "POST" }),
+  adminApplyPhase1Results: () =>
+    request<any>("/admin/selection/apply-phase1-results", { method: "POST" }),
+  adminRunPhase2Selection: () =>
+    request<any>("/admin/selection/run-phase2", { method: "POST" }),
 
   // Admin - Analytics
   adminGetOverview: () => request<any>("/admin/analytics/overview"),
   adminGetDemographics: () => request<any>("/admin/analytics/demographics"),
   adminGetEngagement: () => request<any>("/admin/analytics/engagement"),
   adminGetSocioeconomic: () => request<any>("/admin/analytics/socioeconomic"),
+  adminGetImpactDashboard: () => request<any>("/admin/analytics/impact"),
 
   // Admin - Chatbot Analytics
   adminGetChatbotAnalytics: () => request<any>("/admin/chatbot/analytics"),
@@ -190,6 +214,8 @@ export const api = {
     request<any>(`/admin/surveys/${surveyType}/stats`),
   adminGetSurveyInsights: (surveyType: string) =>
     request<any>(`/admin/surveys/${surveyType}/insights`),
+  adminGetSurveyAnalytics: (surveyType: string) =>
+    request<any>(`/admin/surveys/${surveyType}/analytics`),
   adminGetSurveyResponse: (surveyType: string, responseId: string) =>
     request<any>(`/admin/surveys/${surveyType}/${responseId}`),
   adminExportSurveyResults: (surveyType: string) =>

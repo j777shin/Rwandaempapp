@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, Outlet, useNavigate } from "react-router";
 import {
   Home,
@@ -17,6 +17,7 @@ import {
   User,
   GraduationCap,
   Lightbulb,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
@@ -47,10 +48,13 @@ export function BeneficiaryLayout() {
     phase2Track: beneficiary?.track || null,
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/");
   };
+
+  const isEmploymentTrack = user.phase2Track === "employment" || user.phase2Track === "both";
+  const isEntrepreneurshipTrack = user.phase2Track === "entrepreneurship" || user.phase2Track === "both";
 
   const menuItems: MenuItem[] = [
     {
@@ -65,27 +69,48 @@ export function BeneficiaryLayout() {
         { title: "SkillCraft Test", path: "/beneficiary/skillcraft" },
         { title: "Pathways", path: "/beneficiary/pathways" },
         { title: "Business Development", path: "/beneficiary/business-development" },
-        { title: "Completion Survey", path: "/beneficiary/phase1-survey" },
+        { title: "Completion Survey", path: "/beneficiary/survey?type=phase1" },
       ]
     },
     {
       title: "Phase 2: Employment",
       icon: Building2,
+      locked: !isEmploymentTrack,
       children: [
         { title: "Pathways Deep Dive", path: "/beneficiary/pathways-deepdive" },
-        { title: "Completion Survey", path: "/beneficiary/employment-survey" },
+        { title: "Completion Survey", path: "/beneficiary/survey?type=employment" },
       ]
     },
     {
       title: "Phase 2: Entrepreneur",
       icon: Briefcase,
+      locked: !isEntrepreneurshipTrack,
       children: [
         { title: "Business Chatbot", path: "/beneficiary/chatbot" },
         { title: "Results & Reports", path: "/beneficiary/results" },
-        { title: "Completion Survey", path: "/beneficiary/entrepreneurship-survey" },
+        { title: "Completion Survey", path: "/beneficiary/survey?type=entrepreneurship" },
       ]
     }
   ];
+
+  // Route-level protection: redirect if accessing a locked phase via URL
+  const employmentPaths = ["/beneficiary/pathways-deepdive"];
+  const entrepreneurPaths = ["/beneficiary/chatbot", "/beneficiary/results"];
+  const currentPath = location.pathname;
+  const currentSearch = location.search;
+
+  useEffect(() => {
+    const isEmploymentRoute = employmentPaths.some(p => currentPath === p) ||
+      (currentPath === "/beneficiary/survey" && currentSearch === "?type=employment");
+    const isEntrepreneurRoute = entrepreneurPaths.some(p => currentPath === p) ||
+      (currentPath === "/beneficiary/survey" && currentSearch === "?type=entrepreneurship");
+
+    if (isEmploymentRoute && !isEmploymentTrack) {
+      navigate("/beneficiary", { replace: true });
+    } else if (isEntrepreneurRoute && !isEntrepreneurshipTrack) {
+      navigate("/beneficiary", { replace: true });
+    }
+  }, [currentPath, currentSearch, isEmploymentTrack, isEntrepreneurshipTrack, navigate]);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems(prev =>
@@ -95,7 +120,12 @@ export function BeneficiaryLayout() {
     );
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    if (path.includes("?")) {
+      return location.pathname + location.search === path;
+    }
+    return location.pathname === path;
+  };
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -146,7 +176,9 @@ export function BeneficiaryLayout() {
                           {item.badge}
                         </Badge>
                       )}
-                      {!item.locked && (
+                      {item.locked ? (
+                        <Lock className="w-3.5 h-3.5 text-white/40" />
+                      ) : (
                         expandedItems.includes(item.title) ? (
                           <ChevronDown className="w-4 h-4" />
                         ) : (

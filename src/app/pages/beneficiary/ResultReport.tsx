@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
-import { Download, Target, FileText, Loader2, MessageCircle, CheckCircle2 } from "lucide-react";
+import { Download, FileText, Loader2, MessageCircle, CheckCircle2 } from "lucide-react";
 import { api } from "@/app/lib/api";
 
 interface StageSummary {
@@ -62,7 +62,7 @@ export function ResultReport() {
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Results & Report</h1>
           <p className="text-muted-foreground">
-            Your business development goal and entrepreneurship assessment results
+            Your entrepreneurship assessment results
           </p>
         </div>
         {hasReport && (
@@ -72,25 +72,6 @@ export function ResultReport() {
           </Button>
         )}
       </div>
-
-      {/* Business Development Goal */}
-      {report?.business_development_goal && (
-        <Card className="border-border bg-white">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-foreground">
-              <Target className="w-5 h-5 text-primary" />
-              Your Business Development Goal
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-              <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">
-                {report.business_development_goal}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Stage Summaries */}
       {stageSummaries.length > 0 ? (

@@ -15,38 +15,38 @@ export function CandidateRegistration() {
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     // Personal Information
-    name: "",
-    age: "",
-    gender: "",
-    contact: "",
-    
+    name: "Uwimana Ishimwe",
+    age: "24",
+    gender: "female",
+    contact: "+250788123456",
+
     // Household Information
     marriage_status: false,
     disability: false,
-    education_level: "",
-    occupation: false,
-    informal_working: false,
-    
+    education_level: "secondary",
+    occupation: true,
+    informal_working: true,
+
     // Livestock Assets
     num_cows: "0",
-    num_goats: "0",
+    num_goats: "2",
     num_chickens: "0",
     num_sheep: "0",
-    num_pigs: "0",
+    num_pigs: "1",
     num_rabbits: "0",
-    
+
     // Land & Housing
-    land_ownership: false,
-    land_size: "0",
-    num_radio: "0",
-    num_phone: "0",
+    land_ownership: true,
+    land_size: "0.5",
+    num_radio: "1",
+    num_phone: "1",
     num_tv: "0",
-    fuel: "",
-    water_source: "",
+    fuel: "EU4",
+    water_source: "WS1",
     floor: false,
-    roof: false,
+    roof: true,
     walls: false,
-    toilet: false,
+    toilet: true,
   });
 
   const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

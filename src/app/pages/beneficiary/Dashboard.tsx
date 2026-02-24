@@ -1,7 +1,8 @@
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { BookOpen, Route, Trophy, MessageCircle, FileText, LogOut, Lock, CheckCircle2, GraduationCap, Briefcase, Building2, Lightbulb, Loader2, ClipboardList } from "lucide-react";
+import { BookOpen, Route, Trophy, MessageCircle, FileText, LogOut, Lock, CheckCircle2, GraduationCap, Briefcase, Building2, Lightbulb, Loader2, ClipboardList, Save } from "lucide-react";
+import { Textarea } from "@/app/components/ui/textarea";
 import { Progress } from "@/app/components/ui/progress";
 import { Badge } from "@/app/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/app/components/ui/alert";
@@ -13,18 +14,39 @@ export function BeneficiaryDashboard() {
   const [dashboard, setDashboard] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [employmentStatus, setEmploymentStatus] = useState<"self-employed" | "hired" | null>(null);
+  const [hiredCompanyName, setHiredCompanyName] = useState("");
+  const [selfEmployedDescription, setSelfEmployedDescription] = useState("");
+  const [savingStatus, setSavingStatus] = useState(false);
+  const [statusSaved, setStatusSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState("training");
 
   useEffect(() => {
     loadDashboard();
   }, []);
+
+  // Set active tab based on user's track assignment once data loads
+  useEffect(() => {
+    if (!dashboard) return;
+    const ben = dashboard.beneficiary || {};
+    if (ben.selection_status === "selected" && ben.track === "employment") setActiveTab("employment");
+    else if (ben.selection_status === "selected" && ben.track === "entrepreneurship") setActiveTab("entrepreneurship");
+    else setActiveTab("training");
+  }, [dashboard]);
 
   const loadDashboard = async () => {
     try {
       const data = await api.getDashboard();
       setDashboard(data);
       // Initialize employment status from API data
-      if (data.beneficiary?.employment_status) {
-        setEmploymentStatus(data.beneficiary.employment_status);
+      const p2 = data.phase2 || {};
+      if (p2.hired) {
+        setEmploymentStatus("hired");
+        setHiredCompanyName(p2.hired_company_name || "");
+        setStatusSaved(true);
+      } else if (p2.self_employed) {
+        setEmploymentStatus("self-employed");
+        setSelfEmployedDescription(p2.self_employed_description || "");
+        setStatusSaved(true);
       }
     } catch (err) {
       console.error("Failed to load dashboard:", err);
@@ -43,19 +65,19 @@ export function BeneficiaryDashboard() {
 
   // Derive user data from dashboard API response
   const beneficiary = dashboard?.beneficiary || {};
-  const phase1 = dashboard?.phase1_progress || {};
-  const phase2 = dashboard?.phase2_status || {};
+  const phase1 = dashboard?.phase1 || {};
+  const phase2 = dashboard?.phase2 || {};
 
   const user = {
     name: beneficiary.name || `${beneficiary.first_name || ""} ${beneficiary.last_name || ""}`.trim() || "User",
     email: beneficiary.email || "",
     skillCraftCompleted: !!phase1.skillcraft_score,
     skillCraftScore: phase1.skillcraft_score,
-    pathwaysProgress: phase1.pathways_completion || 0,
-    businessDevelopmentCompleted: !!beneficiary.business_development_text,
-    currentPhase: beneficiary.selection_status === "phase2_selected" ? 2 : 1,
+    pathwaysProgress: phase1.pathways_completion_rate || 0,
+    businessDevelopmentCompleted: !!phase1.business_dev_completed,
+    currentPhase: beneficiary.selection_status === "selected" ? 2 : 1,
     phase2Track: beneficiary.track || null,
-    selectedForPhase2: beneficiary.selection_status === "phase2_selected",
+    selectedForPhase2: beneficiary.selection_status === "selected",
   };
 
   const phase1Features = [
@@ -81,7 +103,7 @@ export function BeneficiaryDashboard() {
       title: "Completion Survey",
       description: "Complete the Phase 1 satisfaction survey",
       icon: ClipboardList,
-      link: "/beneficiary/phase1-survey",
+      link: "/beneficiary/survey?type=phase1",
     },
   ];
 
@@ -96,7 +118,7 @@ export function BeneficiaryDashboard() {
       title: "Completion Survey",
       description: "Complete the Employment track satisfaction survey",
       icon: ClipboardList,
-      link: "/beneficiary/employment-survey",
+      link: "/beneficiary/survey?type=employment",
     },
   ];
 
@@ -117,15 +139,37 @@ export function BeneficiaryDashboard() {
       title: "Completion Survey",
       description: "Complete the Entrepreneurship track satisfaction survey",
       icon: ClipboardList,
-      link: "/beneficiary/entrepreneurship-survey",
+      link: "/beneficiary/survey?type=entrepreneurship",
     },
   ];
 
-  const defaultTab = user.selectedForPhase2 && user.phase2Track === "employment"
-    ? "employment"
-    : user.selectedForPhase2 && user.phase2Track === "entrepreneurship"
-    ? "entrepreneurship"
-    : "training";
+  const handleTabChange = (value: string) => {
+    // Phase 1 user can only access training
+    if (!user.selectedForPhase2 && value !== "training") return;
+    // Phase 2 user can only access their assigned track
+    if (user.selectedForPhase2 && value === "training") return;
+    if (user.selectedForPhase2 && user.phase2Track === "employment" && value === "entrepreneurship") return;
+    if (user.selectedForPhase2 && user.phase2Track === "entrepreneurship" && value === "employment") return;
+    setActiveTab(value);
+  };
+
+  const handleSaveEmploymentStatus = async () => {
+    if (!employmentStatus) return;
+    setSavingStatus(true);
+    setStatusSaved(false);
+    try {
+      await api.updateEmploymentStatus({
+        status: employmentStatus,
+        hired_company_name: employmentStatus === "hired" ? hiredCompanyName : undefined,
+        self_employed_description: employmentStatus === "self-employed" ? selfEmployedDescription : undefined,
+      });
+      setStatusSaved(true);
+    } catch (err) {
+      console.error("Failed to save employment status:", err);
+    } finally {
+      setSavingStatus(false);
+    }
+  };
 
   return (
     <div className="p-8 space-y-6 bg-background">
@@ -229,10 +273,12 @@ export function BeneficiaryDashboard() {
                     type="checkbox"
                     checked={employmentStatus === "self-employed"}
                     onChange={(e) => {
+                      setStatusSaved(false);
                       if (e.target.checked) {
                         setEmploymentStatus("self-employed");
                       } else {
                         setEmploymentStatus(null);
+                        setSelfEmployedDescription("");
                       }
                     }}
                     className="w-5 h-5 cursor-pointer appearance-none border-2 border-neutral-300 rounded checked:bg-primary checked:border-primary relative"
@@ -260,10 +306,12 @@ export function BeneficiaryDashboard() {
                     type="checkbox"
                     checked={employmentStatus === "hired"}
                     onChange={(e) => {
+                      setStatusSaved(false);
                       if (e.target.checked) {
                         setEmploymentStatus("hired");
                       } else {
                         setEmploymentStatus(null);
+                        setHiredCompanyName("");
                       }
                     }}
                     className="w-5 h-5 cursor-pointer appearance-none border-2 border-neutral-300 rounded checked:bg-primary checked:border-primary relative"
@@ -284,12 +332,52 @@ export function BeneficiaryDashboard() {
               </label>
             </div>
 
+            {employmentStatus === "hired" && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-foreground mb-2">Company Name</label>
+                <Textarea
+                  value={hiredCompanyName}
+                  onChange={(e) => { setHiredCompanyName(e.target.value); setStatusSaved(false); }}
+                  placeholder="Enter the name of the company you were hired at..."
+                  className="resize-none"
+                  rows={2}
+                />
+              </div>
+            )}
+
+            {employmentStatus === "self-employed" && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-foreground mb-2">Business Description</label>
+                <Textarea
+                  value={selfEmployedDescription}
+                  onChange={(e) => { setSelfEmployedDescription(e.target.value); setStatusSaved(false); }}
+                  placeholder="Describe the business you started..."
+                  className="resize-none"
+                  rows={3}
+                />
+              </div>
+            )}
+
             {employmentStatus && (
-              <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
-                <p className="text-sm text-foreground">
-                  <CheckCircle2 className="w-4 h-4 text-primary inline mr-2" />
-                  Your employment status has been updated to <span className="font-semibold">{employmentStatus === "self-employed" ? "Self-Employed" : "Hired"}</span>
-                </p>
+              <div className="mt-4 flex items-center gap-3">
+                <Button
+                  onClick={handleSaveEmploymentStatus}
+                  disabled={savingStatus || (employmentStatus === "hired" && !hiredCompanyName.trim()) || (employmentStatus === "self-employed" && !selfEmployedDescription.trim())}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  {savingStatus ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  Save
+                </Button>
+                {statusSaved && (
+                  <p className="text-sm text-green-600 flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Employment status saved
+                  </p>
+                )}
               </div>
             )}
           </CardContent>
@@ -297,49 +385,59 @@ export function BeneficiaryDashboard() {
       </section>
 
       {/* Tab-based Phase Selection */}
-      <Tabs defaultValue={defaultTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-3 bg-neutral-100">
-          <TabsTrigger value="training" className="data-[state=active]:bg-white">
-            <GraduationCap className="w-4 h-4 mr-2" />
+          <TabsTrigger value="training" disabled={user.selectedForPhase2} className="data-[state=active]:bg-white data-[disabled]:opacity-50">
+            {user.selectedForPhase2 ? <Lock className="w-4 h-4 mr-2" /> : <GraduationCap className="w-4 h-4 mr-2" />}
             Training (Phase 1)
           </TabsTrigger>
-          <TabsTrigger value="employment" disabled={!user.selectedForPhase2 || user.phase2Track !== "employment"} className="data-[state=active]:bg-white disabled:opacity-50">
-            <Building2 className="w-4 h-4 mr-2" />
+          <TabsTrigger value="employment" disabled={!user.selectedForPhase2 || user.phase2Track !== "employment"} className="data-[state=active]:bg-white data-[disabled]:opacity-50">
+            {!user.selectedForPhase2 || user.phase2Track !== "employment" ? <Lock className="w-4 h-4 mr-2" /> : <Building2 className="w-4 h-4 mr-2" />}
             Employment (Phase 2)
           </TabsTrigger>
-          <TabsTrigger value="entrepreneurship" disabled={!user.selectedForPhase2 || user.phase2Track !== "entrepreneurship"} className="data-[state=active]:bg-white disabled:opacity-50">
-            <Briefcase className="w-4 h-4 mr-2" />
+          <TabsTrigger value="entrepreneurship" disabled={!user.selectedForPhase2 || user.phase2Track !== "entrepreneurship"} className="data-[state=active]:bg-white data-[disabled]:opacity-50">
+            {!user.selectedForPhase2 || user.phase2Track !== "entrepreneurship" ? <Lock className="w-4 h-4 mr-2" /> : <Briefcase className="w-4 h-4 mr-2" />}
             Entrepreneurship (Phase 2)
           </TabsTrigger>
         </TabsList>
 
         {/* Phase 1: Training Tab */}
         <TabsContent value="training" className="mt-6">
-          <Card className="border-border bg-white">
-            <CardHeader>
-              <CardTitle className="text-foreground">Phase 1: Training & Assessment</CardTitle>
-              <CardDescription>Complete your skills assessment and explore career pathways</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {phase1Features.map((feature, index) => (
-                  <Link key={index} to={feature.link}>
-                    <Card className="hover:shadow-md transition-all cursor-pointer border-border hover:border-primary/50 h-full">
-                      <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                        <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
-                          <feature.icon className="w-8 h-8 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold mb-2 text-foreground">{feature.title}</h3>
-                          <p className="text-sm text-muted-foreground">{feature.description}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          {!user.selectedForPhase2 ? (
+            <Card className="border-border bg-white">
+              <CardHeader>
+                <CardTitle className="text-foreground">Phase 1: Training & Assessment</CardTitle>
+                <CardDescription>Complete your skills assessment and explore career pathways</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {phase1Features.map((feature, index) => (
+                    <Link key={index} to={feature.link}>
+                      <Card className="hover:shadow-md transition-all cursor-pointer border-border hover:border-primary/50 h-full">
+                        <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+                          <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
+                            <feature.icon className="w-8 h-8 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold mb-2 text-foreground">{feature.title}</h3>
+                            <p className="text-sm text-muted-foreground">{feature.description}</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Alert className="border-border bg-white">
+              <Lock className="h-5 w-5 text-neutral-500" />
+              <AlertTitle className="text-foreground">Phase 1 Completed</AlertTitle>
+              <AlertDescription className="text-muted-foreground">
+                You have been selected for Phase 2. Phase 1 resources are no longer accessible.
+              </AlertDescription>
+            </Alert>
+          )}
         </TabsContent>
 
         {/* Phase 2: Employment Track Tab */}

@@ -23,7 +23,7 @@ interface AuthContextType {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<UserData>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -37,9 +37,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"));
   const [loading, setLoading] = useState(false);
 
-  // Verify token on mount
+  // Always refresh user data on mount to ensure beneficiary data is current
   useEffect(() => {
-    if (token && !user) {
+    if (token) {
       refreshUser().catch(() => logout());
     }
   }, []);
@@ -58,7 +58,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Call backend to reset test account data before clearing local state
+    try {
+      await api.logout();
+    } catch {
+      // Ignore errors (e.g. expired token) — still clear local state
+    }
     setToken(null);
     setUser(null);
     localStorage.removeItem("token");

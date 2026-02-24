@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { ArrowLeft, Loader2, Search, RefreshCw, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, Loader2, Search, CheckCircle2, Clock } from "lucide-react";
 import { Badge } from "@/app/components/ui/badge";
 import { Input } from "@/app/components/ui/input";
 import { api } from "@/app/lib/api";
@@ -51,9 +51,6 @@ export function BeneficiaryProgress() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [syncing, setSyncing] = useState(false);
-  const [syncResult, setSyncResult] = useState<string | null>(null);
-
   useEffect(() => {
     let cancelled = false;
     async function fetch() {
@@ -77,23 +74,6 @@ export function BeneficiaryProgress() {
     return () => { cancelled = true; };
   }, []);
 
-  async function handleSyncPathways() {
-    try {
-      setSyncing(true);
-      setSyncResult(null);
-      const result = await api.adminSyncPathways();
-      setSyncResult(`Synced: ${result.matched} matched, ${result.updated} updated`);
-      // Reload beneficiaries to show updated rates
-      const data = await api.adminListBeneficiaries({ page_size: "10000", selection_status: "selected" });
-      const mapped = (data.items || data.beneficiaries || []).map(mapApiBeneficiary);
-      setBeneficiaries(mapped);
-    } catch (err: any) {
-      setSyncResult(`Sync failed: ${err.message}`);
-    } finally {
-      setSyncing(false);
-    }
-  }
-
   const filteredList = beneficiaries.filter(b => {
     const q = search.toLowerCase();
     return !q || b.name.toLowerCase().includes(q) || b.email.toLowerCase().includes(q);
@@ -113,22 +93,9 @@ export function BeneficiaryProgress() {
 
         <Card className="mb-6">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-2xl">Progress View</CardTitle>
-                <CardDescription>View selected beneficiaries and their progress details</CardDescription>
-              </div>
-              <div className="flex items-center gap-3">
-                {syncResult && (
-                  <span className={`text-sm ${syncResult.startsWith("Sync failed") ? "text-destructive" : "text-green-600"}`}>
-                    {syncResult}
-                  </span>
-                )}
-                <Button onClick={handleSyncPathways} disabled={syncing} variant="outline">
-                  <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
-                  {syncing ? "Syncing..." : "Sync Pathways"}
-                </Button>
-              </div>
+            <div>
+              <CardTitle className="text-2xl">Progress View</CardTitle>
+              <CardDescription>View selected beneficiaries and their progress details</CardDescription>
             </div>
           </CardHeader>
         </Card>

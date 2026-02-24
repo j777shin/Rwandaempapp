@@ -10,9 +10,7 @@ import { EligibilityScore } from "@/app/pages/beneficiary/EligibilityScore";
 import { ChatbotPage } from "@/app/pages/beneficiary/ChatbotPage";
 import { ResultReport } from "@/app/pages/beneficiary/ResultReport";
 import { BusinessDevelopment } from "@/app/pages/beneficiary/BusinessDevelopment";
-import { Phase1Survey } from "@/app/pages/beneficiary/Phase1Survey";
-import { EmploymentSurvey } from "@/app/pages/beneficiary/EmploymentSurvey";
-import { EntrepreneurshipSurvey } from "@/app/pages/beneficiary/EntrepreneurshipSurvey";
+import { SurveyPage } from "@/app/pages/beneficiary/SurveyPage";
 import { AdminLayout } from "@/app/components/AdminLayout";
 import { AdminDashboard } from "@/app/pages/admin/Dashboard";
 import { DataRegistration } from "@/app/pages/admin/DataRegistration";
@@ -31,6 +29,7 @@ import { Phase1Dashboard } from "@/app/pages/admin/Phase1Dashboard";
 import { Phase2Dashboard } from "@/app/pages/admin/Phase2Dashboard";
 import { Phase1Selection } from "@/app/pages/admin/Phase1Selection";
 import { SurveyResults } from "@/app/pages/admin/SurveyResults";
+import { AnalysisDashboard } from "@/app/pages/admin/AnalysisDashboard";
 import { NotFound } from "@/app/pages/NotFound";
 
 export const router = createBrowserRouter([
@@ -51,9 +50,7 @@ export const router = createBrowserRouter([
           { path: "chatbot", Component: ChatbotPage },
           { path: "results", Component: ResultReport },
           { path: "business-development", Component: BusinessDevelopment },
-          { path: "phase1-survey", Component: Phase1Survey },
-          { path: "employment-survey", Component: EmploymentSurvey },
-          { path: "entrepreneurship-survey", Component: EntrepreneurshipSurvey },
+          { path: "survey", Component: SurveyPage },
         ],
       },
       {
@@ -77,6 +74,7 @@ export const router = createBrowserRouter([
           { path: "analytics", Component: Analytics },
           { path: "phase1-selection", Component: Phase1Selection },
           { path: "surveys", Component: SurveyResults },
+          { path: "analysis", Component: AnalysisDashboard },
         ],
       },
       { path: "*", Component: NotFound },

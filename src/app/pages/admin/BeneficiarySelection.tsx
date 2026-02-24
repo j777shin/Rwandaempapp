@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table";
-import { ArrowLeft, UserCheck, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, UserCheck, Loader2, RotateCcw, ChevronLeft, ChevronRight, Play, Sparkles } from "lucide-react";
 import { Input } from "@/app/components/ui/input";
 import { Badge } from "@/app/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { api } from "@/app/lib/api";
 
 interface Beneficiary {
@@ -38,62 +39,160 @@ function mapApiBeneficiary(raw: any): Beneficiary {
   };
 }
 
+const PAGE_SIZE = 50;
+
 export function BeneficiarySelection() {
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [assigning, setAssigning] = useState(false);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
-  const loadBeneficiaries = async () => {
+  // Action loading states
+  const [applying, setApplying] = useState(false);
+  const [selecting, setSelecting] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  // Summary counts
+  const [entApplicants, setEntApplicants] = useState(0);
+  const [empTrackCount, setEmpTrackCount] = useState(0);
+  const [entTrackCount, setEntTrackCount] = useState(0);
+  const [hasResults, setHasResults] = useState(false);
+
+  // Search with debounce
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Build API params
+  const buildParams = useCallback(() => {
+    const params: Record<string, string> = {
+      selection_status: "selected",
+      page: String(page),
+      page_size: String(PAGE_SIZE),
+    };
+    if (debouncedSearch) {
+      params.search = debouncedSearch;
+    }
+    return params;
+  }, [page, debouncedSearch]);
+
+  // Fetch beneficiaries
+  const loadBeneficiaries = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await api.adminListBeneficiaries({
-        selection_status: "selected",
-        page_size: "10000",
-      });
-      const mapped = (data.items ?? data.beneficiaries ?? []).map(mapApiBeneficiary);
+      const params = buildParams();
+      const data = await api.adminListBeneficiaries(params);
+
+      let items: any[];
+      if (Array.isArray(data)) {
+        items = data;
+        setTotalCount(data.length);
+      } else if (data.items) {
+        items = data.items;
+        setTotalCount(data.total ?? data.count ?? data.items.length);
+      } else {
+        items = [];
+        setTotalCount(0);
+      }
+
+      const mapped = items.map(mapApiBeneficiary);
       setBeneficiaries(mapped);
+
+      // Detect if phase 1 results have been applied (any beneficiary has skillcraft > 0)
+      const anyScored = mapped.some((b) => b.skillcraftScore > 0);
+      setHasResults(anyScored);
     } catch (err: any) {
       setError(err.message || "Failed to load beneficiaries");
     } finally {
       setLoading(false);
     }
-  };
+  }, [buildParams]);
 
-  useEffect(() => {
-    loadBeneficiaries();
+  // Fetch summary counts
+  const loadSummary = useCallback(async () => {
+    try {
+      const results = await api.adminGetSelectionResults();
+      setEntApplicants(0); // Will be updated from page data
+      setEmpTrackCount(results.track_counts?.employment ?? 0);
+      setEntTrackCount(results.track_counts?.entrepreneurship ?? 0);
+    } catch {
+      // Non-critical, ignore
+    }
   }, []);
 
-  const filteredBeneficiaries = beneficiaries.filter(b => {
-    const q = searchQuery.toLowerCase();
-    return !q || b.name.toLowerCase().includes(q) || b.email.toLowerCase().includes(q);
-  });
+  // Load on mount and param changes
+  useEffect(() => {
+    loadBeneficiaries();
+  }, [loadBeneficiaries]);
 
-  const toggleSelection = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  useEffect(() => {
+    loadSummary();
+  }, [loadSummary]);
+
+  const handleApplyResults = async () => {
+    try {
+      setApplying(true);
+      setError(null);
+      setActionMessage(null);
+      const result = await api.adminApplyPhase1Results();
+      setActionMessage(
+        `Phase 1 results applied: ${result.updated?.toLocaleString()} beneficiaries updated, ${result.ent_applicants?.toLocaleString()} applied for entrepreneurship`
+      );
+      setPage(1);
+      await Promise.all([loadBeneficiaries(), loadSummary()]);
+    } catch (err: any) {
+      setError(err.message || "Failed to apply Phase 1 results");
+    } finally {
+      setApplying(false);
+    }
   };
 
-  const handleAssignTrack = async (track: string) => {
-    const ids = Array.from(selectedIds);
-    if (ids.length === 0) return;
+  const handleRunSelection = async () => {
     try {
-      setAssigning(true);
-      await api.adminAssignTracks(ids, track);
-      await loadBeneficiaries();
-      setSelectedIds(new Set());
+      setSelecting(true);
+      setError(null);
+      setActionMessage(null);
+      const result = await api.adminRunPhase2Selection();
+      setActionMessage(
+        `Phase 2 selection complete: ${result.entrepreneurship?.toLocaleString()} → Entrepreneurship, ${result.employment?.toLocaleString()} → Employment`
+      );
+      setPage(1);
+      await Promise.all([loadBeneficiaries(), loadSummary()]);
     } catch (err: any) {
-      setError(err.message || `Failed to assign to ${track} track`);
+      setError(err.message || "Failed to run Phase 2 selection");
     } finally {
-      setAssigning(false);
+      setSelecting(false);
+    }
+  };
+
+  const handleResetPhase2 = async () => {
+    try {
+      setResetting(true);
+      setError(null);
+      setActionMessage(null);
+      await api.adminResetPhase2();
+      setActionMessage("Phase 2 reset complete — all generated data cleared");
+      setIsResetDialogOpen(false);
+      setPage(1);
+      await Promise.all([loadBeneficiaries(), loadSummary()]);
+    } catch (err: any) {
+      setError(err.message || "Failed to reset Phase 2");
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -102,6 +201,8 @@ export function BeneficiarySelection() {
     if (t === "entrepreneurship") return "Entrepreneurship";
     return "—";
   };
+
+  const anyActionRunning = applying || selecting || resetting;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -122,53 +223,109 @@ export function BeneficiarySelection() {
               <div>
                 <CardTitle className="text-2xl">Phase 2 Selection</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Total: {beneficiaries.length} selected beneficiaries
+                  {totalCount.toLocaleString()} selected beneficiaries
                 </p>
               </div>
             </div>
-            {selectedIds.size > 0 && (
-              <Badge variant="outline" className="border-primary text-primary ml-auto">
-                {selectedIds.size} Selected
-              </Badge>
-            )}
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                onClick={handleApplyResults}
+                disabled={anyActionRunning}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {applying ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 mr-2" />
+                )}
+                {applying ? "Applying..." : "Apply Phase 1 Results"}
+              </Button>
+              <Button
+                onClick={handleRunSelection}
+                disabled={anyActionRunning || !hasResults}
+                className="bg-green-600 hover:bg-green-700"
+                title={!hasResults ? "Apply Phase 1 Results first" : ""}
+              >
+                {selecting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 mr-2" />
+                )}
+                {selecting ? "Selecting..." : "Run Selection"}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => setIsResetDialogOpen(true)}
+                disabled={anyActionRunning}
+              >
+                {resetting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                )}
+                {resetting ? "Resetting..." : "Reset Phase 2"}
+              </Button>
+            </div>
+
+            {/* Messages */}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between">
                 <span>{error}</span>
                 <Button variant="ghost" size="sm" onClick={() => setError(null)}>Dismiss</Button>
               </div>
             )}
+            {actionMessage && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center justify-between">
+                <span>{actionMessage}</span>
+                <Button variant="ghost" size="sm" onClick={() => setActionMessage(null)}>Dismiss</Button>
+              </div>
+            )}
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <Input
-                type="text"
-                placeholder="Search by name or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="max-w-md"
-              />
-              {selectedIds.size > 0 && (
-                <div className="flex items-center gap-2 ml-auto">
-                  <Button
-                    onClick={() => handleAssignTrack("employment")}
-                    disabled={assigning}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    {assigning && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Assign Employment
-                  </Button>
-                  <Button
-                    onClick={() => handleAssignTrack("entrepreneurship")}
-                    disabled={assigning}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    {assigning && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Assign Entrepreneurship
-                  </Button>
-                </div>
-              )}
-            </div>
+            {/* Summary Cards */}
+            {(hasResults || empTrackCount > 0 || entTrackCount > 0) && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">Total Selected</p>
+                    <p className="text-2xl font-bold text-primary">{totalCount.toLocaleString()}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">Ent. Applicants</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {beneficiaries.filter((b) => b.wantsEntrepreneurship).length > 0
+                        ? "~70%"
+                        : "0"}
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">Employment Track</p>
+                    <p className="text-2xl font-bold text-blue-600">{empTrackCount.toLocaleString()}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">Entrepreneurship Track</p>
+                    <p className="text-2xl font-bold text-green-600">{entTrackCount.toLocaleString()}</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Search */}
+            <Input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="max-w-md"
+            />
 
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20">
@@ -176,55 +333,44 @@ export function BeneficiarySelection() {
                 <p className="text-muted-foreground">Loading beneficiaries...</p>
               </div>
             ) : (
-              <div className="border rounded-lg overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-8"></TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Age</TableHead>
-                      <TableHead>Gender</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead className="text-center">SkillCraft</TableHead>
-                      <TableHead className="text-center">Pathways Rate</TableHead>
-                      <TableHead className="text-center">Attendance</TableHead>
-                      <TableHead className="text-center">Ent. Applied</TableHead>
-                      <TableHead>Business Goal</TableHead>
-                      <TableHead className="text-center">Track</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredBeneficiaries.length === 0 ? (
+              <>
+                <div className="border rounded-lg overflow-x-auto">
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={11} className="text-center py-12 text-muted-foreground">
-                          No beneficiaries found
-                        </TableCell>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Age</TableHead>
+                        <TableHead>Gender</TableHead>
+                        <TableHead className="text-center">SkillCraft</TableHead>
+                        <TableHead className="text-center">Pathways Rate</TableHead>
+                        <TableHead className="text-center">Attendance</TableHead>
+                        <TableHead className="text-center">Ent. Applied</TableHead>
+                        <TableHead>Business Goal</TableHead>
+                        <TableHead className="text-center">Track</TableHead>
                       </TableRow>
-                    ) : (
-                      filteredBeneficiaries.map((b) => {
-                        const checked = selectedIds.has(b.id);
-                        return (
-                          <TableRow key={b.id} className={`hover:bg-gray-100 ${checked ? "bg-primary/5" : ""}`}>
-                            <TableCell>
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={(e) => {
-                                  const next = new Set(selectedIds);
-                                  if (e.target.checked) next.add(b.id);
-                                  else next.delete(b.id);
-                                  setSelectedIds(next);
-                                }}
-                                className="h-4 w-4 rounded border-gray-300"
-                              />
-                            </TableCell>
+                    </TableHeader>
+                    <TableBody>
+                      {beneficiaries.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
+                            No beneficiaries found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        beneficiaries.map((b) => (
+                          <TableRow key={b.id} className="hover:bg-gray-100">
                             <TableCell className="font-medium">{b.name}</TableCell>
                             <TableCell>{b.age}</TableCell>
                             <TableCell>{b.gender}</TableCell>
-                            <TableCell className="text-muted-foreground text-sm">{b.email}</TableCell>
-                            <TableCell className="text-center font-semibold">{b.skillcraftScore}</TableCell>
-                            <TableCell className="text-center font-semibold">{b.pathwaysRate}%</TableCell>
-                            <TableCell className="text-center font-semibold">{b.offlineAttendance}</TableCell>
+                            <TableCell className="text-center font-semibold">
+                              {b.skillcraftScore || "—"}
+                            </TableCell>
+                            <TableCell className="text-center font-semibold">
+                              {b.pathwaysRate ? `${b.pathwaysRate}%` : "—"}
+                            </TableCell>
+                            <TableCell className="text-center font-semibold">
+                              {b.offlineAttendance || "—"}
+                            </TableCell>
                             <TableCell className="text-center">
                               <Badge variant={b.wantsEntrepreneurship ? "default" : "secondary"}>
                                 {b.wantsEntrepreneurship ? "Yes" : "No"}
@@ -246,15 +392,72 @@ export function BeneficiarySelection() {
                               )}
                             </TableCell>
                           </TableRow>
-                        );
-                      })
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Pagination controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      Page {page} of {totalPages} ({totalCount.toLocaleString()} total)
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page <= 1}
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        Previous
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page >= totalPages}
+                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
+
+        {/* Reset Phase 2 Confirmation Dialog */}
+        <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reset Phase 2</DialogTitle>
+              <DialogDescription>
+                This will clear all track assignments and generated Phase 1 results
+                (SkillCraft scores, Pathways rates, attendance, entrepreneurship applications,
+                and business goals). Beneficiaries will return to their Phase 1 selected state.
+                This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsResetDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleResetPhase2} disabled={resetting}>
+                {resetting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                )}
+                {resetting ? "Resetting..." : "Confirm Reset"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

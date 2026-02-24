@@ -93,7 +93,7 @@ export function BusinessDevelopment() {
               ? "Your business development goal has been saved. You've expressed interest in the Entrepreneurship track for Phase 2."
               : "You've indicated your interest in wage employment for Phase 2."}
           </AlertDescription>
-          <Button onClick={handleEdit} className="mt-4 bg-primary hover:bg-primary/90">
+          <Button onClick={handleEdit} className="mt-4 bg-primary hover:bg-primary/90 whitespace-nowrap w-fit">
             Edit Submission
           </Button>
         </Alert>

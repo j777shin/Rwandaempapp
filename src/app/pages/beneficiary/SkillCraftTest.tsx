@@ -60,7 +60,7 @@ export function SkillCraftTest() {
 
   const score = status?.score;
   const hasStarted = !!status?.skillcraft_user_id;
-  const isCompleted = score !== null && score !== undefined;
+  const isCompleted = status?.finished === true && score !== null && score !== undefined;
 
   return (
     <div className="p-8 space-y-6 bg-background">
