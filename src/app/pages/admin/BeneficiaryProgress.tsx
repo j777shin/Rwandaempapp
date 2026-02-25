@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { ArrowLeft, Loader2, Search, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, Loader2, Search, CheckCircle2, Clock, Sparkles } from "lucide-react";
 import { Badge } from "@/app/components/ui/badge";
 import { Input } from "@/app/components/ui/input";
 import { api } from "@/app/lib/api";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+} from "recharts";
 
 interface CourseInfo {
   course_name: string;
@@ -19,11 +23,24 @@ interface PathwayInfo {
   courses: Record<string, CourseInfo>;
 }
 
+interface SubScore {
+  score: number;
+  [key: string]: any;
+}
+
+interface SkillcraftScores {
+  w_sub_scores: Record<string, SubScore>;
+  e_sub_scores: Record<string, SubScore>;
+}
+
 interface Beneficiary {
   id: string;
   name: string;
   email: string;
   skillcraftScore: number | null;
+  wScore: number | null;
+  eScore: number | null;
+  skillcraftScores: SkillcraftScores | null;
   pathwaysRate: number | null;
   businessGoal: string;
   offlineAttendance: number;
@@ -31,12 +48,44 @@ interface Beneficiary {
   courseProgress: Record<string, PathwayInfo> | null;
 }
 
+const W_SUB_LABELS: Record<string, string> = {
+  corsi: "Corsi Block",
+  cpt: "CPT (Attention)",
+  digit_span: "Digit Span",
+  tmt: "Trail Making",
+  social_awareness: "Social Awareness",
+  self_management: "Self-Management",
+  self_awareness: "Self-Awareness",
+  agreeableness: "Agreeableness",
+  conscientiousness: "Conscientiousness",
+  realistic: "Realistic",
+  investigative: "Investigative",
+  artistic: "Artistic",
+  social: "Social",
+  conventional: "Conventional",
+};
+
+const E_SUB_LABELS: Record<string, string> = {
+  digit_span: "Digit Span",
+  hmt: "HMT (Memory)",
+  conscientiousness: "Conscientiousness",
+  openness: "Openness",
+  growth_mindset: "Growth Mindset",
+  bret: "BRET (Risk)",
+  proactive: "Proactive",
+  mtpt: "MTPT (Persistence)",
+  enterprising: "Enterprising",
+};
+
 function mapApiBeneficiary(b: any): Beneficiary {
   return {
     id: b.id ?? b._id ?? "",
     name: b.name || [b.first_name, b.last_name].filter(Boolean).join(" ") || "Unknown",
     email: b.email || "",
     skillcraftScore: b.skillcraft_score ?? null,
+    wScore: b.w_score ?? null,
+    eScore: b.e_score ?? null,
+    skillcraftScores: b.skillcraft_scores ?? null,
     pathwaysRate: b.pathways_completion_rate ?? b.pathways_completion ?? null,
     businessGoal: b.business_development_text || "",
     offlineAttendance: b.offline_attendance ?? 0,
@@ -51,6 +100,31 @@ export function BeneficiaryProgress() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const handleGenerateResults = async () => {
+    try {
+      setGenerating(true);
+      setActionError(null);
+      setActionMessage(null);
+      const result = await api.adminApplyPhase1Results();
+      setActionMessage(
+        `Results generated: ${result.updated?.toLocaleString()} beneficiaries updated, ${result.ent_applicants?.toLocaleString()} applied for entrepreneurship`
+      );
+      // Reload beneficiaries to reflect new data
+      const data = await api.adminListBeneficiaries({ page_size: "10000", selection_status: "selected" });
+      const mapped = (data.items || data.beneficiaries || []).map(mapApiBeneficiary);
+      setBeneficiaries(mapped);
+      if (mapped.length > 0 && !selectedId) setSelectedId(mapped[0].id);
+    } catch (err: any) {
+      setActionError(err.message || "Failed to generate results");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
     async function fetch() {
@@ -93,10 +167,30 @@ export function BeneficiaryProgress() {
 
         <Card className="mb-6">
           <CardHeader>
-            <div>
-              <CardTitle className="text-2xl">Progress View</CardTitle>
-              <CardDescription>View selected beneficiaries and their progress details</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl">Progress View</CardTitle>
+                <CardDescription>View selected beneficiaries and their progress details</CardDescription>
+              </div>
+              <Button
+                onClick={handleGenerateResults}
+                disabled={generating}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {generating ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 mr-2" />
+                )}
+                {generating ? "Generating..." : "Generate Results"}
+              </Button>
             </div>
+            {actionMessage && (
+              <div className="mt-3 p-3 bg-green-50 text-green-700 rounded-md text-sm">{actionMessage}</div>
+            )}
+            {actionError && (
+              <div className="mt-3 p-3 bg-red-50 text-red-700 rounded-md text-sm">{actionError}</div>
+            )}
           </CardHeader>
         </Card>
 
@@ -191,6 +285,22 @@ export function BeneficiaryProgress() {
                         </p>
                       </div>
 
+                      {/* W Score */}
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <p className="text-sm text-blue-600 mb-1">W Score (Employability)</p>
+                        <p className="text-2xl font-bold text-blue-700">
+                          {selected.wScore != null ? selected.wScore.toFixed(4) : "—"}
+                        </p>
+                      </div>
+
+                      {/* E Score */}
+                      <div className="bg-purple-50 rounded-lg p-4">
+                        <p className="text-sm text-purple-600 mb-1">E Score (Entrepreneurship)</p>
+                        <p className="text-2xl font-bold text-purple-700">
+                          {selected.eScore != null ? selected.eScore.toFixed(4) : "—"}
+                        </p>
+                      </div>
+
                       {/* Pathways Completion Rate */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <p className="text-sm text-muted-foreground mb-1">Pathways Completion Rate</p>
@@ -214,6 +324,88 @@ export function BeneficiaryProgress() {
                           {selected.hired ? "Yes" : "No"}
                         </p>
                       </div>
+
+                      {/* Bar Chart – All 23 Sub-Scores */}
+                      {selected.skillcraftScores && (
+                        <div className="bg-gray-50 rounded-lg p-4 sm:col-span-2">
+                          <p className="text-sm font-semibold text-foreground mb-3">All SkillCraft Scores</p>
+                          <ResponsiveContainer width="100%" height={340}>
+                            <BarChart
+                              data={[
+                                ...Object.entries(W_SUB_LABELS).map(([key, label]) => ({
+                                  name: label,
+                                  score: selected.skillcraftScores!.w_sub_scores?.[key]?.score ?? 0,
+                                  type: "W",
+                                })),
+                                ...Object.entries(E_SUB_LABELS).map(([key, label]) => ({
+                                  name: label,
+                                  score: selected.skillcraftScores!.e_sub_scores?.[key]?.score ?? 0,
+                                  type: "E",
+                                })),
+                              ]}
+                              margin={{ top: 5, right: 10, left: 0, bottom: 80 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis
+                                dataKey="name"
+                                angle={-45}
+                                textAnchor="end"
+                                interval={0}
+                                tick={{ fontSize: 10 }}
+                                height={80}
+                              />
+                              <YAxis domain={[0, 1]} tick={{ fontSize: 11 }} />
+                              <Tooltip
+                                formatter={(value: number) => value.toFixed(4)}
+                                labelStyle={{ fontWeight: 600 }}
+                              />
+                              <Bar dataKey="score" radius={[3, 3, 0, 0]}>
+                                {[
+                                  ...Object.keys(W_SUB_LABELS).map(() => "W"),
+                                  ...Object.keys(E_SUB_LABELS).map(() => "E"),
+                                ].map((type, i) => (
+                                  <Cell key={i} fill={type === "W" ? "#3b82f6" : "#8b5cf6"} />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                          <div className="flex items-center justify-center gap-6 mt-2 text-xs">
+                            <span className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-sm bg-blue-500 inline-block" /> W Sub-Scores
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-sm bg-violet-500 inline-block" /> E Sub-Scores
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Radar Chart – E Sub-Scores */}
+                      {selected.skillcraftScores?.e_sub_scores && (
+                        <div className="bg-purple-50/30 rounded-lg p-4 sm:col-span-2">
+                          <p className="text-sm font-semibold text-purple-700 mb-3">Entrepreneur Ability</p>
+                          <ResponsiveContainer width="100%" height={340}>
+                            <RadarChart
+                              data={Object.entries(E_SUB_LABELS).map(([key, label]) => ({
+                                subject: label,
+                                score: selected.skillcraftScores!.e_sub_scores[key]?.score ?? 0,
+                              }))}
+                              outerRadius="75%"
+                            >
+                              <PolarGrid />
+                              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11 }} />
+                              <PolarRadiusAxis domain={[0, 1]} tick={{ fontSize: 10 }} tickCount={5} />
+                              <Radar
+                                dataKey="score"
+                                stroke="#7c3aed"
+                                fill="#8b5cf6"
+                                fillOpacity={0.35}
+                              />
+                              <Tooltip formatter={(value: number) => value.toFixed(4)} />
+                            </RadarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      )}
 
                       {/* Business Goal */}
                       <div className="bg-gray-50 rounded-lg p-4 sm:col-span-2">

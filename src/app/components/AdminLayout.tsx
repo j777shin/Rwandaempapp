@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { useAuth } from "@/app/context/AuthContext";
+import { api } from "@/app/lib/api";
 
 interface MenuItem {
   title: string;
@@ -36,6 +37,13 @@ export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleLogout = async () => {
+    try {
+      // Reset phase 2 first (needs selection_status still set), then reset phase 1
+      await api.adminResetPhase2();
+      await api.adminResetSelection();
+    } catch {
+      // Ensure logout completes even if reset fails
+    }
     await logout();
     navigate("/");
   };
@@ -52,7 +60,7 @@ export function AdminLayout() {
       children: [
         { title: "Data Registration", path: "/admin/registration" },
         { title: "Account Management", path: "/admin/accounts" },
-        { title: "Analytics", path: "/admin/analysis" },
+        { title: "Analytics", path: "/admin/analytics" },
         { title: "Survey Results", path: "/admin/surveys" },
       ]
     },

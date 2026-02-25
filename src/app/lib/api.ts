@@ -192,9 +192,11 @@ export const api = {
 
   // Admin - Analytics
   adminGetOverview: () => request<any>("/admin/analytics/overview"),
-  adminGetDemographics: () => request<any>("/admin/analytics/demographics"),
+  adminGetDemographics: (phase?: string) =>
+    request<any>(`/admin/analytics/demographics${phase ? `?phase=${phase}` : ""}`),
   adminGetEngagement: () => request<any>("/admin/analytics/engagement"),
-  adminGetSocioeconomic: () => request<any>("/admin/analytics/socioeconomic"),
+  adminGetSocioeconomic: (phase?: string) =>
+    request<any>(`/admin/analytics/socioeconomic${phase ? `?phase=${phase}` : ""}`),
   adminGetImpactDashboard: () => request<any>("/admin/analytics/impact"),
 
   // Admin - Chatbot Analytics

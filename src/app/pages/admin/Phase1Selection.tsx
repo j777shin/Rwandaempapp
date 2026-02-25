@@ -154,7 +154,7 @@ export function Phase1Selection() {
       page: String(page),
       page_size: String(PAGE_SIZE),
       sort_by: "eligibility_score",
-      sort_order: "asc",
+      sort_order: "desc",
     };
     if (debouncedSearch) {
       params.search = debouncedSearch;
@@ -306,7 +306,7 @@ export function Phase1Selection() {
               <div>
                 <CardTitle className="text-2xl">Phase 1 Selection</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Total Beneficiaries: {totalCount.toLocaleString()} | Sorted by Eligibility Score (lowest first)
+                  Total Beneficiaries: {totalCount.toLocaleString()} | Sorted highest to lowest
                 </p>
               </div>
             </div>

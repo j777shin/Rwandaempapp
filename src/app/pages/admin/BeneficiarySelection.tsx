@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table";
-import { ArrowLeft, UserCheck, Loader2, RotateCcw, ChevronLeft, ChevronRight, Play, Sparkles } from "lucide-react";
+import { ArrowLeft, UserCheck, Loader2, RotateCcw, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { Input } from "@/app/components/ui/input";
 import { Badge } from "@/app/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
@@ -16,6 +16,7 @@ interface Beneficiary {
   gender: string;
   email: string;
   skillcraftScore: number;
+  eScore: number | null;
   pathwaysRate: number;
   offlineAttendance: number;
   wantsEntrepreneurship: boolean;
@@ -31,6 +32,7 @@ function mapApiBeneficiary(raw: any): Beneficiary {
     gender: raw.gender ?? "",
     email: raw.email ?? "",
     skillcraftScore: raw.skillcraft_score ?? 0,
+    eScore: raw.e_score ?? null,
     pathwaysRate: raw.pathways_completion_rate ?? raw.pathways_completion ?? 0,
     offlineAttendance: raw.offline_attendance ?? 0,
     wantsEntrepreneurship: raw.wants_entrepreneurship ?? false,
@@ -48,7 +50,6 @@ export function BeneficiarySelection() {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   // Action loading states
-  const [applying, setApplying] = useState(false);
   const [selecting, setSelecting] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
@@ -62,7 +63,10 @@ export function BeneficiarySelection() {
   const [entApplicants, setEntApplicants] = useState(0);
   const [empTrackCount, setEmpTrackCount] = useState(0);
   const [entTrackCount, setEntTrackCount] = useState(0);
-  const [hasResults, setHasResults] = useState(false);
+  const [hasResults, setHasResults] = useState(true);
+
+  // Track filter
+  const [trackFilter, setTrackFilter] = useState("");
 
   // Search with debounce
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,8 +90,11 @@ export function BeneficiarySelection() {
     if (debouncedSearch) {
       params.search = debouncedSearch;
     }
+    if (trackFilter) {
+      params.track = trackFilter;
+    }
     return params;
-  }, [page, debouncedSearch]);
+  }, [page, debouncedSearch, trackFilter]);
 
   // Fetch beneficiaries
   const loadBeneficiaries = useCallback(async () => {
@@ -111,10 +118,6 @@ export function BeneficiarySelection() {
 
       const mapped = items.map(mapApiBeneficiary);
       setBeneficiaries(mapped);
-
-      // Detect if phase 1 results have been applied (any beneficiary has skillcraft > 0)
-      const anyScored = mapped.some((b) => b.skillcraftScore > 0);
-      setHasResults(anyScored);
     } catch (err: any) {
       setError(err.message || "Failed to load beneficiaries");
     } finally {
@@ -143,33 +146,12 @@ export function BeneficiarySelection() {
     loadSummary();
   }, [loadSummary]);
 
-  const handleApplyResults = async () => {
-    try {
-      setApplying(true);
-      setError(null);
-      setActionMessage(null);
-      const result = await api.adminApplyPhase1Results();
-      setActionMessage(
-        `Phase 1 results applied: ${result.updated?.toLocaleString()} beneficiaries updated, ${result.ent_applicants?.toLocaleString()} applied for entrepreneurship`
-      );
-      setPage(1);
-      await Promise.all([loadBeneficiaries(), loadSummary()]);
-    } catch (err: any) {
-      setError(err.message || "Failed to apply Phase 1 results");
-    } finally {
-      setApplying(false);
-    }
-  };
-
   const handleRunSelection = async () => {
     try {
       setSelecting(true);
       setError(null);
       setActionMessage(null);
-      const result = await api.adminRunPhase2Selection();
-      setActionMessage(
-        `Phase 2 selection complete: ${result.entrepreneurship?.toLocaleString()} → Entrepreneurship, ${result.employment?.toLocaleString()} → Employment`
-      );
+      await api.adminRunPhase2Selection();
       setPage(1);
       await Promise.all([loadBeneficiaries(), loadSummary()]);
     } catch (err: any) {
@@ -202,7 +184,7 @@ export function BeneficiarySelection() {
     return "—";
   };
 
-  const anyActionRunning = applying || selecting || resetting;
+  const anyActionRunning = selecting || resetting;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -232,22 +214,10 @@ export function BeneficiarySelection() {
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-3">
               <Button
-                onClick={handleApplyResults}
-                disabled={anyActionRunning}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {applying ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Sparkles className="w-4 h-4 mr-2" />
-                )}
-                {applying ? "Applying..." : "Apply Phase 1 Results"}
-              </Button>
-              <Button
                 onClick={handleRunSelection}
                 disabled={anyActionRunning || !hasResults}
                 className="bg-green-600 hover:bg-green-700"
-                title={!hasResults ? "Apply Phase 1 Results first" : ""}
+                title={!hasResults ? "Generate results first" : ""}
               >
                 {selecting ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -318,14 +288,25 @@ export function BeneficiarySelection() {
               </div>
             )}
 
-            {/* Search */}
-            <Input
-              type="text"
-              placeholder="Search by name or email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-md"
-            />
+            {/* Search & Track Filter */}
+            <div className="flex flex-wrap items-center gap-3">
+              <Input
+                type="text"
+                placeholder="Search by name or email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-md"
+              />
+              <select
+                value={trackFilter}
+                onChange={(e) => { setTrackFilter(e.target.value); setPage(1); }}
+                className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value="">All Tracks</option>
+                <option value="employment">Employment</option>
+                <option value="entrepreneurship">Entrepreneurship</option>
+              </select>
+            </div>
 
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20">
@@ -342,6 +323,7 @@ export function BeneficiarySelection() {
                         <TableHead>Age</TableHead>
                         <TableHead>Gender</TableHead>
                         <TableHead className="text-center">SkillCraft</TableHead>
+                        <TableHead className="text-center">E Score</TableHead>
                         <TableHead className="text-center">Pathways Rate</TableHead>
                         <TableHead className="text-center">Attendance</TableHead>
                         <TableHead className="text-center">Ent. Applied</TableHead>
@@ -352,7 +334,7 @@ export function BeneficiarySelection() {
                     <TableBody>
                       {beneficiaries.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
+                          <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
                             No beneficiaries found
                           </TableCell>
                         </TableRow>
@@ -365,6 +347,9 @@ export function BeneficiarySelection() {
                             <TableCell className="text-center font-semibold">
                               {b.skillcraftScore || "—"}
                             </TableCell>
+                            <TableCell className="text-center font-semibold text-purple-600">
+                              {b.eScore != null ? b.eScore.toFixed(4) : "—"}
+                            </TableCell>
                             <TableCell className="text-center font-semibold">
                               {b.pathwaysRate ? `${b.pathwaysRate}%` : "—"}
                             </TableCell>
@@ -376,8 +361,15 @@ export function BeneficiarySelection() {
                                 {b.wantsEntrepreneurship ? "Yes" : "No"}
                               </Badge>
                             </TableCell>
-                            <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground" title={b.businessGoal}>
-                              {b.businessGoal || "—"}
+                            <TableCell className="max-w-[200px] text-sm text-muted-foreground">
+                              <div className="relative group">
+                                <span className="block truncate cursor-default">{b.businessGoal || "—"}</span>
+                                {b.businessGoal && (
+                                  <div className="hidden group-hover:block absolute z-50 top-full left-0 mt-2 w-80 p-3 bg-white border border-gray-200 rounded-lg shadow-lg text-sm text-foreground whitespace-normal">
+                                    {b.businessGoal}
+                                  </div>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell className="text-center">
                               {b.track ? (
