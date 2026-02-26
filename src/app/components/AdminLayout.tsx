@@ -135,7 +135,7 @@ export function AdminLayout() {
                     )}
                   </button>
                   {expandedItems.includes(item.title) && (
-                    <div className="ml-7 mt-1 space-y-1">
+                    <div className="ml-4 mt-1 space-y-1 bg-white/10 rounded-lg p-2">
                       {item.children.map((child) => (
                         <Link
                           key={child.path}
@@ -143,7 +143,7 @@ export function AdminLayout() {
                           className={`block px-3 py-2 rounded text-sm transition-colors ${
                             isActive(child.path)
                               ? "bg-primary text-white font-medium"
-                              : "hover:bg-white/5"
+                              : "hover:bg-white/10"
                           }`}
                         >
                           {child.title}

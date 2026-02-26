@@ -31,7 +31,7 @@ interface Account {
   track: string;
   createdAt: string;
   skillcraftScore: number;
-  pathwaysScore: number;
+  ingaziScore: number;
   eligibilityScore: number;
   lastEdited: string;
 }
@@ -89,7 +89,7 @@ function mapBeneficiary(b: any): Account {
     track,
     createdAt: b.created_at ? new Date(b.created_at).toLocaleDateString() : "",
     skillcraftScore: b.skillcraft_score ?? 0,
-    pathwaysScore: b.pathways_completion_rate ?? b.pathways_completion ?? 0,
+    ingaziScore: b.ingazi_completion_rate ?? b.ingazi_completion ?? 0,
     eligibilityScore: b.eligibility_score ?? 0,
     lastEdited: b.updated_at
       ? new Date(b.updated_at).toLocaleString("en-US", {
@@ -672,7 +672,7 @@ export function AccountManagement() {
                         <h4 className="text-sm font-medium text-muted-foreground mb-2">Scores & Status</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 rounded-lg p-3">
                           <div><span className="text-xs text-muted-foreground">SkillCraft Score</span><p className="text-sm font-medium">{detailedInfo.skillcraft_score ?? "—"}</p></div>
-                          <div><span className="text-xs text-muted-foreground">Pathways Rate</span><p className="text-sm font-medium">{detailedInfo.pathways_completion_rate != null ? `${detailedInfo.pathways_completion_rate}%` : "—"}</p></div>
+                          <div><span className="text-xs text-muted-foreground">Ingazi Rate</span><p className="text-sm font-medium">{detailedInfo.ingazi_completion_rate != null ? `${detailedInfo.ingazi_completion_rate}%` : "—"}</p></div>
                           <div><span className="text-xs text-muted-foreground">Eligibility Score</span><p className="text-sm font-medium">{detailedInfo.eligibility_score ?? "—"}</p></div>
                           <div><span className="text-xs text-muted-foreground">Selection Status</span><p className="text-sm font-medium">{detailedInfo.selection_status || "—"}</p></div>
                           <div><span className="text-xs text-muted-foreground">Track</span><p className="text-sm font-medium">{detailedInfo.track || "—"}</p></div>

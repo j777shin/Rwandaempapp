@@ -73,7 +73,7 @@ export function BeneficiaryDashboard() {
     email: beneficiary.email || "",
     skillCraftCompleted: !!phase1.skillcraft_score,
     skillCraftScore: phase1.skillcraft_score,
-    pathwaysProgress: phase1.pathways_completion_rate || 0,
+    ingaziProgress: phase1.ingazi_completion_rate || 0,
     businessDevelopmentCompleted: !!phase1.business_dev_completed,
     currentPhase: beneficiary.selection_status === "selected" ? 2 : 1,
     phase2Track: beneficiary.track || null,
@@ -88,10 +88,10 @@ export function BeneficiaryDashboard() {
       link: "/beneficiary/skillcraft",
     },
     {
-      title: "Pathways",
-      description: "Explore learning and career pathways",
+      title: "eLearning- Ingazi",
+      description: "Explore eLearning- Ingazi courses",
       icon: Route,
-      link: "/beneficiary/pathways",
+      link: "/beneficiary/ingazi",
     },
     {
       title: "Business Development",
@@ -109,10 +109,10 @@ export function BeneficiaryDashboard() {
 
   const employmentFeatures = [
     {
-      title: "Pathways Deep Dive",
-      description: "Explore detailed career pathways and employment opportunities",
+      title: "eLearning- Ingazi",
+      description: "Continue your advanced learning journey",
       icon: Route,
-      link: "/beneficiary/pathways-deepdive",
+      link: "/beneficiary/ingazi-deepdive",
     },
     {
       title: "Completion Survey",
@@ -217,15 +217,15 @@ export function BeneficiaryDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-foreground">
                 <Route className="w-5 h-5 text-neutral-700" />
-                Pathways Exploration
+                eLearning- Ingazi
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Progress</span>
-                <span className="font-bold text-foreground">{user.pathwaysProgress}%</span>
+                <span className="font-bold text-foreground">{user.ingaziProgress}%</span>
               </div>
-              <Progress value={user.pathwaysProgress} className="h-3" />
+              <Progress value={user.ingaziProgress} className="h-3" />
             </CardContent>
           </Card>
 
@@ -407,7 +407,7 @@ export function BeneficiaryDashboard() {
             <Card className="border-border bg-white">
               <CardHeader>
                 <CardTitle className="text-foreground">Phase 1: Training & Assessment</CardTitle>
-                <CardDescription>Complete your skills assessment and explore career pathways</CardDescription>
+                <CardDescription>Complete your skills assessment and explore eLearning- Ingazi</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

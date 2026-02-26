@@ -308,7 +308,7 @@ export function AnalysisDashboard() {
                     {fmt(data.employability.total)}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Completed attendance, SkillCraft, and Pathways
+                    Completed attendance, SkillCraft, and Ingazi
                   </p>
                 </CardContent>
               </Card>

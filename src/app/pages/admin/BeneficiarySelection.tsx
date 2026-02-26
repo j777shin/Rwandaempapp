@@ -17,7 +17,7 @@ interface Beneficiary {
   email: string;
   skillcraftScore: number;
   eScore: number | null;
-  pathwaysRate: number;
+  ingaziRate: number;
   offlineAttendance: number;
   wantsEntrepreneurship: boolean;
   businessGoal: string;
@@ -33,7 +33,7 @@ function mapApiBeneficiary(raw: any): Beneficiary {
     email: raw.email ?? "",
     skillcraftScore: raw.skillcraft_score ?? 0,
     eScore: raw.e_score ?? null,
-    pathwaysRate: raw.pathways_completion_rate ?? raw.pathways_completion ?? 0,
+    ingaziRate: raw.ingazi_completion_rate ?? raw.ingazi_completion ?? 0,
     offlineAttendance: raw.offline_attendance ?? 0,
     wantsEntrepreneurship: raw.wants_entrepreneurship ?? false,
     businessGoal: raw.business_development_text ?? "",
@@ -324,7 +324,7 @@ export function BeneficiarySelection() {
                         <TableHead>Gender</TableHead>
                         <TableHead className="text-center">SkillCraft</TableHead>
                         <TableHead className="text-center">E Score</TableHead>
-                        <TableHead className="text-center">Pathways Rate</TableHead>
+                        <TableHead className="text-center">Ingazi Rate</TableHead>
                         <TableHead className="text-center">Attendance</TableHead>
                         <TableHead className="text-center">Ent. Applied</TableHead>
                         <TableHead>Business Goal</TableHead>
@@ -351,7 +351,7 @@ export function BeneficiarySelection() {
                               {b.eScore != null ? b.eScore.toFixed(4) : "—"}
                             </TableCell>
                             <TableCell className="text-center font-semibold">
-                              {b.pathwaysRate ? `${b.pathwaysRate}%` : "—"}
+                              {b.ingaziRate ? `${b.ingaziRate}%` : "—"}
                             </TableCell>
                             <TableCell className="text-center font-semibold">
                               {b.offlineAttendance || "—"}
@@ -430,7 +430,7 @@ export function BeneficiarySelection() {
               <DialogTitle>Reset Phase 2</DialogTitle>
               <DialogDescription>
                 This will clear all track assignments and generated Phase 1 results
-                (SkillCraft scores, Pathways rates, attendance, entrepreneurship applications,
+                (SkillCraft scores, Ingazi rates, attendance, entrepreneurship applications,
                 and business goals). Beneficiaries will return to their Phase 1 selected state.
                 This action cannot be undone.
               </DialogDescription>

@@ -10,7 +10,7 @@ interface Candidate {
   id: string;
   name: string;
   skillcraft_score: number | null;
-  pathways_completion_rate: number | null;
+  ingazi_completion_rate: number | null;
   offline_attendance: number;
   wants_entrepreneurship: boolean;
 }
@@ -61,15 +61,15 @@ export function TrackAssignment() {
           <Progress value={candidate.skillcraft_score || 0} className="h-2" />
         </div>
 
-        {/* Pathways Completion Rate */}
+        {/* Ingazi Completion Rate */}
         <div className="p-4 bg-neutral-50 rounded-lg border border-border">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-neutral-700">Pathways Completion Rate</span>
+            <span className="font-semibold text-neutral-700">Ingazi Completion Rate</span>
             <span className="text-2xl font-bold text-foreground">
-              {candidate.pathways_completion_rate != null ? `${candidate.pathways_completion_rate}%` : "N/A"}
+              {candidate.ingazi_completion_rate != null ? `${candidate.ingazi_completion_rate}%` : "N/A"}
             </span>
           </div>
-          <Progress value={candidate.pathways_completion_rate || 0} className="h-2" />
+          <Progress value={candidate.ingazi_completion_rate || 0} className="h-2" />
         </div>
 
         {/* Offline Training Attendance */}
@@ -193,7 +193,7 @@ export function TrackAssignment() {
                       >
                         <p className="font-semibold text-foreground">{candidate.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          Score: {candidate.skillcraft_score ?? "N/A"} | Pathways: {candidate.pathways_completion_rate ?? "N/A"}%
+                          Score: {candidate.skillcraft_score ?? "N/A"} | Ingazi: {candidate.ingazi_completion_rate ?? "N/A"}%
                         </p>
                       </div>
                     ))}
@@ -255,7 +255,7 @@ export function TrackAssignment() {
                       >
                         <p className="font-semibold text-foreground">{candidate.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          Score: {candidate.skillcraft_score ?? "N/A"} | Pathways: {candidate.pathways_completion_rate ?? "N/A"}%
+                          Score: {candidate.skillcraft_score ?? "N/A"} | Ingazi: {candidate.ingazi_completion_rate ?? "N/A"}%
                         </p>
                       </div>
                     ))}

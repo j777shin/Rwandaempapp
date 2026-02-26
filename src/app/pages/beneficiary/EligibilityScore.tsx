@@ -57,9 +57,9 @@ export function EligibilityScore() {
       met: !!phase1.skillcraft_score,
     },
     {
-      name: "Pathway Completion",
-      score: phase1.pathways_completion ?? 0,
-      met: (phase1.pathways_completion ?? 0) > 0,
+      name: "Ingazi Completion",
+      score: phase1.ingazi_completion ?? 0,
+      met: (phase1.ingazi_completion ?? 0) > 0,
     },
   ];
 

@@ -225,7 +225,7 @@ export function BusinessDevelopment() {
               <Briefcase className="w-4 h-4 text-primary" /> Employment Track
             </h3>
             <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-              <li>Continued Pathways Deep Dive for career development</li>
+              <li>Continued eLearning- Ingazi for career development</li>
               <li>Focused training on employment readiness and job market skills</li>
             </ul>
           </div>

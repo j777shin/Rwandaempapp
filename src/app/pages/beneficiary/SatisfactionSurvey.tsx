@@ -18,14 +18,14 @@ interface SatisfactionSurveyProps {
 const surveyQuestions: Record<string, SurveyQuestion[]> = {
   phase1: [
     { id: "q1", question: "How satisfied are you with the SkillCraft Test experience?", type: "rating" },
-    { id: "q2", question: "How useful were the Pathways exploration resources?", type: "rating" },
+    { id: "q2", question: "How useful were the Ingazi exploration resources?", type: "rating" },
     { id: "q3", question: "How would you rate the Business Development writing exercise?", type: "rating" },
     { id: "q4", question: "How satisfied are you with the overall Phase 1 training program?", type: "rating" },
     { id: "q5", question: "What did you like most about Phase 1?", type: "text" },
     { id: "q6", question: "What could be improved in Phase 1?", type: "text" },
   ],
   employment: [
-    { id: "q1", question: "How satisfied are you with the Pathways Deep Dive content?", type: "rating" },
+    { id: "q1", question: "How satisfied are you with the eLearning- Ingazi content?", type: "rating" },
     { id: "q2", question: "How useful was the career guidance provided?", type: "rating" },
     { id: "q3", question: "How well did the program prepare you for employment?", type: "rating" },
     { id: "q4", question: "How satisfied are you with the overall Employment track?", type: "rating" },

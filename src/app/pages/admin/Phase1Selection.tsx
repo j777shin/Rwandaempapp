@@ -19,7 +19,7 @@ interface Beneficiary {
   email: string;
   eligibility_score: number | null;
   skillcraft_score: number | null;
-  pathways_completion_rate: number | null;
+  ingazi_completion_rate: number | null;
   selection_status: string | null;
 }
 
@@ -549,15 +549,15 @@ export function Phase1Selection() {
                       {/* Pathway Completion */}
                       <div className="p-4 bg-neutral-50 border border-border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-neutral-700">Pathway Completion</span>
+                          <span className="font-semibold text-neutral-700">Ingazi Completion</span>
                           <span className="text-xl font-bold text-foreground">
-                            {selectedBeneficiary.pathways_completion_rate ?? "--"}%
+                            {selectedBeneficiary.ingazi_completion_rate ?? "--"}%
                           </span>
                         </div>
                         <div className="w-full bg-neutral-200 rounded-full h-2">
                           <div
                             className="bg-neutral-600 h-2 rounded-full transition-all"
-                            style={{ width: `${selectedBeneficiary.pathways_completion_rate ?? 0}%` }}
+                            style={{ width: `${selectedBeneficiary.ingazi_completion_rate ?? 0}%` }}
                           />
                         </div>
                       </div>

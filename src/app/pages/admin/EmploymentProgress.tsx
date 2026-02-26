@@ -10,7 +10,7 @@ interface EmpBeneficiary {
   id: string;
   name: string;
   email: string;
-  pathways_completion_rate: number | null;
+  ingazi_completion_rate: number | null;
 }
 
 export function EmploymentProgress() {
@@ -33,7 +33,7 @@ export function EmploymentProgress() {
           id: b.id,
           name: b.name || "",
           email: b.email || "",
-          pathways_completion_rate: b.pathways_completion_rate ?? null,
+          ingazi_completion_rate: b.ingazi_completion_rate ?? null,
         }));
         setBeneficiaries(items);
         if (items.length > 0) setSelectedId(items[0].id);
@@ -72,7 +72,7 @@ export function EmploymentProgress() {
               </div>
               <div>
                 <CardTitle className="text-2xl">Employment Track View</CardTitle>
-                <CardDescription>View pathways completion rate for employment track beneficiaries</CardDescription>
+                <CardDescription>View Ingazi completion rate for employment track beneficiaries</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -161,9 +161,9 @@ export function EmploymentProgress() {
                   </CardHeader>
                   <CardContent>
                     <div className="bg-gray-50 rounded-lg p-6">
-                      <p className="text-sm text-muted-foreground mb-2">Pathways Completion Rate</p>
+                      <p className="text-sm text-muted-foreground mb-2">Ingazi Completion Rate</p>
                       <p className="text-4xl font-bold text-primary">
-                        {selected.pathways_completion_rate != null ? `${selected.pathways_completion_rate}%` : "—"}
+                        {selected.ingazi_completion_rate != null ? `${selected.ingazi_completion_rate}%` : "—"}
                       </p>
                     </div>
                   </CardContent>

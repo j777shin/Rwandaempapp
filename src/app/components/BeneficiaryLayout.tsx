@@ -67,7 +67,7 @@ export function BeneficiaryLayout() {
       icon: GraduationCap,
       children: [
         { title: "SkillCraft Test", path: "/beneficiary/skillcraft" },
-        { title: "Pathways", path: "/beneficiary/pathways" },
+        { title: "eLearning- Ingazi", path: "/beneficiary/ingazi" },
         { title: "Business Development", path: "/beneficiary/business-development" },
         { title: "Completion Survey", path: "/beneficiary/survey?type=phase1" },
       ]
@@ -77,7 +77,7 @@ export function BeneficiaryLayout() {
       icon: Building2,
       locked: !isEmploymentTrack,
       children: [
-        { title: "Pathways Deep Dive", path: "/beneficiary/pathways-deepdive" },
+        { title: "eLearning- Ingazi", path: "/beneficiary/ingazi-deepdive" },
         { title: "Completion Survey", path: "/beneficiary/survey?type=employment" },
       ]
     },
@@ -94,7 +94,7 @@ export function BeneficiaryLayout() {
   ];
 
   // Route-level protection: redirect if accessing a locked phase via URL
-  const employmentPaths = ["/beneficiary/pathways-deepdive"];
+  const employmentPaths = ["/beneficiary/ingazi-deepdive"];
   const entrepreneurPaths = ["/beneficiary/chatbot", "/beneficiary/results"];
   const currentPath = location.pathname;
   const currentSearch = location.search;
@@ -188,7 +188,7 @@ export function BeneficiaryLayout() {
                     </div>
                   </button>
                   {expandedItems.includes(item.title) && !item.locked && (
-                    <div className="ml-7 mt-1 space-y-1">
+                    <div className="ml-4 mt-1 space-y-1 bg-white/10 rounded-lg p-2">
                       {item.children.map((child) => (
                         <Link
                           key={child.path}
@@ -196,7 +196,7 @@ export function BeneficiaryLayout() {
                           className={`block px-3 py-2 rounded text-sm transition-colors ${
                             isActive(child.path)
                               ? "bg-primary text-white font-medium"
-                              : "hover:bg-white/5"
+                              : "hover:bg-white/10"
                           }`}
                         >
                           {child.title}

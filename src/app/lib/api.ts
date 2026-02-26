@@ -103,10 +103,10 @@ export const api = {
   startSkillcraft: () => request<any>("/beneficiary/skillcraft/start", { method: "POST" }),
   syncSkillcraft: () => request<any>("/beneficiary/skillcraft/sync", { method: "POST" }),
 
-  // Pathways
-  getPathwaysStatus: () => request<any>("/beneficiary/pathways/status"),
-  enrollPathways: () => request<any>("/beneficiary/pathways/enroll", { method: "POST" }),
-  syncPathways: () => request<any>("/beneficiary/pathways/sync", { method: "POST" }),
+  // Ingazi
+  getIngaziStatus: () => request<any>("/beneficiary/ingazi/status"),
+  enrollIngazi: () => request<any>("/beneficiary/ingazi/enroll", { method: "POST" }),
+  syncIngazi: () => request<any>("/beneficiary/ingazi/sync", { method: "POST" }),
 
   // Business Development
   getBusinessDev: () => request<any>("/beneficiary/business-dev"),
@@ -226,6 +226,6 @@ export const api = {
     downloadBlob(`/admin/surveys/${surveyType}/export`),
 
   // Admin - Sync
-  adminSyncPathways: () =>
-    request<any>("/admin/sync/pathways", { method: "POST" }),
+  adminSyncIngazi: () =>
+    request<any>("/admin/sync/ingazi", { method: "POST" }),
 };

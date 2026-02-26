@@ -41,7 +41,7 @@ interface Beneficiary {
   wScore: number | null;
   eScore: number | null;
   skillcraftScores: SkillcraftScores | null;
-  pathwaysRate: number | null;
+  ingaziRate: number | null;
   businessGoal: string;
   offlineAttendance: number;
   hired: boolean;
@@ -86,11 +86,11 @@ function mapApiBeneficiary(b: any): Beneficiary {
     wScore: b.w_score ?? null,
     eScore: b.e_score ?? null,
     skillcraftScores: b.skillcraft_scores ?? null,
-    pathwaysRate: b.pathways_completion_rate ?? b.pathways_completion ?? null,
+    ingaziRate: b.ingazi_completion_rate ?? b.ingazi_completion ?? null,
     businessGoal: b.business_development_text || "",
     offlineAttendance: b.offline_attendance ?? 0,
     hired: b.hired ?? false,
-    courseProgress: b.pathways_course_progress ?? null,
+    courseProgress: b.ingazi_course_progress ?? null,
   };
 }
 
@@ -301,11 +301,11 @@ export function BeneficiaryProgress() {
                         </p>
                       </div>
 
-                      {/* Pathways Completion Rate */}
+                      {/* Ingazi Completion Rate */}
                       <div className="bg-gray-50 rounded-lg p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Pathways Completion Rate</p>
+                        <p className="text-sm text-muted-foreground mb-1">Ingazi Completion Rate</p>
                         <p className="text-2xl font-bold text-foreground">
-                          {selected.pathwaysRate != null ? `${selected.pathwaysRate}%` : "—"}
+                          {selected.ingaziRate != null ? `${selected.ingaziRate}%` : "—"}
                         </p>
                       </div>
 

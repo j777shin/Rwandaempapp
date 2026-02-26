@@ -7,7 +7,7 @@ interface BeneficiaryData {
   track: string | null;
   selection_status: string;
   skillcraft_score: number | null;
-  pathways_completion_rate: number | null;
+  ingazi_completion_rate: number | null;
   wants_entrepreneurship: boolean;
 }
 

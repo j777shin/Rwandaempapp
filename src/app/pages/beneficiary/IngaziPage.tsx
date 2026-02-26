@@ -16,13 +16,13 @@ interface CourseProgress {
   completed: boolean;
 }
 
-interface PathwayProgress {
+interface IngaziProgress {
   pathway_name: string;
   order_number: number;
   courses: Record<string, CourseProgress>;
 }
 
-export function PathwaysPage() {
+export function IngaziPage() {
   const [status, setStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -36,10 +36,10 @@ export function PathwaysPage() {
 
   const loadStatus = async () => {
     try {
-      const data = await api.getPathwaysStatus();
+      const data = await api.getIngaziStatus();
       setStatus(data);
     } catch (err) {
-      console.error("Failed to load Pathways status:", err);
+      console.error("Failed to load Ingazi status:", err);
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export function PathwaysPage() {
 
   const handleEnroll = async () => {
     try {
-      await api.enrollPathways();
+      await api.enrollIngazi();
       await loadStatus();
     } catch (err) {
       console.error("Failed to enroll:", err);
@@ -57,7 +57,7 @@ export function PathwaysPage() {
   const handleSync = async () => {
     setSyncing(true);
     try {
-      await api.syncPathways();
+      await api.syncIngazi();
       await loadStatus();
     } catch (err) {
       console.error("Failed to sync:", err);
@@ -66,9 +66,9 @@ export function PathwaysPage() {
     }
   };
 
-  const openPathway = (pathwayId: string, pathwayName: string) => {
-    setIframeUrl(`${ELEARNING_URL}/pathway/${pathwayId}`);
-    setIframeTitle(pathwayName);
+  const openIngazi = (ingaziId: string, ingaziName: string) => {
+    setIframeUrl(`${ELEARNING_URL}/pathway/${ingaziId}`);
+    setIframeTitle(ingaziName);
     setIframeOpen(true);
   };
 
@@ -89,25 +89,25 @@ export function PathwaysPage() {
     );
   }
 
-  const isEnrolled = !!status?.pathways_user_id;
+  const isEnrolled = !!status?.ingazi_user_id;
   const completionRate = status?.completion_rate ?? 0;
   const externalProgress = status?.external_progress;
-  const courseProgress: Record<string, PathwayProgress> = status?.course_progress || {};
+  const courseProgress: Record<string, IngaziProgress> = status?.course_progress || {};
 
-  // Sort pathways by order_number
-  const sortedPathways = Object.entries(courseProgress).sort(
+  // Sort ingazi paths by order_number
+  const sortedPaths = Object.entries(courseProgress).sort(
     ([, a], [, b]) => (a.order_number || 0) - (b.order_number || 0)
   );
 
-  // Count totals across all pathways
-  const allCourses = sortedPathways.flatMap(([, pw]) => Object.values(pw.courses));
+  // Count totals across all paths
+  const allCourses = sortedPaths.flatMap(([, pw]) => Object.values(pw.courses));
   const totalCourses = allCourses.length;
   const completedCourses = allCourses.filter((c) => c.completed).length;
 
   return (
     <div className="p-8 space-y-6 bg-background">
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Pathways eLearning</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">eLearning- Ingazi</h1>
         <p className="text-muted-foreground">
           Complete online learning modules to build your skills for employment and entrepreneurship
         </p>
@@ -120,7 +120,7 @@ export function PathwaysPage() {
             <Route className="w-6 h-6 text-primary" />
             Learning Progress
           </CardTitle>
-          <CardDescription>Your Pathways eLearning completion status</CardDescription>
+          <CardDescription>Your eLearning- Ingazi completion status</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
@@ -177,7 +177,7 @@ export function PathwaysPage() {
             {!isEnrolled && (
               <Button onClick={handleEnroll} className="bg-primary hover:bg-primary/90">
                 <BookOpen className="w-4 h-4 mr-2" />
-                Enroll in Pathways
+                Enroll in Ingazi
               </Button>
             )}
             {isEnrolled && (
@@ -190,23 +190,23 @@ export function PathwaysPage() {
         </CardContent>
       </Card>
 
-      {/* Pathways & Courses List */}
-      {isEnrolled && sortedPathways.length > 0 && (
+      {/* Courses List */}
+      {isEnrolled && sortedPaths.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-foreground">Courses</h2>
-          {sortedPathways.map(([pathwayId, pathway]) => {
-            const courses = Object.entries(pathway.courses).sort(
+          {sortedPaths.map(([pathId, path]) => {
+            const courses = Object.entries(path.courses).sort(
               ([, a], [, b]) => (a.order_number || 0) - (b.order_number || 0)
             );
             const pwCompleted = courses.filter(([, c]) => c.completed).length;
 
             return (
-              <Card key={pathwayId} className="border-border bg-white">
+              <Card key={pathId} className="border-border bg-white">
                 <Collapsible defaultOpen>
                   <CollapsibleTrigger className="w-full text-left">
                     <CardHeader className="flex flex-row items-center justify-between py-4">
                       <div className="flex-1">
-                        <CardTitle className="text-lg">{pathway.pathway_name}</CardTitle>
+                        <CardTitle className="text-lg">{path.pathway_name}</CardTitle>
                         <CardDescription>
                           {pwCompleted} of {courses.length} courses completed
                         </CardDescription>
@@ -226,7 +226,7 @@ export function PathwaysPage() {
                         <div
                           key={courseId}
                           className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors"
-                          onClick={() => openPathway(pathwayId, pathway.pathway_name)}
+                          onClick={() => openIngazi(pathId, path.pathway_name)}
                         >
                           <div className="flex items-center gap-3">
                             <div
@@ -269,7 +269,7 @@ export function PathwaysPage() {
       )}
 
       {/* Fallback when no course data yet */}
-      {isEnrolled && sortedPathways.length === 0 && (
+      {isEnrolled && sortedPaths.length === 0 && (
         <Card className="border-border bg-white">
           <CardContent className="py-8 text-center">
             <p className="text-muted-foreground mb-3">
@@ -287,12 +287,12 @@ export function PathwaysPage() {
       <Sheet open={iframeOpen} onOpenChange={(open) => { if (!open) handleIframeClose(); }}>
         <SheetContent side="right" className="w-full sm:max-w-[90vw] p-0">
           <SheetHeader className="p-4 border-b">
-            <SheetTitle>{iframeTitle || "Pathways eLearning"}</SheetTitle>
+            <SheetTitle>{iframeTitle || "eLearning- Ingazi"}</SheetTitle>
           </SheetHeader>
           <iframe
             src={iframeUrl}
             className="w-full h-[calc(100vh-60px)]"
-            title="Pathways eLearning"
+            title="eLearning- Ingazi"
             allow="fullscreen"
           />
         </SheetContent>

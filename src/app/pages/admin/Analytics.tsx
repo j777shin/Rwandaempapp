@@ -48,7 +48,7 @@ interface OverviewData {
   employment_track?: number;
   entrepreneurship_track?: number;
   avg_skillcraft_score?: number;
-  avg_pathways_rate?: number;
+  avg_ingazi_rate?: number;
   avg_eligibility_score?: number;
   chatbot_sessions?: number;
   completion_rate?: number;
@@ -81,7 +81,7 @@ interface DemographicsData {
 
 interface EngagementData {
   skillcraft?: { total: number; completed: number };
-  pathways?: { enrolled: number };
+  ingazi?: { enrolled: number };
   business_development?: { submitted: number };
   chatbot?: { unique_users: number; total_messages: number };
   // Legacy fields
@@ -691,7 +691,7 @@ export function Analytics() {
                   <Separator />
 
                   <p className="text-sm text-muted-foreground">
-                    Beneficiaries who completed SkillCraft, achieved Pathways completion rate of 80%+, and have offline attendance greater than 8.
+                    Beneficiaries who completed SkillCraft, achieved Ingazi completion rate of 80%+, and have offline attendance greater than 8.
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

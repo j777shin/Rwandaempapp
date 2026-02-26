@@ -4,8 +4,8 @@ import { Login } from "@/app/pages/Login";
 import { BeneficiaryLayout } from "@/app/components/BeneficiaryLayout";
 import { BeneficiaryDashboard } from "@/app/pages/beneficiary/Dashboard";
 import { SkillCraftTest } from "@/app/pages/beneficiary/SkillCraftTest";
-import { PathwaysPage } from "@/app/pages/beneficiary/PathwaysPage";
-import { PathwaysDeepDive } from "@/app/pages/beneficiary/PathwaysDeepDive";
+import { IngaziPage } from "@/app/pages/beneficiary/IngaziPage";
+import { IngaziDeepDive } from "@/app/pages/beneficiary/IngaziDeepDive";
 import { EligibilityScore } from "@/app/pages/beneficiary/EligibilityScore";
 import { ChatbotPage } from "@/app/pages/beneficiary/ChatbotPage";
 import { ResultReport } from "@/app/pages/beneficiary/ResultReport";
@@ -44,8 +44,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, Component: BeneficiaryDashboard },
           { path: "skillcraft", Component: SkillCraftTest },
-          { path: "pathways", Component: PathwaysPage },
-          { path: "pathways-deepdive", Component: PathwaysDeepDive },
+          { path: "ingazi", Component: IngaziPage },
+          { path: "ingazi-deepdive", Component: IngaziDeepDive },
           { path: "eligibility", Component: EligibilityScore },
           { path: "chatbot", Component: ChatbotPage },
           { path: "results", Component: ResultReport },

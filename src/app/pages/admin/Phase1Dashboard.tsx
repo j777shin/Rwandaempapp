@@ -135,12 +135,12 @@ export function Phase1Dashboard() {
           </Card>
           <Card>
             <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground">Pathways Enrolled</p>
+              <p className="text-sm text-muted-foreground">Ingazi Enrolled</p>
               <p className="text-2xl font-bold text-[#FAD201]">
-                {dashboardData?.pathways?.enrolled?.toLocaleString() || 0}
+                {dashboardData?.ingazi?.enrolled?.toLocaleString() || 0}
               </p>
               <p className="text-xs text-muted-foreground">
-                {((dashboardData?.pathways?.enrollment_rate || 0) * 100).toFixed(1)}% rate
+                {((dashboardData?.ingazi?.enrollment_rate || 0) * 100).toFixed(1)}% rate
               </p>
             </CardContent>
           </Card>
@@ -166,10 +166,10 @@ export function Phase1Dashboard() {
           </Card>
           <Card>
             <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground">Avg Pathways Completion</p>
+              <p className="text-sm text-muted-foreground">Avg Ingazi Completion</p>
               <p className="text-3xl font-bold text-[#00A1DE]">
-                {dashboardData?.pathways?.avg_completion != null
-                  ? `${dashboardData.pathways.avg_completion.toFixed(1)}%`
+                {dashboardData?.ingazi?.avg_completion != null
+                  ? `${dashboardData.ingazi.avg_completion.toFixed(1)}%`
                   : "N/A"}
               </p>
             </CardContent>
