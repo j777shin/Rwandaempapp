@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8001";
+const API_BASE = import.meta.env.VITE_API_BASE || `http://${window.location.hostname}:8001`;
 
 function getToken(): string | null {
   return localStorage.getItem("token");
