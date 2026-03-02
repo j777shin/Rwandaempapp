@@ -21,16 +21,19 @@ export function BusinessDevelopment() {
   // Load existing submission on mount
   useEffect(() => {
     api.getBusinessDev().then((data) => {
-      if (data.wants_entrepreneurship === true) {
+      const savedText = data.business_development_text || "";
+      setBusinessGoal(savedText);
+      setWordCount(savedText.trim().split(/\s+/).filter((w: string) => w.length > 0).length);
+
+      if (data.wants_entrepreneurship === true && savedText) {
+        // Only treat as fully submitted if there is actual text saved
         setChoice("entrepreneurship");
-        setBusinessGoal(data.business_development_text || "");
-        setWordCount(
-          (data.business_development_text || "").trim().split(/\s+/).filter((w: string) => w.length > 0).length
-        );
         setSubmittedChoice("entrepreneurship");
         setIsSubmitted(true);
-      } else if (data.wants_entrepreneurship === false && data.business_development_text !== null) {
-        // User explicitly chose wage employment
+      } else if (data.wants_entrepreneurship === true) {
+        // Wants entrepreneurship but no text yet — show form pre-selected
+        setChoice("entrepreneurship");
+      } else if (data.wants_entrepreneurship === false) {
         setChoice("wage_employment");
         setSubmittedChoice("wage_employment");
         setIsSubmitted(true);
@@ -64,7 +67,13 @@ export function BusinessDevelopment() {
     }
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
+    try {
+      const data = await api.getBusinessDev();
+      const savedText = data.business_development_text || "";
+      setBusinessGoal(savedText);
+      setWordCount(savedText.trim().split(/\s+/).filter((w: string) => w.length > 0).length);
+    } catch {}
     setIsSubmitted(false);
   };
 
@@ -112,11 +121,15 @@ export function BusinessDevelopment() {
             {/* Radio Group for Track Choice */}
             <RadioGroup
               value={choice || ""}
-              onValueChange={(value) => {
+              onValueChange={async (value) => {
                 setChoice(value as TrackChoice);
-                if (value === "wage_employment") {
-                  setBusinessGoal("");
-                  setWordCount(0);
+                if (value === "entrepreneurship") {
+                  try {
+                    const data = await api.getBusinessDev();
+                    const savedText = data.business_development_text || "";
+                    setBusinessGoal(savedText);
+                    setWordCount(savedText.trim().split(/\s+/).filter((w: string) => w.length > 0).length);
+                  } catch {}
                 }
               }}
               className="space-y-4"
