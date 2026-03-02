@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { api } from "@/app/lib/api";
+import { API_BASE } from "@/app/lib/api";
 
 interface BeneficiaryData {
   id: string;
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Call backend to reset test account data using the saved token directly
     if (savedToken) {
       try {
-        await fetch("http://localhost:8001/auth/logout", {
+        await fetch(`${API_BASE}/auth/logout`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
