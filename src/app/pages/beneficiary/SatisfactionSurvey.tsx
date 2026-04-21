@@ -73,8 +73,6 @@ export function SatisfactionSurvey({ phase }: SatisfactionSurveyProps) {
       return;
     }
 
-    // In a real app, this would send data to backend
-    console.log("Survey submitted:", { phase, ratings, textResponses });
     setSubmitted(true);
   };
 

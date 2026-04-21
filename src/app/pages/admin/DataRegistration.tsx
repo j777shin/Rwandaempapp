@@ -18,39 +18,39 @@ export function DataRegistration() {
   const [additionalCsvFile, setAdditionalCsvFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     // Personal Information
-    email: "test.user@example.com",
-    name: "Test User",
-    age: "24",
-    gender: "female",
-    contact: "+250788123456",
+    email: "",
+    name: "",
+    age: "",
+    gender: "",
+    contact: "",
 
     // Household Information
     marriage_status: false,
     disability: false,
-    education_level: "secondary",
-    occupation: true,
-    informal_working: true,
+    education_level: "",
+    occupation: false,
+    informal_working: false,
 
     // Livestock Assets
     num_cows: "0",
-    num_goats: "2",
+    num_goats: "0",
     num_chickens: "0",
     num_sheep: "0",
-    num_pigs: "1",
+    num_pigs: "0",
     num_rabbits: "0",
 
     // Land & Housing
-    land_ownership: true,
-    land_size: "0.5",
-    num_radio: "1",
-    num_phone: "1",
+    land_ownership: false,
+    land_size: "0",
+    num_radio: "0",
+    num_phone: "0",
     num_tv: "0",
-    fuel: "EU4",
-    water_source: "WS1",
+    fuel: "",
+    water_source: "",
     floor: false,
-    roof: true,
+    roof: false,
     walls: false,
-    toilet: true,
+    toilet: false,
   });
 
   // Candidates for Additional Info manual entry - loaded from API

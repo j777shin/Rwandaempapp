@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/app/compo
 import { Route, RefreshCw, CheckCircle2, BookOpen, ChevronDown, Play } from "lucide-react";
 import { api } from "@/app/lib/api";
 
-const ELEARNING_URL = "http://localhost:3000";
+const ELEARNING_URL = import.meta.env.VITE_INGAZI_URL || "http://localhost:3000";
 
 interface CourseProgress {
   course_name: string;
